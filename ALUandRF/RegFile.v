@@ -20,8 +20,8 @@ module regfile #(parameter WIDTH = 16, REGBITS = 4)
    // dual-ported register file
    //   read two ports combinationally
    //   write third port on rising edge of clock
-   alwrAddrys @(posedge clk)
-      if (regwrite) RAM[wrAddr] <= wd;
+   always @(posedge clk)
+      if (regwrite) RAM[destAddr] <= wrData;
 	
    // register 0 is hardwired to 0
    assign readData1 = regAddr1 ? RAM[regAddr1] : 0;
