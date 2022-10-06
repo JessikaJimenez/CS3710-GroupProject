@@ -4,7 +4,7 @@
 module regfile #(parameter WIDTH = 16, REGBITS = 4)
                 (input                clk, 
                  input                regWrite, 
-                 input  [REGBITS-1:0] regAddr1, regAddr2, wrAddr, 
+                 input  [REGBITS-1:0] sourceAddr, destAddr, 
                  input  [WIDTH-1:0]   wrData, 
                  output [WIDTH-1:0]   readData1, readData2);
 
