@@ -3,16 +3,18 @@
 // This module acts as a part of the bigger CR-16 Processor System
 // Assuming immediate is 16-bit, sign-extended or zero-extended
 
-module ALUandRF #(parameter WIDTH = 16) (clk, reset, pc, srcAddr, dstAddr, immd);
-    input clk, reset;
-    input [WIDTH - 1 : 0] pc, srcAddr, dstAddr, immd;
-    input pcInstruction, rTypeInstruction, shiftInstruction, regWrite;
-    input [2:0] aluOp;
-    output reg [WIDTH - 1 : 0] resultData;
+module ALUandRF #(parameter WIDTH = 16) (
+    input clk, reset,
+    input [WIDTH - 1 : 0] pc, srcAddr, dstAddr, immd,
+    input pcInstruction, rTypeInstruction, shiftInstruction, regWrite,
+    input [2:0] aluOp,
+    input [3:0] shiftAmount,
+    output reg [WIDTH - 1 : 0] resultData
+	 );
 
     // Declare variables
     wire carry, low, flag, zero, negative;
-    wire [WIDTH - 1 : 0] srcValue, dstValue, aluResult;
+    wire [WIDTH - 1 : 0] srcValue, dstValue, aluResult, shiftResult;
 
     // Registers for muxes
     reg [WIDTH - 1: 0] aluDstInput, aluSrcInput;
@@ -21,8 +23,8 @@ module ALUandRF #(parameter WIDTH = 16) (clk, reset, pc, srcAddr, dstAddr, immd)
     regfile rf(.clk(clk), 
         .regWrite(regWrite), 
         .flags({11'd0, negative, zero, flag, low, carry}),
-        .regAddr1(srcAddr), 
-        .regAddr2(dstAddr), 
+        .sourceAddr(srcAddr), 
+        .destAddr(dstAddr), 
         .wrData(resultData), 
         .readData1(srcValue),
         .readData2(dstValue));
@@ -37,7 +39,13 @@ module ALUandRF #(parameter WIDTH = 16) (clk, reset, pc, srcAddr, dstAddr, immd)
         .zero(zero),
         .negative(negative));
 
-    // PLACE FOR SHIFTER
+    // For the shifter, we will determine which way to shift based on whether
+    //  the shift amount is negative or positive.
+    Shifter sb(.reset(reset), 
+        .shiftInput(aluDstInput), 
+        .shiftAmount(shiftAmount), 
+        .rightShift(shiftAmount[3]), 
+        .shiftResult(shiftResult));
 
     // MUX for instructions that modify program counter
     always @(*) begin
@@ -56,7 +64,7 @@ module ALUandRF #(parameter WIDTH = 16) (clk, reset, pc, srcAddr, dstAddr, immd)
     // MUX for shift instructions
     always @(*) begin
         if (!reset) resultData <= aluResult;
-        else if (shiftInstruction) resultData <= 
+        else if (shiftInstruction) resultData <= shiftResult;
         else resultData <= aluResult;
     end
 
