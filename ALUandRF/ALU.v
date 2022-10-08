@@ -63,11 +63,11 @@ module ALU #(parameter WIDTH = 16) (regSrc, regDst, aluOp, aluResult, carry, low
 	// What is default comparison (signed or unsigned) and how can we compare without operators
 	// When does a carry bit need to be set to 1
 	// How can we determine signed overflow
-	assign carry = 1'b0; // NEED TO BE COMPLETED
+	assign carry = aluOp[2] ? (regDst<regSrc):(sum<regDst);
 	assign zero = aluResult == 0;
-	assign low = 1'b0; // NEED TO BE COMPLETED
+	assign low = regDst < regSrc; 
 	assign flag = 1'b0; // NEED TO BE COMPLETED
-	assign negative = 1'b0; // NEED TO BE COMPLETED
+	assign negative = ((regDst < regSrc) && (regDst[WIDTH - 1] == regSrc[WIDTH - 1]))||(regDst[WIDTH - 1] == 1'b1); 
 
 	always@(*) begin
 		case(aluOp[1:0])
