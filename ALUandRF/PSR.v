@@ -2,7 +2,7 @@
 /*************************************************************/
 
 module PSR #(parameter WIDTH = 16) (
-       input                clk,
+       input                clk, reset,
        input  [WIDTH-1:0]   flags, 
        output [WIDTH-1:0]   readFlags
 );

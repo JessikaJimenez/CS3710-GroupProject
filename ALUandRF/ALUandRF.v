@@ -9,7 +9,8 @@ module ALUandRF #(parameter WIDTH = 16) (
 	input pcInstruction, rTypeInstruction, shiftInstruction, regWrite,
 	input [2:0] aluOp,
 	input [3:0] shiftAmount,
-	output reg [WIDTH - 1 : 0] resultData
+	output reg [WIDTH - 1 : 0] resultData,
+	output reg [WIDTH - 1 : 0] outputFlags
 );
 
 	// Declare variables
@@ -22,13 +23,20 @@ module ALUandRF #(parameter WIDTH = 16) (
 	// Instantiate modules
 	RegFile rf (
 	  .clk(clk), 
-	  .regWrite(regWrite), 
-	  .flags({11'd0, negative, zero, flag, low, carry}),
+	  .reset(reset),
+	  .regWrite(regWrite),
 	  .sourceAddr(srcAddr), 
 	  .destAddr(dstAddr), 
 	  .wrData(resultData), 
 	  .readData1(srcValue),
 	  .readData2(dstValue)
+	);
+
+	PSR psr (
+	  .clk(clk),
+	  .reset(reset),
+	  .flags({11'd0, negative, zero, flag, low, carry}),
+	  .readFlags(outputFlags)
 	);
 
 	ALU aluModule (
