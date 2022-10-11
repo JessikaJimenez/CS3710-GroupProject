@@ -10,6 +10,7 @@ module tb_ALUandRF #(parameter WIDTH = 16) ();
 	reg [2:0] aluOp;
 	reg [3:0] shiftAmount;
 	wire [WIDTH - 1 : 0] resultData;
+	wire [WIDTH - 1 : 0] outputFlags;
 
 	// Instantiate top level module
 	ALUandRF #(WIDTH) alurf (
@@ -25,7 +26,8 @@ module tb_ALUandRF #(parameter WIDTH = 16) ();
 		.regWrite(regWrite),
 		.aluOp(aluOp),
 		.shiftAmount(shiftAmount),
-		.resultData(resultData)
+		.resultData(resultData),
+		.outputFlags(outputFlags)
 	);	
 	
 	// Instantiate inputs
