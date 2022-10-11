@@ -16,19 +16,19 @@ module PSR #(parameter WIDTH = 16) (
           $display("done with RF load"); 
        end
 
-   // dual-ported register file
-   //   read two ports combinationally
-   //   write third port on rising edge of clock
-   always @(negedge reset, posedge clk) begin
-      if(~reset) begin
-        $display("Loading register file");
-	      // you'll need to change the path to this file! 
-	      $readmemb("C:/Users/danie/Documents/Homework/22 Fall/ECE 3710/Quartus/MiniMips/reg.dat", RAM); 
-	      $display("done with RF load"); 
+      // dual-ported register file
+      //   read two ports combinationally
+      //   write third port on rising edge of clock
+      always @(negedge reset, posedge clk) begin
+         if(~reset) begin
+            $display("Loading register file");
+	    // you'll need to change the path to this file! 
+	    $readmemb("C:/Users/danie/Documents/Homework/22 Fall/ECE 3710/Quartus/MiniMips/reg.dat", RAM); 
+	    $display("done with RF load"); 
+         end
+         RAM[conditionAddr] <= flags; //Fill the register
       end
-
-      RAM[conditionAddr] <= flags; //Fill the register
-   end
       
        assign readFlags = RAM[regAddr1]; // assign the output
+	
 endmodule
