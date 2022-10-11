@@ -1,22 +1,25 @@
 // REGISTER FILE MODULE
 /*************************************************************/
 
-module regfile #(parameter WIDTH = 16, REGBITS = 4)
-                (input                clk, 
-                 input                regWrite, 
-		 input  	      flags,  //**TODO - fix this to have proper size and parameters
-                 input  [REGBITS-1:0] sourceAddr, destAddr, 
-                 input  [WIDTH-1:0]   wrData, 
-                 output [WIDTH-1:0]   readData1, readData2);
+module regfile #(parameter WIDTH = 16, REGBITS = 4) (
+   input                clk, 
+   input                regWrite, 
+   input  	        flags,  //**TODO - fix this to have proper size and parameters
+   input  [REGBITS-1:0] sourceAddr, destAddr, 
+   input  [WIDTH-1:0]   wrData, 
+   output [WIDTH-1:0]   readData1, readData2
+);
 
    reg  [WIDTH-1:0] RAM [(1<<REGBITS)-1:0];
 	
-	initial begin
-	$display("Loading register file");
-	// you'll need to change the path to this file! 
-	$readmemb("C:/Users/danie/Documents/Homework/22 Fall/ECE 3710/Quartus/MiniMips/reg.dat", RAM); 
-	$display("done with RF load"); 
-	end
+   //**TODO - handle the flags variable
+	
+   initial begin
+      $display("Loading register file");
+      // you'll need to change the path to this file! 
+      $readmemb("C:/Users/danie/Documents/Homework/22 Fall/ECE 3710/Quartus/MiniMips/reg.dat", RAM); 
+      $display("done with RF load"); 
+   end
 
    // dual-ported register file
    //   read two ports combinationally
