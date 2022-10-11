@@ -53,21 +53,22 @@ module ALU #(parameter WIDTH = 16) (regSrc, regDst, aluOp, aluResult, carry, low
 	output carry, low, flag, zero, negative;
 
 	wire [WIDTH - 1:0] regSrc2, sum;
-	wire addOverflow, subOverflow;
+	wire SameSign;
 
 	// Sum will be the result of an add or subtract based on the operation code
 	assign regSrc2 = aluOp[2] ? ~regSrc:regSrc; 
 	assign sum = regDst + regSrc2 + aluOp[2];
+	assign sameSign = regDst[WIDTH-1] == regSrc[WIDTH-1];
 
 	// NEED TO FIGURE OUT:
 	// What is default comparison (signed or unsigned) and how can we compare without operators
 	// When does a carry bit need to be set to 1
 	// How can we determine signed overflow
-	assign carry = 1'b0; // NEED TO BE COMPLETED
+	assign carry = aluOp[2] ? (regDst<regSrc):(sum<regDst);
 	assign zero = aluResult == 0;
-	assign low = 1'b0; // NEED TO BE COMPLETED
-	assign flag = 1'b0; // NEED TO BE COMPLETED
-	assign negative = 1'b0; // NEED TO BE COMPLETED
+	assign low = regDst < regSrc; 
+	assign flag = aluOP[2] ? (!sameSign&&(regSrc[WIDTH-1]==sum[WIDTH-1])):(sameSign&&(sum[WIDTH-1]!=regDst[WIDTH-1])); 
+	assign negative = ((regDst < regSrc) && sameSign)||(regDst[WIDTH - 1] == 1'b1); 
 
 	always@(*) begin
 		case(aluOp[1:0])
