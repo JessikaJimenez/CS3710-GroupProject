@@ -4,11 +4,11 @@ module AluRFonBoard #(
     input clk, reset,
 	input [3:0] srcAddrSwitches,
 	input [2:0] aluOp,
-	output reg [9:0] resultDataLeds
+	output wire [9:0] resultDataLeds
 );
 reg [WIDTH - 1 : 0] pc = 16'd0;
 reg [WIDTH - 1 : 0] immd = 16'd0;
-reg [WIDTH - 1 : 0] dstAddr = 16'd1;
+reg [3:0] dstAddr = 4'd1;
 
 reg pcInstruction = 1'b0;
 reg rTypeInstruction = 1'b1;
@@ -18,6 +18,8 @@ reg regWrite = 1'b0;
 reg flagSet = 1'b0;
 reg copyInstruction = 1'b0;
 
+reg [WIDTH - 1 : 0] resultDataLedsLong;
+
 wire [WIDTH - 1 : 0] outputFlags;
 
 
@@ -26,7 +28,7 @@ wire [WIDTH - 1 : 0] outputFlags;
 		.reset(reset),              //INPUT
 		.pc(pc),                    //HARDCODE: 0
 		.srcAddr(srcAddrSwitches),  //comes from switches on Board
-		.dstAddr(dstAddr),          //HARDCODE: 0 (Doesn't need to write)
+		.dstAddr(dstAddr),          //HARDCODE: 1 (Doesn't need to write)
 		.immd(immd),                //HARDCODE: 0 (not testing immediate)
 		.pcInstruction(pcInstruction),       //HARDCODE: 0 (not testing pc)
 		.rTypeInstruction(rTypeInstruction), //HARDCODE: 1 (Only testing r-type)
@@ -35,12 +37,13 @@ wire [WIDTH - 1 : 0] outputFlags;
 		.copyInstruction(copyInstruction),   //HARDCODE: 0
 		.regWrite(regWrite),        //HARDCODE: 0 (not writing back to regfile)
 		.aluOp(aluOp),              //INPUT
-		.resultData(resultDataLedsLong),     //OUPTUT (Sent to be curtailed first)
+		.resultData(resultDataLeds),     //OUPTUT (Sent to be curtailed first)
 		.outputFlags(outputFlags)   //Assigned but not used
 	);
 
 	always @(*) begin
-    	resultDataLeds <= resultDataLedsLong;
+    	//resultDataLeds <= resultDataLedsLong;
+		$display("LEDS are displaying: %b", resultDataLeds);
 	end
     
 endmodule
