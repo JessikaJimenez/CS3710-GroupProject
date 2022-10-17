@@ -1,7 +1,7 @@
 // REGISTER FILE MODULE
 /*************************************************************/
 
-module regfile #(parameter WIDTH = 16, REGBITS = 4) (
+module RegFile #(parameter WIDTH = 16, REGBITS = 4) (
        input                clk, reset,
        input                regWrite, 
        input  [REGBITS-1:0] sourceAddr, destAddr, 
