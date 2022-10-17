@@ -60,10 +60,7 @@ module ALU #(parameter WIDTH = 16) (regSrc, regDst, aluOp, aluResult, carry, low
 	assign sum = regDst + regSrc2 + aluOp[2];
 	assign sameSign = regDst[WIDTH-1] == regSrc[WIDTH-1];
 
-	// NEED TO FIGURE OUT:
-	// What is default comparison (signed or unsigned) and how can we compare without operators
-	// When does a carry bit need to be set to 1
-	// How can we determine signed overflow
+	// PSR Flags
 	assign carry = aluOp[2] ? (regDst<regSrc):(sum<regDst);
 	assign zero = aluResult == 0;
 	assign low = regDst < regSrc; 
