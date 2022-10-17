@@ -35,14 +35,7 @@ module tb_RF #(parameter WIDTH = 16) ();
 	// Instantiate inputs
 	initial begin
 	   clk <= 0;
-	   reset <= 0;
-	   #10;
-	   clk <= 1;
-	   #10;
 	   reset <= 1;
-	   #10;
-	   clk <= 0;
-	   #10;
 	end
 		
 	// Generate clock
@@ -53,16 +46,22 @@ module tb_RF #(parameter WIDTH = 16) ();
 	initial begin
 	   ////////Test for Register File
 	   ///TestWriting
+		#20;
 	   dstAddr <= 4'd1;
-	   writeDataRF <= 16'd1;
+		srcAddr <= 4'd1;
+	   writeDataRF <= 16'd5;
 	   regWrite <= 1;
-	   #10;
+	   #20;
 		if (dstValue == 16'd1) $display("Write to register 1 was successful");
 	   dstAddr <= 4'd2;
 	   writeDataRF <= 16'd4;
 	   regWrite <= 1;
-	   #10;
+	   #20;
 		if (dstValue == 16'd1) $display("Write to register 1 was successful");
+		dstAddr <= 4'd3;
+	   writeDataRF <= 16'd2;
+	   regWrite <= 1;
+		#20;
 	end
 	
 endmodule 
