@@ -45,18 +45,34 @@ module tb_ALU #(parameter WIDTH = 16) ();
        aluOp <= 3'b011;
        #10
        if (aluResult == 16'd14) $display("Xor is correct (%d ^ %d = %d).", regDst, regSrc, aluResult);
-	   aluOp <= 3'b100;
-	   regDst <= 16'b0000000000000011;
-	   regSrc <= 16'b0000000000000101;
-	   #10
-	   if (carry = 1) $display("carry flag is correct");
-	   else $display("something is wrong");
-	   aluOp <= 3'b000;
-	   regDst <= 16'b0000000000000011;
-	   regSrc <= 16'b0111111111111101;
-	   #10
-	   if (carry = 0 && flag = 1) $display("carry/flag flags are correct");
-	   else $display("something is wrong");
+		 
+	    aluOp <= 3'b100;
+	    regDst <= 16'b0000000000000011;
+	    regSrc <= 16'b0000000000000101;
+	    #10
+	    if (carry == 1 && zero == 0 && low == 1 && flag == 0 && negative == 1) $display("all flags is correct");
+	    else $display("something is wrong");
+		 
+	    aluOp <= 3'b000;
+	    regDst <= 16'b0000000000000011;
+	    regSrc <= 16'b0111111111111101;
+	    #10
+	    if (carry == 0 && flag == 1 && zero==0 && low==1) $display("carry/flag flags are correct");
+	    else $display("something is wrong");
+		 
+	    aluOp <= 3'b100;
+	    regDst <= 16'b0000000000000011;
+	    regSrc <= 16'b0000000000000001;
+	    #10
+	    if (carry == 0) $display("carry flag is correct");
+	    else $display("something is wrong");
+		 
+		 aluOp <= 3'b100;
+	    regDst <= 16'b1111111111111111;
+	    regSrc <= 16'b1111111111111110;
+	    #10
+	    if (negative==0 && carry==1 && zero==0 && low==0 && flag==0) $display("carry flag is correct");
+	    else $display("something is wrong");
 	end
 	
 endmodule 

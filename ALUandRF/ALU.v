@@ -7,9 +7,9 @@
 //
 // The ALU also must generate condition flags:
 /*
-	C - Carry bit (1 if carry UNSIGNED)
+	C - Carry bit (1 if carry for add or borrow for sub UNSIGNED)
 	L - Low bit (1 if Rdest < Rsc UNSIGNED)
-	F - Flag bit (1 if overflow SIGNED)
+	F - Flag bit (1 if overflow SIGNED) 
 	Z - Zero bit (1 if Rdest = Rsc ALWAYS)
 	N - Negative bit (1 if Rdest < Rsc SIGNED)
 */
@@ -32,7 +32,7 @@ module ALU #(parameter WIDTH = 16) (regSrc, regDst, aluOp, aluResult, carry, low
 	assign zero = aluResult == 0;
 	assign low = regDst < regSrc; 
 	assign flag = aluOp[2] ? (!sameSign&&(regSrc[WIDTH-1]==sum[WIDTH-1])):(sameSign&&(sum[WIDTH-1]!=regDst[WIDTH-1])); 
-	assign negative = ((regDst < regSrc) && sameSign)||(regDst[WIDTH - 1] == 1'b1); 
+	assign negative = ((regDst < regSrc) && sameSign)||(regDst[WIDTH - 1] == 1'b1 && !sameSign); 
 
 	always@(*) begin
 		case(aluOp[1:0])
