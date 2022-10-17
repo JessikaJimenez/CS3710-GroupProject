@@ -2,7 +2,7 @@
 /*************************************************************/
 // This module acts as a part of the bigger CR-16 Processor System
 // Assuming immediate is 16-bit, sign-extended or zero-extended
-
+// This module will focus on arithmetic and writing to the register file
 module ALUandRF #(parameter WIDTH = 16) (
 	input clk, reset,
 	input [WIDTH - 1 : 0] pc, immd,
@@ -52,8 +52,7 @@ module ALUandRF #(parameter WIDTH = 16) (
 	  .negative(negative)
 	);
 
-	// For the shifter, we will determine which way to shift based on whether
-	//  the shift amount is negative or positive.
+	// Shifter module using RSrc/Immd as the amount
 	Shifter sb (
 	  .reset(reset), 
 	  .shiftInput(aluDstInput), 
