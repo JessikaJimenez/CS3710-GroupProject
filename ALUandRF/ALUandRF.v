@@ -5,7 +5,8 @@
 
 module ALUandRF #(parameter WIDTH = 16) (
 	input clk, reset,
-	input [WIDTH - 1 : 0] pc, srcAddr, dstAddr, immd,
+	input [WIDTH - 1 : 0] pc, immd,
+	input [3 : 0] srcAddr, dstAddr,
 	input pcInstruction, rTypeInstruction, shiftInstruction, regWrite, flagSet,
 	input [2:0] aluOp,
 	output reg [WIDTH - 1 : 0] resultData,
