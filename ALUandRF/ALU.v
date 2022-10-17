@@ -67,7 +67,7 @@ module ALU #(parameter WIDTH = 16) (regSrc, regDst, aluOp, aluResult, carry, low
 	assign carry = aluOp[2] ? (regDst<regSrc):(sum<regDst);
 	assign zero = aluResult == 0;
 	assign low = regDst < regSrc; 
-	assign flag = aluOP[2] ? (!sameSign&&(regSrc[WIDTH-1]==sum[WIDTH-1])):(sameSign&&(sum[WIDTH-1]!=regDst[WIDTH-1])); 
+	assign flag = aluOp[2] ? (!sameSign&&(regSrc[WIDTH-1]==sum[WIDTH-1])):(sameSign&&(sum[WIDTH-1]!=regDst[WIDTH-1])); 
 	assign negative = ((regDst < regSrc) && sameSign)||(regDst[WIDTH - 1] == 1'b1); 
 
 	always@(*) begin
