@@ -21,7 +21,7 @@ module RegFile #(parameter WIDTH = 16, REGBITS = 4) (
       // dual-ported register file
       //   read two ports combinationally
       //   write third port on rising edge of clock
-      always @(negedge reset, posedge clk) begin
+      always @(posedge clk) begin
          if(~reset) begin
             $display("Loading register file");
 	    // you'll need to change the path to this file! 
