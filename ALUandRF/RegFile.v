@@ -28,7 +28,10 @@ module RegFile #(parameter WIDTH = 16, REGBITS = 4) (
 	    $readmemb("C:/Users/danie/Documents/Homework/22 Fall/ECE 3710/Quartus/ALUandRegister/CS3710-GroupProject/Helper Files/TestReg.dat", RAM); 
 	    $display("done with RF load"); 
          end
-         if (regWrite) RAM[destAddr] <= wrData;
+			else 
+				if (regWrite) RAM[destAddr] <= wrData;
+			end
+         
       end     
 	
        // register 0 is hardwired to 0

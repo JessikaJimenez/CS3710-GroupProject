@@ -52,16 +52,17 @@ module tb_RF #(parameter WIDTH = 16) ();
 	   writeDataRF <= 16'd5;
 	   regWrite <= 1;
 	   #20;
-		if (dstValue == 16'd1) $display("Write to register 1 was successful");
+		if (dstValue == 16'd5) $display("Write to register 1 was successful");
 	   dstAddr <= 4'd2;
 	   writeDataRF <= 16'd4;
 	   regWrite <= 1;
 	   #20;
-		if (dstValue == 16'd1) $display("Write to register 1 was successful");
+		if (dstValue == 16'd4) $display("Write to register 2 was successful");
 		dstAddr <= 4'd3;
 	   writeDataRF <= 16'd2;
 	   regWrite <= 1;
 		#20;
+		if (dstValue == 16'd2) $display("Write to register 2 was successful");
 	end
 	
 endmodule 
