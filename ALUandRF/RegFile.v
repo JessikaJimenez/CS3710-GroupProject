@@ -32,7 +32,7 @@ module regfile #(parameter WIDTH = 16, REGBITS = 4) (
       end     
 	
        // register 0 is hardwired to 0
-       assign readData1 = regAddr1 ? RAM[regAddr1] : 0;
-       assign readData2 = regAddr2 ? RAM[regAddr2] : 0;
+       assign readData1 = regAddr1 ? RAM[destAddr] : 0;
+       assign readData2 = regAddr2 ? RAM[sourceAddr] : 0;
 	
 endmodule
