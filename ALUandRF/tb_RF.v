@@ -32,7 +32,7 @@ module tb_RF #(parameter WIDTH = 16) ();
          .readFlags(outputFlags)
 	);
 	
-	// Instantiate inputs
+	// Start clock and reset
 	initial begin
 	   clk <= 0;
 	   reset <= 1;
@@ -45,28 +45,30 @@ module tb_RF #(parameter WIDTH = 16) ();
 		
 	initial begin
 	   ////////Test for Register File
-	   ///TestWriting
+	   ///TestWriting & Reading
 		#20;
-	   dstAddr <= 4'd1;
-		srcAddr <= 4'd1;
-	   writeDataRF <= 16'd5;
+	   dstAddr <= 4'd1;      //Write to register 1
+	   srcAddr <= 4'd1; 
+	   writeDataRF <= 16'd5; //Write a 5
+	   regWrite <= 1;        //Make sure we're writing
+	   #20;
+		if (dstValue == 16'd5) $display("Write & Read to register 1 was successful"); //Read to see if the value is correct
+		else $display("Write to register 2 was unsuccessful, decimal value was: %d", dstValue);
+	   //Repeat the same process as above with different values and registers. srcAddr is
+	   //used as the check address from here on.
+	   dstAddr <= 4'd2;			//Write to register 2
+	   srcAddr <= 4'd2;
+	   writeDataRF <= 16'd4;	//Write a 4
 	   regWrite <= 1;
 	   #20;
-		if (dstValue == 16'd5) $display("Write & Read to register 1 was successful");
+		if (dstValue == 16'd4) $display("Write & Read to register 2 was successful"); //Read to see if the value is correct
 		else $display("Write to register 2 was unsuccessful, decimal value was: %d", dstValue);
-	   dstAddr <= 4'd2;
-		srcAddr <= 4'd2;
-	   writeDataRF <= 16'd4;
-	   regWrite <= 1;
-	   #20;
-		if (dstValue == 16'd4) $display("Write & Read to register 2 was successful");
-		else $display("Write to register 2 was unsuccessful, decimal value was: %d", dstValue);
-		dstAddr <= 4'd3;
+		dstAddr <= 4'd3;		//Write to register 2
 		srcAddr <= 4'd3;
-	   writeDataRF <= 16'd2;
+	   writeDataRF <= 16'd2;	//Write a 4
 	   regWrite <= 1;
 		#20;
-		if (dstValue == 16'd2) $display("Write & Read to register 3 was successful");
+		if (dstValue == 16'd2) $display("Write & Read to register 3 was successful"); //Read to see if the value is correct
 		else $display("Write to register 2 was unsuccessful, decimal value was: %d", dstValue);
 	end
 	
