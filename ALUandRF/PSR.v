@@ -20,7 +20,7 @@ module PSR #(parameter WIDTH = 16) (
          if(~reset) begin
             RAM <= 16'd0; 
          end
-         RAM[WIDTH-1:0] <= flags; //Fill the register
+			else RAM[WIDTH-1:0] <= flags; //Fill the register
       end
       
        assign readFlags = RAM[WIDTH-1:0]; // assign the output
