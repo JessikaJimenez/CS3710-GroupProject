@@ -53,11 +53,11 @@ module tb_RF #(parameter WIDTH = 16) ();
 	   ////////Test for Register File
 	   ///TestWriting
 	   dstAddr <= 4'b0001;
-	   writeDataRF <= 16'b0000000000000001;
+	   writeData <= 16'b0000000000000001;
 	   regWrite <= 1;
 	   #10;
 	   dstAddr <= 4'b0010;
-	   writeDataRF <= 16'b0000000000000010;
+	   writeData <= 16'b0000000000000010;
 	   regWrite <= 1;
 	   #10;
 	end
