@@ -15,6 +15,9 @@ reg rTypeInstruction = 1'b1;
 reg shiftInstruction = 1'b0;
 reg regWrite = 1'b0;
 
+reg flagSet = 1'b0;
+reg copyInstruction = 1'b0;
+
 wire [WIDTH - 1 : 0] outputFlags;
 
 
@@ -28,6 +31,8 @@ wire [WIDTH - 1 : 0] outputFlags;
 		.pcInstruction(pcInstruction),       //HARDCODE: 0 (not testing pc)
 		.rTypeInstruction(rTypeInstruction), //HARDCODE: 1 (Only testing r-type)
 		.shiftInstruction(shiftInstruction), //HARCODE: 0 (Not testing shift)
+		.flagSet(flagSet),					 //HARDCODE: 0
+		.copyInstruction(copyInstruction),   //HARDCODE: 0
 		.regWrite(regWrite),        //HARDCODE: 0 (not writing back to regfile)
 		.aluOp(aluOp),              //INPUT
 		.resultData(resultDataLeds),     //OUPTUT (Sent to be curtailed first)
