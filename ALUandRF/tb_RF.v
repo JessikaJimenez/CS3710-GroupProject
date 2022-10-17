@@ -52,17 +52,22 @@ module tb_RF #(parameter WIDTH = 16) ();
 	   writeDataRF <= 16'd5;
 	   regWrite <= 1;
 	   #20;
-		if (dstValue == 16'd5) $display("Write to register 1 was successful");
+		if (dstValue == 16'd5) $display("Write & Read to register 1 was successful");
+		else $display("Write to register 2 was unsuccessful, decimal value was: %d", dstValue);
 	   dstAddr <= 4'd2;
+		srcAddr <= 4'd2;
 	   writeDataRF <= 16'd4;
 	   regWrite <= 1;
 	   #20;
-		if (dstValue == 16'd4) $display("Write to register 2 was successful");
+		if (dstValue == 16'd4) $display("Write & Read to register 2 was successful");
+		else $display("Write to register 2 was unsuccessful, decimal value was: %d", dstValue);
 		dstAddr <= 4'd3;
+		srcAddr <= 4'd3;
 	   writeDataRF <= 16'd2;
 	   regWrite <= 1;
 		#20;
-		if (dstValue == 16'd2) $display("Write to register 2 was successful");
+		if (dstValue == 16'd2) $display("Write & Read to register 3 was successful");
+		else $display("Write to register 2 was unsuccessful, decimal value was: %d", dstValue);
 	end
 	
 endmodule 
