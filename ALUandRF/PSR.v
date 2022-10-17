@@ -26,9 +26,9 @@ module PSR #(parameter WIDTH = 16) (
 	    $readmemb("C:/Users/danie/Documents/Homework/22 Fall/ECE 3710/Quartus/MiniMips/reg.dat", RAM); 
 	    $display("done with RF load"); 
          end
-         RAM[conditionAddr] <= flags; //Fill the register
+         RAM[WIDTH-1:0] <= flags; //Fill the register
       end
       
-       assign readFlags = RAM[regAddr1]; // assign the output
+       assign readFlags = RAM[WIDTH-1:0]; // assign the output
 	
 endmodule
