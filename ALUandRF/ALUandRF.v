@@ -10,7 +10,7 @@ module ALUandRF #(parameter WIDTH = 16) (
 	input [2:0] aluOp,
 	input [3:0] shiftAmount,
 	output reg [WIDTH - 1 : 0] resultData,
-	output reg [WIDTH - 1 : 0] outputFlags
+	output wire [WIDTH - 1 : 0] outputFlags
 );
 
 	// Declare variables

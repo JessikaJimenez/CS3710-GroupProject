@@ -1,7 +1,7 @@
 // REGISTER FILE MODULE
 /*************************************************************/
 
-module regfile #(parameter WIDTH = 16, REGBITS = 4) (
+module RegFile #(parameter WIDTH = 16, REGBITS = 4) (
        input                clk, reset,
        input                regWrite, 
        input  [REGBITS-1:0] sourceAddr, destAddr, 
@@ -21,7 +21,7 @@ module regfile #(parameter WIDTH = 16, REGBITS = 4) (
       // dual-ported register file
       //   read two ports combinationally
       //   write third port on rising edge of clock
-      always @(negedge reset, posedge clk) begin
+      always @(posedge clk) begin
          if(~reset) begin
             $display("Loading register file");
 	    // you'll need to change the path to this file! 
@@ -32,7 +32,7 @@ module regfile #(parameter WIDTH = 16, REGBITS = 4) (
       end     
 	
        // register 0 is hardwired to 0
-       assign readData1 = regAddr1 ? RAM[destAddr] : 0;
-       assign readData2 = regAddr2 ? RAM[sourceAddr] : 0;
+       assign readData1 = destAddr ? RAM[destAddr] : 0;
+       assign readData2 = sourceAddr ? RAM[sourceAddr] : 0;
 	
 endmodule
