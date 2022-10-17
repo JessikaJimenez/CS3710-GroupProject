@@ -1,0 +1,48 @@
+module AluRFonBoard #(
+    parameter WIDTH = 16
+) (
+    input clk, reset,
+	input [3:0] srcAddrSwitches,
+	input [2:0] aluOp,
+	input [3:0] shiftAmount,
+	output reg [WIDTH - 1 : 0] resultDataLeds,
+	output wire [WIDTH - 1 : 0] outputFlags
+);
+reg [WIDTH - 1 : 0] pc, immd;
+pc <= 16'd0;
+immd <= 16'd0;
+
+reg pcInstruction, rTypeInstruction, shiftInstruction, regWrite;
+pcInstruction <= 1'b0;
+rTypeInstruction <= 1'b1;
+shiftInstruction <= 1'b0;
+regWrite <= 1'b0; 
+
+reg [3:0] shiftAmount;
+shiftAmount <= 4'b0000;
+
+reg [9:0] resultDataLedsLong;
+
+
+    	ALUandRF #(WIDTH) alurf (
+		.clk(clk),    //INPUT
+		.reset(reset),//INPUT
+		.pc(pc),      //HARDCODE: 0
+		.srcAddr(srcAddrSwitches),  //comes from switches on Board
+		.dstAddr(dstAddr), //HARDCODE: 0 (Doesn't need to write)
+		.immd(immd),  //HARDCODE: 0 (not testing immediate)
+		.pcInstruction(pcInstruction), //HARDCODE: 0 (not testing pc)
+		.rTypeInstruction(rTypeInstruction), //HARDCODE: 1 (Only testing r-type)
+		.shiftInstruction(shiftInstruction), //HARCODE: 0 (Not testing shift)
+		.regWrite(regWrite), //HARDCODE: 0 (not writing back to regfile)
+		.aluOp(aluOp), //INPUT
+		.shiftAmount(shiftAmount),   //HARDCODE: 0 (not testing shift)
+		.resultData(resultDataLedsLong), //OUPTUT (Sent to be curtailed first)
+		.outputFlags(outputFlags)
+	);	
+
+always @(*) begin
+    resultDataLeds <= resultDataLedsLong;
+end
+    
+endmodule
