@@ -42,7 +42,7 @@
 /*
 	C - Carry bit (1 if carry for add or borrow for sub UNSIGNED)
 	L - Low bit (1 if Rdest < Rsc UNSIGNED)
-	F - Flag bit (1 if overflow SIGNED)
+	F - Flag bit (1 if overflow SIGNED) 
 	Z - Zero bit (1 if Rdest = Rsc ALWAYS)
 	N - Negative bit (1 if Rdest < Rsc SIGNED)
 */
