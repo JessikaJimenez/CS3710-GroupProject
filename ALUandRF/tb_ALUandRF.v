@@ -6,8 +6,9 @@ module tb_ALUandRF #(parameter WIDTH = 16) ();
 
 	reg clk, reset;
 	reg [WIDTH - 1 : 0] pc, immd;
+	reg regWrite;
 	wire [3:0] srcAddr, dstAddr;
-	wire pcInstruction, rTypeInstruction, shiftInstruction, regWrite, flagSet;
+	wire pcInstruction, rTypeInstruction, shiftInstruction, flagSet;
 	wire [2:0] aluOp;
 	wire [WIDTH - 1 : 0] resultData;
 	wire [WIDTH - 1 : 0] outputFlags;
@@ -41,9 +42,8 @@ module tb_ALUandRF #(parameter WIDTH = 16) ();
 		(shiftInstruction && (instruction[7:4] == 4'b0100 || instruction[7:4] == 4'b0110)));
 	assign pcInstruction = 1'b0;
 	assign shiftInstruction = (instruction[15:12] == 4'b1000);
-	assign opCode = rTypeInstruction ? instruction[15:12]:instruction[7:4];
+	assign opCode = rTypeInstruction ? instruction[7:4]:instruction[15:12];
 	assign aluOp = (opCode[3:2] == 2'b00) ? {1'b0, opCode[1:0]}:{opCode[3], 2'b00};
-	assign regWrite = (opCode != 4'b1011);
 	assign flagSet = (aluOp[1:0] == 2'b00);
 	assign carry = outputFlags[0];
 	assign low = outputFlags[1];
@@ -55,27 +55,43 @@ module tb_ALUandRF #(parameter WIDTH = 16) ();
 	initial begin
 		clk <= 0;
 		reset <= 0;
+		regWrite <= 0;
 		#10
 		reset <= 1;
 		#10
 		instruction <= 16'b0101000100000001; // I-Type Add ($1 += 1)
+		#50
+		regWrite <= 1;
 		#20
+		regWrite <= 0;
 		if (resultData == 16'd1) $display("$1 now equals 1 ($1 += 1).");
 		if (!carry && low && !flag && !zero && negative) $display("Flags set correctly (Low, Negative).");
 		instruction <= 16'b0010001000001111; // I-Type Or ($2 | 15)
+		#50
+		regWrite <= 1;
 		#20
+		regWrite <= 0;
 		if (resultData == 16'd15) $display("$2 now equals 15 ($2 | 15).");
 		if (!carry && low && !flag && !zero && negative) $display("Flags set correctly (unchanged).");
 		instruction <= 16'b0000001001010001; // R-Type Add ($2 += $1)
+		#50
+		regWrite <= 1;
 		#20
+		regWrite <= 0;
 		if (resultData == 16'd16) $display("$2 now equals 16 ($2 += $1).");
 		if (!carry && !low && !flag && !zero && !negative) $display("Flags set correctly (Nothing).");
 		instruction <= 16'b0000000110010001; // R-Type Sub ($1 -= $1)
+		#50
+		regWrite <= 1;
 		#20
+		regWrite <= 0;
 		if (resultData == 16'd0) $display("$1 now equals 0 ($1 -= $1).");
 		if (!carry && !low && !flag && zero && !negative) $display("Flags set correctly (Zero).");
 		instruction <= 16'b1000001000010001; // I-Type LSH ($2 >> 1)
+		#50
+		regWrite <= 1;
 		#20
+		regWrite <= 0;
 		if (resultData == 16'd8) $display("$2 now equals 8 ($2 >> 1).");
 	end
 		

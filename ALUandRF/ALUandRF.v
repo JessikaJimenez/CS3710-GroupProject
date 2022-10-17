@@ -29,8 +29,8 @@ module ALUandRF #(parameter WIDTH = 16) (
 	  .sourceAddr(srcAddr), 
 	  .destAddr(dstAddr), 
 	  .wrData(resultData), 
-	  .readData1(srcValue),
-	  .readData2(dstValue)
+	  .readData1(dstValue),
+	  .readData2(srcValue)
 	);
 
 	PSR psr (
@@ -84,7 +84,7 @@ module ALUandRF #(parameter WIDTH = 16) (
 	end
 
 	// Flip-Flop for setting flags
-	always @(negedge reset, posedge clk) begin
+	always @(posedge clk) begin
 		if (~reset) inputFlags <= 16'd0;
 		if (flagSet) inputFlags <= {11'd0, negative, zero, flag, low, carry};
 		else inputFlags <= outputFlags;

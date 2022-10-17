@@ -53,7 +53,7 @@ module ALU #(parameter WIDTH = 16) (regSrc, regDst, aluOp, aluResult, carry, low
 	output carry, low, flag, zero, negative;
 
 	wire [WIDTH - 1:0] regSrc2, sum;
-	wire SameSign;
+	wire sameSign;
 
 	// Sum will be the result of an add or subtract based on the operation code
 	assign regSrc2 = aluOp[2] ? ~regSrc:regSrc; 
