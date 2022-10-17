@@ -28,7 +28,7 @@ module regfile #(parameter WIDTH = 16, REGBITS = 4) (
 	    $readmemb("C:/Users/danie/Documents/Homework/22 Fall/ECE 3710/Quartus/MiniMips/reg.dat", RAM); 
 	    $display("done with RF load"); 
          end
-         if (regwrite) RAM[destAddr] <= wrData;
+         if (regWrite) RAM[destAddr] <= wrData;
       end     
 	
        // register 0 is hardwired to 0
