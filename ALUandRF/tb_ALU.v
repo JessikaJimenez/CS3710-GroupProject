@@ -30,21 +30,21 @@ module tb_ALU #(parameter WIDTH = 16) ();
 	   #10
        aluOp <= 3'b000;
        #10
-       if (aluResult == 16'd2) $display("Add is correct.");
+       if (aluResult == 16'd2) $display("Add is correct (%d + %d = %d).", regDst, regSrc, aluResult);
        aluOp <= 3'b100;
        #10
-       if (aluResult == 16'd0) $display("Subtract is correct.");
+       if (aluResult == 16'd0) $display("Subtract is correct (%d - %d = %d)", regDst, regSrc, aluResult);
        regSrc <= 16'd15;
        #10
        aluOp <= 3'b001;
        #10
-       if (aluResult == 16'd1) $display("And is correct.");
+       if (aluResult == 16'd1) $display("And is correct (%d & %d = %d).", regDst, regSrc, aluResult);
        aluOp <= 3'b010;
        #10
-       if (aluResult == 16'd15) $display("Or is correct.");
+       if (aluResult == 16'd15) $display("Or is correct (%d | %d = %d).", regDst, regSrc, aluResult);
        aluOp <= 3'b011;
        #10
-       if (aluResult == 16'd14) $display("Xor is correct.");
+       if (aluResult == 16'd14) $display("Xor is correct (%d ^ %d = %d).", regDst, regSrc, aluResult);
 	end
 	
 endmodule 
