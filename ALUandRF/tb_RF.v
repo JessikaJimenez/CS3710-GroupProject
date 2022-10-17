@@ -5,7 +5,8 @@
 module tb_RF #(parameter WIDTH = 16) ();
 	
 	reg clk, reset;
-	reg [WIDTH - 1 : 0] srcAddr, dstAddr, writeDataRF;
+	reg [3:0] srcAddr, dstAddr;
+	reg [WIDTH - 1: 0] writeDataRF;
 	reg regWrite;
 	reg flags;
 	wire [WIDTH - 1 : 0] writeData;
@@ -19,7 +20,7 @@ module tb_RF #(parameter WIDTH = 16) ();
 	   .regWrite(regWrite),
 	   .sourceAddr(srcAddr), 
 	   .destAddr(dstAddr), 
-	   .wrData(writeData), 
+	   .wrData(writeDataRF), 
 	   .readData1(srcValue),
 	   .readData2(dstValue)
 	);
@@ -52,14 +53,16 @@ module tb_RF #(parameter WIDTH = 16) ();
 	initial begin
 	   ////////Test for Register File
 	   ///TestWriting
-	   dstAddr <= 4'b0001;
-	   writeDataRF <= 16'b0000000000000001;
+	   dstAddr <= 4'd1;
+	   writeDataRF <= 16'd1;
 	   regWrite <= 1;
 	   #10;
-	   dstAddr <= 4'b0010;
-	   writeDataRF <= 16'b0000000000000010;
+		if (dstValue == 16'd1) $display("Write to register 1 was successful");
+	   dstAddr <= 4'd2;
+	   writeDataRF <= 16'd4;
 	   regWrite <= 1;
 	   #10;
+		if (dstValue == 16'd1) $display("Write to register 1 was successful");
 	end
 	
 endmodule 
