@@ -3,40 +3,7 @@
 // A 16-bit two's complement ALU that will take two registers
 // as arguments and output a 16-bit result.
 //
-//	Must support all required instructions:
-/*
-	ADD
-	ADDI
-	
-	SUB
-	SUBI
-	
-	CMP
-	CMPI
-	
-	AND
-	ANDI
-	
-	OR
-	ORI
-	
-	XOR
-	XORI
-	
-	MOV
-	MOVI
-	
-	LSH
-	LSHI
-	
-	LUI
-	LOAD
-	STOR
-	
-	Bcond
-	Jcond
-	JAL
-*/
+// Supports Add, Subtract, And, Or, Xor operations
 //
 // The ALU also must generate condition flags:
 /*
