@@ -4,7 +4,7 @@ module AluRFonBoard #(
     input clk, reset,
 	input [3:0] srcAddrSwitches,
 	input [2:0] aluOp,
-	output [WIDTH - 1 : 0] resultDataLeds
+	output reg [9:0] resultDataLeds
 );
 reg [WIDTH - 1 : 0] pc = 16'd0;
 reg [WIDTH - 1 : 0] immd = 16'd0;
@@ -35,8 +35,12 @@ wire [WIDTH - 1 : 0] outputFlags;
 		.copyInstruction(copyInstruction),   //HARDCODE: 0
 		.regWrite(regWrite),        //HARDCODE: 0 (not writing back to regfile)
 		.aluOp(aluOp),              //INPUT
-		.resultData(resultDataLeds),     //OUPTUT (Sent to be curtailed first)
+		.resultData(resultDataLedsLong),     //OUPTUT (Sent to be curtailed first)
 		.outputFlags(outputFlags)   //Assigned but not used
-	);	
+	);
+
+	always @(*) begin
+    	resultDataLeds <= resultDataLedsLong;
+	end
     
 endmodule
