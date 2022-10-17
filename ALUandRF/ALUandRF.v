@@ -7,7 +7,7 @@ module ALUandRF #(parameter WIDTH = 16) (
 	input clk, reset,
 	input [WIDTH - 1 : 0] pc, immd,
 	input [3 : 0] srcAddr, dstAddr,
-	input pcInstruction, rTypeInstruction, shiftInstruction, regWrite, flagSet,
+	input pcInstruction, rTypeInstruction, shiftInstruction, regWrite, flagSet, copyInstruction,
 	input [2:0] aluOp,
 	output reg [WIDTH - 1 : 0] resultData,
 	output wire [WIDTH - 1 : 0] outputFlags
@@ -76,9 +76,13 @@ module ALUandRF #(parameter WIDTH = 16) (
 	  else aluSrcInput <= immd;
 	end
 
-	// MUX for shift instructions
+	// MUX for the output of this module
+	// If this is a copy instruction (MOV, JAL, Jcond) then the src/immd will be output
+	// If this is a shift instruction (LSH, ASHU) then the shifter will be output
+	// For anything else, the ALU will be the output
 	always @(*) begin
 	  if (~reset) resultData <= aluResult;
+	  else if (copyInstruction) resultData <= aluSrcInput;
 	  else if (shiftInstruction) resultData <= shiftResult;
 	  else resultData <= aluResult;
 	end
