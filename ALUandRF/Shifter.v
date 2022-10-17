@@ -5,7 +5,7 @@ module Shifter #(parameter INPUTWIDTH = 16, parameter OUTPUTWIDTH = 16)
     (reset, shiftInput, shiftAmount, rightShift, shiftResult);
     input reset;
     input [INPUTWIDTH - 1 : 0] shiftInput;
-    input [3:0] shiftAmount;
+    input unsigned [3 : 0] shiftAmount;
     input rightShift; // Flag for determining left or right shift
     output reg [OUTPUTWIDTH - 1 : 0] shiftResult;
 
