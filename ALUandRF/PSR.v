@@ -10,10 +10,7 @@ module PSR #(parameter WIDTH = 16) (
        reg  [WIDTH-1:0] RAM; //Register file is 16 bits wide and 1 register deep
 	
        initial begin
-          $display("Loading register file");
-          // you'll need to change the path to this file! 
-          $readmemb("C:/Users/danie/Documents/Homework/22 Fall/ECE 3710/Quartus/MiniMips/reg.dat", RAM); 
-          $display("done with RF load"); 
+          RAM <= 16'd0;
        end
 
       // dual-ported register file
@@ -21,10 +18,7 @@ module PSR #(parameter WIDTH = 16) (
       //   write third port on rising edge of clock
       always @(negedge reset, posedge clk) begin
          if(~reset) begin
-            $display("Loading register file");
-	    // you'll need to change the path to this file! 
-	    $readmemb("C:/Users/danie/Documents/Homework/22 Fall/ECE 3710/Quartus/MiniMips/reg.dat", RAM); 
-	    $display("done with RF load"); 
+            RAM <= 16'd0; 
          end
          RAM[WIDTH-1:0] <= flags; //Fill the register
       end
