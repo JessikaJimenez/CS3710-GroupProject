@@ -57,7 +57,7 @@ module tb_ALU #(parameter WIDTH = 16) ();
 	    regDst <= 16'b0000000000000011;
 	    regSrc <= 16'b0111111111111101;
 	    #10
-	    if (carry == 0 && flag == 1 && zero==0 && low==1 &&) $display("carry/flag flags are correct");
+	    if (carry == 0 && flag == 1 && zero==0 && low==1) $display("carry/flag flags are correct");
 	    else $display("something is wrong");
 		 
 	    aluOp <= 3'b100;
