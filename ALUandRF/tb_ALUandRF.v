@@ -8,8 +8,9 @@ module tb_ALUandRF #(parameter WIDTH = 16) ();
 	reg [WIDTH - 1 : 0] pc, immd;
 	reg regWrite;
 	reg pcInstruction;
+	reg flagSet;
 	wire [3:0] srcAddr, dstAddr;
-	wire rTypeInstruction, shiftInstruction, flagSet, copyInstruction;
+	wire rTypeInstruction, shiftInstruction, copyInstruction;
 	wire [2:0] aluOp;
 	wire [WIDTH - 1 : 0] resultData;
 	wire [WIDTH - 1 : 0] outputFlags;
@@ -46,7 +47,6 @@ module tb_ALUandRF #(parameter WIDTH = 16) ();
 	assign shiftInstruction = (instruction[15:12] == 4'b1000);
 	assign opCode = rTypeInstruction ? instruction[7:4]:instruction[15:12];
 	assign aluOp = (opCode[3:2] == 2'b00) ? {1'b0, opCode[1:0]}:{opCode[3], 2'b00};
-	assign flagSet = (aluOp[1:0] == 2'b00);
 	assign copyInstruction = (opCode == 4'b1101);
 
 	// Spread out flags
@@ -62,6 +62,7 @@ module tb_ALUandRF #(parameter WIDTH = 16) ();
 		reset <= 0;
 		regWrite <= 0;
 		pcInstruction <= 0;
+		flagSet <= 1;
 		#50
 		reset <= 1;
 		#10
@@ -76,6 +77,7 @@ module tb_ALUandRF #(parameter WIDTH = 16) ();
 		if (!carry && low && !flag && !zero && negative) $display("Flags set correctly (Low, Negative).");
 		
 		// ORI
+		flagSet <= 0; // Check to see if PSR flip-flop works
 		instruction <= 16'b0010001000001111; // I-Type Or ($2 | 15)
 		#50
 		regWrite <= 1;
@@ -91,9 +93,11 @@ module tb_ALUandRF #(parameter WIDTH = 16) ();
 		#20
 		regWrite <= 0;
 		if (resultData == 16'd16) $display("$2 now equals 16 ($2 += $1).");
-		if (!carry && !low && !flag && !zero && !negative) $display("Flags set correctly (Nothing).");
+		// "flagSet" determines if the flags are changed
+		if (!carry && low && !flag && !zero && negative) $display("Flags set correctly (unchanged).");
 		
 		// SUB
+		flagSet <= 1; 
 		instruction <= 16'b0000000110010001; // R-Type Sub ($1 -= $1)
 		#50
 		regWrite <= 1;
@@ -203,9 +207,9 @@ module tb_ALUandRF #(parameter WIDTH = 16) ();
 		instruction <= 16'b0101000000000001; // I-Type Add (PC += 1)
 		#50
 		pcInstruction <= 1;
-		#10
+		#20
 		pcInstruction <= 0;
-		if (pc == 16'd2) $display("PC was set correctly.");
+		if (resultData == 16'd2) $display("PC was used correctly.");
 	end
 		
 	// Generate clock
