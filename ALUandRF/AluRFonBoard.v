@@ -1,26 +1,24 @@
-module AluRFonBoard #(
-    parameter WIDTH = 16
-) (
+module AluRFonBoard #(parameter WIDTH = 16) (
     input clk, reset,
-	input [3:0] srcAddrSwitches,
-	input [2:0] aluOp,
-	output wire [9:0] resultDataLeds
+    input [3:0] srcAddrSwitches,
+    input [2:0] aluOp,
+    output wire [9:0] resultDataLeds
 );
-reg [WIDTH - 1 : 0] pc = 16'd0;
-reg [WIDTH - 1 : 0] immd = 16'd0;
-reg [3:0] dstAddr = 4'd1;
+    reg [WIDTH - 1 : 0] pc = 16'd0;
+    reg [WIDTH - 1 : 0] immd = 16'd0;
+    reg [3:0] dstAddr = 4'd1;
 
-reg pcInstruction = 1'b0;
-reg rTypeInstruction = 1'b1;
-reg shiftInstruction = 1'b0;
-reg regWrite = 1'b0;
+    reg pcInstruction = 1'b0;
+    reg rTypeInstruction = 1'b1;
+    reg shiftInstruction = 1'b0;
+    reg regWrite = 1'b0;
 
-reg flagSet = 1'b0;
-reg copyInstruction = 1'b0;
+    reg flagSet = 1'b0;
+    reg copyInstruction = 1'b0;
 
-reg [WIDTH - 1 : 0] resultDataLedsLong;
+    reg [WIDTH - 1 : 0] resultDataLedsLong;
 
-wire [WIDTH - 1 : 0] outputFlags;
+    wire [WIDTH - 1 : 0] outputFlags;
 
 
     ALUandRF #(WIDTH) alurf (
