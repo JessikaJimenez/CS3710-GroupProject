@@ -82,16 +82,16 @@ module tb_ALU #(parameter WIDTH = 16) ();
 	    regDst <= 16'b1111111111111111;
 	    regSrc <= 16'b1111111111111110;
 	    #10
-	    if (negative==0 && carry==1 && zero==0 && low==0 && flag==0) $display("carry flag is correct");
+	    if (negative==0 && carry==0 && zero==0 && low==0 && flag==0) $display("negative flag is correct");
 	    else $display("5. something is wrong");
 
 		aluOp <= 3'b100;
 	    regDst <= 16'b1111111111111110;
 	    regSrc <= 16'b1111111111111111;
 	    #10
-	    if (negative==1 && carry==1 && zero==0 && low==0 && flag==0) $display("carry flag is correct");
-	    else $display("6. something is wrong"); 
-		
+	    if (negative==1 && carry==1 && zero==0 && low==1 && flag==0) $display("negative flag is correct");
+	    else $display("6. something is wrong");
+		 
 		 //Tests to see if zero flag is set to 1 when the result is zero
 		 aluOp <= 3'b100;
 	    regDst <= 16'b1111111111111110;
