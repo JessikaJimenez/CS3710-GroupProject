@@ -46,33 +46,59 @@ module tb_ALU #(parameter WIDTH = 16) ();
        #10
        if (aluResult == 16'd14) $display("Xor is correct (%d ^ %d = %d).", regDst, regSrc, aluResult);
 		 
+		 //Testing if subtraction borrow is detected and low bit is set and negative bit.
 	    aluOp <= 3'b100;
 	    regDst <= 16'b0000000000000011;
 	    regSrc <= 16'b0000000000000101;
 	    #10
 	    if (carry == 1 && zero == 0 && low == 1 && flag == 0 && negative == 1) $display("all flags is correct");
-	    else $display("something is wrong");
+	    else $display("1. something is wrong");
 		 
+		 //Test if overflow (flag) and carry flags are set  
 	    aluOp <= 3'b000;
 	    regDst <= 16'b0000000000000011;
 	    regSrc <= 16'b0111111111111101;
 	    #10
 	    if (carry == 0 && flag == 1 && zero==0 && low==1) $display("carry/flag flags are correct");
-	    else $display("something is wrong");
+	    else $display("2. something is wrong");
 		 
+		 //Tests that no carry is detected.
 	    aluOp <= 3'b100;
 	    regDst <= 16'b0000000000000011;
 	    regSrc <= 16'b0000000000000001;
 	    #10
 	    if (carry == 0) $display("carry flag is correct");
-	    else $display("something is wrong");
+	    else $display("3. something is wrong");
+
+	    aluOp <= 3'b000;
+	    regDst <= 16'b0000000000000011;
+	    regSrc <= 16'b0000000000000001;
+	    #10
+	    if (carry == 0) $display("carry flag is correct");
+	    else $display("4. something is wrong");
 		 
-		 aluOp <= 3'b100;
+		 //Tests that the negative flag is correctly set when both are negative.
+		aluOp <= 3'b100;
 	    regDst <= 16'b1111111111111111;
 	    regSrc <= 16'b1111111111111110;
 	    #10
 	    if (negative==0 && carry==1 && zero==0 && low==0 && flag==0) $display("carry flag is correct");
-	    else $display("something is wrong");
+	    else $display("5. something is wrong");
+
+		aluOp <= 3'b100;
+	    regDst <= 16'b1111111111111110;
+	    regSrc <= 16'b1111111111111111;
+	    #10
+	    if (negative==1 && carry==1 && zero==0 && low==0 && flag==0) $display("carry flag is correct");
+	    else $display("6. something is wrong"); 
+		
+		 //Tests to see if zero flag is set to 1 when the result is zero
+		 aluOp <= 3'b100;
+	    regDst <= 16'b1111111111111110;
+	    regSrc <= 16'b1111111111111110;
+	    #10
+	    if (negative==0 && carry==0 && zero==1 && low==0 && flag==0) $display("zero flag is correct");
+	    else $display("7. something is wrong");
 	end
 	
 endmodule 
