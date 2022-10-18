@@ -7,8 +7,9 @@ module tb_ALUandRF #(parameter WIDTH = 16) ();
 	reg clk, reset;
 	reg [WIDTH - 1 : 0] pc, immd;
 	reg regWrite;
+	reg pcInstruction;
 	wire [3:0] srcAddr, dstAddr;
-	wire pcInstruction, rTypeInstruction, shiftInstruction, flagSet, copyInstruction;
+	wire rTypeInstruction, shiftInstruction, flagSet, copyInstruction;
 	wire [2:0] aluOp;
 	wire [WIDTH - 1 : 0] resultData;
 	wire [WIDTH - 1 : 0] outputFlags;
@@ -42,7 +43,6 @@ module tb_ALUandRF #(parameter WIDTH = 16) ();
 	assign srcAddr = instruction[3:0];
 	assign rTypeInstruction = (instruction[15:12] == 4'b0000 || 
 		(shiftInstruction && (instruction[7:4] == 4'b0100 || instruction[7:4] == 4'b0110)));
-	assign pcInstruction = 1'b0;
 	assign shiftInstruction = (instruction[15:12] == 4'b1000);
 	assign opCode = rTypeInstruction ? instruction[7:4]:instruction[15:12];
 	assign aluOp = (opCode[3:2] == 2'b00) ? {1'b0, opCode[1:0]}:{opCode[3], 2'b00};
@@ -61,7 +61,8 @@ module tb_ALUandRF #(parameter WIDTH = 16) ();
 		clk <= 0;
 		reset <= 0;
 		regWrite <= 0;
-		#10
+		pcInstruction <= 0;
+		#50
 		reset <= 1;
 		#10
 		
@@ -196,6 +197,15 @@ module tb_ALUandRF #(parameter WIDTH = 16) ();
 		#10
 		regWrite <= 0;
 		if (resultData == 16'd1) $display("$2 now equals 1 ($2 >> 2).");
+
+		// Test potential PC instruction
+		pc <= 16'd1;
+		instruction <= 16'b0101000000000001; // I-Type Add (PC += 1)
+		#50
+		pcInstruction <= 1;
+		#10
+		pcInstruction <= 0;
+		if (pc == 16'd2) $display("PC was set correctly.");
 	end
 		
 	// Generate clock
