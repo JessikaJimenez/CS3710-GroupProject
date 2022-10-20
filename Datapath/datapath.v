@@ -81,7 +81,7 @@ module datapath #(parameter WIDTH = 16) ();
     input regWrite, flagSet;
     input [2:0] aluOp;
     input pcOverwrite, pcContinue, zeroExtend, luiInstruction;
-    output reg [WIDTH - 1 : 0] instr, PC, nextPC;
+    output reg [WIDTH - 1 : 0] instr, PC;
     output wire [WIDTH - 1 : 0] outputFlags;
 
     // Define parameters
