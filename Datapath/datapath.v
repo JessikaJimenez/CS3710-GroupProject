@@ -44,11 +44,11 @@ module datapath #(parameter WIDTH = 16) ();
     input clk, reset;
     input pcInstruction, rTypeInstruction, shiftInstruction, regWrite, flagSet, copyInstruction;
     input [2:0] aluOp;
-    input [7:0] eightImmd;
     input pcWrite, zeroExtend, luiInstruction;
-    output reg [WIDTH - 1 : 0] PC, nextPC;
+    output reg [WIDTH - 1 : 0] instr, PC, nextPC;
 
     // Declare variables
+    wire [3:0] srcAddr, dstAddr;
     reg [WIDTH - 1 : 0] sixteenImmd, immdInput, luiOutput;
 
     // Instantiate modules
@@ -56,8 +56,9 @@ module datapath #(parameter WIDTH = 16) ();
         .clk(clk), 
         .reset(reset),
 	    .pc(PC), 
-        .immd,
-	input [3 : 0] srcAddr, dstAddr,
+        .immd(immdInput),
+	    .srcAddr(srcAddr), 
+        .dstAddr(dstAddr),
 	    .pcInstruction(pcInstruction), 
         .rTypeInstruction(rTypeInstruction), 
         .shiftInstruction(shiftInstruction), 
@@ -65,7 +66,7 @@ module datapath #(parameter WIDTH = 16) ();
         .flagSet(flagSet), 
         .copyInstruction(copyInstruction),
 	    .aluOp(aluOp),
-	output reg [WIDTH - 1 : 0] resultData,
+	output wire resultData(aluOutput),
 	output wire [WIDTH - 1 : 0] outputFlags
     );
 
@@ -77,6 +78,19 @@ module datapath #(parameter WIDTH = 16) ();
         .shiftResult(luiOutput)
     );
 
+    // Load instruction from memory TO DO
+
+
+    // Set address bits for registers
+    assign dstAddr = instruction[11:8];
+	assign srcAddr = instruction[3:0];
+
+    // Flip-flop for the PC
+    always @(posedge clk) begin
+        if (~reset) PC <= 16'd0;
+        else if (pcWrite) PC <= nextPC;
+    end
+
     // MUX for the next PC instruction
     always @(*) begin
         if (~reset) nextPC <= PC + 1;
@@ -86,21 +100,15 @@ module datapath #(parameter WIDTH = 16) ();
 
     // Either zero-extend or sign-extend the immediate based on instruction
 	always @(*) begin
-		if (~reset) sixteenImmd <= 16'd0;
-		if (zeroExtend) sixteenImmd <= {8'd0, eightImmd};
-		else immd <= {{8{eightImmd[7]}}, eightImmd};
+		if (~reset) instructionImmd <= 16'd0;
+		if (zeroExtend) instructionImmd <= {8'd0, instruction[7:0]};
+		else instructionImmd <= {{8{instruction[7]}}, instruction[7:0]};
 	end
-    
-    // Flip-flop for the PC
-    always @(posedge clk) begin
-        if (~reset) PC <= 16'd0;
-        else if (pcWrite) PC <= nextPC;
-    end
 
-    // Flip-flop for immediate that gets inputted into the ALUandRF
-    always @(posedge clk) begin
-        if (~reset) immdInput <= sixteenImmd;
+    // MUX for immediate or luiImmediate that gets inputted into the ALUandRF
+    always @(*) begin
+        if (~reset) immdInput <= instructionImmd;
         else if (luiInstruction) immdInput <= luiOutput;
-        else immdInput <= sixteenImmd;
+        else immdInput <= instructionImmd;
     end
 endmodule

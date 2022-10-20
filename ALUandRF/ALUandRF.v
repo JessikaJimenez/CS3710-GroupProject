@@ -89,8 +89,7 @@ module ALUandRF #(parameter WIDTH = 16) (
 	// Flip-Flop for setting flags
 	always @(posedge clk) begin
 		if (~reset) inputFlags <= 16'd0;
-		if (flagSet) inputFlags <= {11'd0, negative, zero, flag, low, carry};
-		else inputFlags <= outputFlags;
+		else if (flagSet) inputFlags <= {11'd0, negative, zero, flag, low, carry};
 	end
 
 endmodule 
