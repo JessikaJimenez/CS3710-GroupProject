@@ -1,82 +1,166 @@
 // DATAPATH MODULE
 /*************************************************************/
-//
-// ADD - rTypeInstruction, regWrite, flagSet, 000
-// ADDI - regWrite, flagSet, 000
 // 
-// SUB - rTypeInstruction, regWrite, flagSet, 100
-// SUBI - regWrite, flagSet, 100
+// ADDEX - rTypeInstruction, 000
+// ADDWR - regWrite, flagSet
 //
-// CMP - rTypeInstruction, flagSet, 100
-// CMPI - flagSet, 100
+// ADDIEX - 000
+// ADDIWR - regWrite, flagSet
+// 
+// SUBEX - rTypeInstruction, 100
+// SUBWR - regWrite, flagSet
 //
-// AND - rTypeInstruction, regWrite, 001
-// ANDI - regWrite, zeroExtend, 001
+// SUBIEX - 100
+// SUBIWR - regWrite, flagSet
 //
-// OR - rTypeInstruction, regWrite, 010
-// ORI - regWrite, zeroExtend, 010
+// CMPEX - rTypeInstruction, 100
+// CMPWR - flagSet
 //
-// XOR - rTypeInstruction, regWrite, 011
-// XORI - regWrite, zeroExtend, 011
+// CMPIEX - 100
+// CMPIWR - flagSet
 //
-// MOV - rTypeInstruction, regWrite, copyInstruction
-// MOVI - regWrite, zeroExtend, copyInstruction
+// ANDEX - rTypeInstruction, 001
+// ANDWR - regWrite
 //
-// LSH - rTypeInstruction, regWrite, shiftInstruction
-// LSHI - regWrite, shiftInstruction
+// ANDIEX - zeroExtend, 001
+// ANDIWR - regWrite
 //
-// ASHU - rTypeInstruction, regWrite, shiftInstruction
-// ASHUI - regWrite, shiftInstruction
+// OREX - rTypeInstruction, 010
+// ORWR - regWrite
 //
-// LUI - luiInstruction, copyInstruction
+// ORIEX - zeroExtend, 010
+// ORIWR - regWrite
 //
+// XOREX - rTypeInstruction, 011
+// XORWR - regWrite
+//
+// XORIEX - zeroExtend, 011
+// XORIWR - regWrite
+//
+// MOVEX - rTypeInstruction, COPY
+// MOVWR - regWrite
+//
+// MOVIEX - zeroExtend, COPY
+// MOVIWR - regWrite
+//
+// LSHEX - rTypeInstruction, SHIFT
+// LSHWR - regWrite
+//
+// LSHIEX - SHIFT
+// LSHIWR - regWrite
+//
+// ASHUEX - rTypeInstruction, SHIFT
+// ASHUWR - regWrite
+//
+// ASHUIEX - SHIFT
+// ASHUIWR - regWrite
+//
+// LUI -
 // LOAD - 
 // STOR -
 //
 // NEED TO DETERMINE CONDITION CODES
-// B - pcInstruction, 000
-// J - pcInstruction, copyInstruction
+// BEX - pcInstruction, 000
+// BWR - pcOverwrite
 //
-// JAL - TO DO
+// JEX - pcInstruction, rTypeInstruction, COPY
+// JWR - pcOverwrite
+//
+// JAL
+// NEXTINSTREX - NEXTINSTRUCTION
+// NEXTINSTRWR - regWrite
+// JEX - pcInstruction, rTypeInstruction, COPY
+// JWR - pcOverwrite
+// 
 //
 module datapath #(parameter WIDTH = 16) ();
     // Inputs and outputs
     input clk, reset;
-    input pcInstruction, rTypeInstruction, shiftInstruction, regWrite, flagSet, copyInstruction;
+    input pcInstruction, rTypeInstruction;
+    input [1:0] outputSelect;
+    input regWrite, flagSet;
     input [2:0] aluOp;
-    input pcWrite, zeroExtend, luiInstruction;
+    input pcOverwrite, pcContinue, zeroExtend, luiInstruction;
     output reg [WIDTH - 1 : 0] instr, PC, nextPC;
+    output wire [WIDTH - 1 : 0] outputFlags;
+
+    // Define parameters
+    parameter ALURESULT = 2'b00;
+    parameter SHIFTRESULT = 2'b01;
+    parameter COPYSRC = 2'b10;
+    parameter STORENEXTINSTRUCTION = 2'b11;
 
     // Declare variables
-    wire [3:0] srcAddr, dstAddr;
-    reg [WIDTH - 1 : 0] sixteenImmd, immdInput, luiOutput;
+    wire [3:0] srcAddr, dstAddr; // Addresses of source and destination registers
+    wire carry, low, flag, zero, negative; // Flags of ALU
+	wire [WIDTH - 1 : 0] srcValue, dstValue; // Values read from register file
+    wire [WIDTH - 1 : 0] aluResult, shiftResult, luiOutput; // Results of ALU and Shifters
+    reg [WIDTH - 1 : 0]  immd; // Immediate retrieved from instruction
+    reg [WIDTH - 1: 0] aluDstInput, aluSrcInput; // Inputs into the ALU
+	reg [WIDTH - 1 : 0] inputFlags; // The current flags of the system
+    reg [WIDTH - 1 : 0] resultMUXData, memData; // The result that gets written into a register
+
 
     // Instantiate modules
-    ALUandRF alurf(
-        .clk(clk), 
-        .reset(reset),
-	    .pc(PC), 
-        .immd(immdInput),
-	    .srcAddr(srcAddr), 
-        .dstAddr(dstAddr),
-	    .pcInstruction(pcInstruction), 
-        .rTypeInstruction(rTypeInstruction), 
-        .shiftInstruction(shiftInstruction), 
-        .regWrite(regWrite), 
-        .flagSet(flagSet), 
-        .copyInstruction(copyInstruction),
-	    .aluOp(aluOp),
-	output wire resultData(aluOutput),
-	output wire [WIDTH - 1 : 0] outputFlags
-    );
+    // ALUandRF alurf(
+    //     .clk(clk), 
+    //     .reset(reset),
+	//     .pc(PC), 
+    //     .immd(immdInput),
+	//     .srcAddr(srcAddr), 
+    //     .dstAddr(dstAddr),
+	//     .pcInstruction(pcInstruction), 
+    //     .rTypeInstruction(rTypeInstruction), 
+    //     .shiftInstruction(shiftInstruction), 
+    //     .regWrite(regWrite), 
+    //     .flagSet(flagSet), 
+    //     .copyInstruction(copyInstruction),
+	//     .aluOp(aluOp),
+	// output wire resultData(aluOutput),
+	// output wire [WIDTH - 1 : 0] outputFlags
+    // );
 
-    Shifter LUIShift(
-        .reset(reset), 
-        .shiftInput(sixteenImmd), 
-        .shiftAmount(4'd8), 
-        .rightShift(1'b0), 
-        .shiftResult(luiOutput)
-    );
+	// Instantiate modules
+	RegFile rf (
+	  .clk(clk), 
+	  .reset(reset),
+	  .regWrite(regWrite),
+	  .sourceAddr(srcAddr), 
+	  .destAddr(dstAddr), 
+	  .wrData(memData), 
+	  .readData1(dstValue),
+	  .readData2(srcValue)
+	);
+
+    // Flag register file
+	PSR psr (
+	  .clk(clk),
+	  .reset(reset),
+	  .flags(inputFlags),
+      .flagSet(flagSet),
+	  .readFlags(outputFlags)
+	);
+
+	ALU aluModule (
+	  .regSrc(aluSrcInput),
+	  .regDst(aluDstInput),
+	  .aluOp(aluOp),
+	  .aluResult(aluResult), 
+	  .carry(carry), 
+	  .low(low), 
+	  .flag(flag), 
+	  .zero(zero),
+	  .negative(negative)
+	);
+
+	// Shifter module using RSrc/Immd as the amount
+	Shifter sb (
+	  .reset(reset), 
+	  .shiftInput(aluDstInput), 
+	  .shiftAmount(aluSrcInput[3 : 0]), 
+	  .rightShift(aluSrcInput[4]), 
+	  .shiftResult(shiftResult)
+	);
 
     // Load instruction from memory TO DO
 
@@ -85,30 +169,64 @@ module datapath #(parameter WIDTH = 16) ();
     assign dstAddr = instruction[11:8];
 	assign srcAddr = instruction[3:0];
 
+    /* FLIP FLOPS */
     // Flip-flop for the PC
     always @(posedge clk) begin
         if (~reset) PC <= 16'd0;
-        else if (pcWrite) PC <= nextPC;
+        else PC <= nextPC;
     end
+
+    // Flip-Flop for the output that goes into the register file
+    always @(posedge clk) begin
+        if (~reset) memData <= 16'd0;
+        else memData <= resultMUXData;
+    end
+
+    // Flip-Flop for flags
+	always @(posedge clk) begin
+		if (~reset) inputFlags <= 16'd0;
+		else inputFlags <= {11'd0, negative, zero, flag, low, carry};
+	end
+
+    /* MUX */
+    // MUX for instructions that modify PC or Rdest
+	always @(*) begin
+	  if (~reset) aluDstInput <= dstValue;
+	  else if (pcInstruction) aluDstInput <= PC;
+	  else aluDstInput <= dstValue; 
+	end
 
     // MUX for the next PC instruction
     always @(*) begin
-        if (~reset) nextPC <= PC + 1;
-        else if (pcInstruction) nextPC <= resultData;
-        else nextPC <= PC + 1;
+        if (~reset) nextPC <= PC;
+        else if (pcContinue) nextPC <= PC + 1;
+        else if (pcOverwrite) nextPC <= memData;
+        else nextPC <= PC;
     end
 
-    // Either zero-extend or sign-extend the immediate based on instruction
+    // MUX for R-Type instructions
 	always @(*) begin
-		if (~reset) instructionImmd <= 16'd0;
-		if (zeroExtend) instructionImmd <= {8'd0, instruction[7:0]};
-		else instructionImmd <= {{8{instruction[7]}}, instruction[7:0]};
+	  if (~reset) aluSrcInput <= srcValue;
+	  else if (rTypeInstruction) aluSrcInput <= srcValue;
+	  else aluSrcInput <= immd;
 	end
 
-    // MUX for immediate or luiImmediate that gets inputted into the ALUandRF
-    always @(*) begin
-        if (~reset) immdInput <= instructionImmd;
-        else if (luiInstruction) immdInput <= luiOutput;
-        else immdInput <= instructionImmd;
-    end
+    // Either zero-extend or sign-extend the immediate based on instruction type
+	always @(*) begin
+		if (~reset) immd <= 16'd0;
+		else if (zeroExtend) immd <= {8'd0, instruction[7:0]};
+		else immd <= {{8{instruction[7]}}, instruction[7:0]};
+	end
+
+	// MUX for data that goes into the register file
+	// Will either output the alu, shifter, value for the source, or PC + 1
+	always @(*) begin
+	    if (~reset) resultMUXData <= aluResult;
+        case (outputSelect) 
+            ALURESULT: resultMUXData <= aluResult;
+            SHIFTRESULT: resultMUXData <= shiftResult;
+            COPYSRC: resultMUXData <= aluSrcInput;
+            STORENEXTINSTRUCTION: resultMUXData <= PC + 1;
+        endcase
+	end
 endmodule
