@@ -4,6 +4,7 @@
 module PSR #(parameter WIDTH = 16) (
        input                clk, reset,
        input  [WIDTH-1:0]   flags, 
+       input flagSet,
        output [WIDTH-1:0]   readFlags
 );
 
@@ -17,7 +18,7 @@ module PSR #(parameter WIDTH = 16) (
          if(~reset) begin
             RAM <= 16'd0; //Clear the register
          end
-			else RAM[WIDTH-1:0] <= flags; //Fill the register with input flags
+			else if (flagSet) RAM[WIDTH-1:0] <= flags; //Fill the register with input flags
       end
       
        assign readFlags = RAM[WIDTH-1:0]; // assign the output
