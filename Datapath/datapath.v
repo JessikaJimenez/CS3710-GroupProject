@@ -123,8 +123,8 @@ module datapath #(parameter WIDTH = 16) (
 	// output wire [WIDTH - 1 : 0] outputFlags
     // );
 
-	// Instantiate modules
-	RegFile rf (
+    // Instantiate modules
+    RegFile rf (
 	  .clk(clk), 
 	  .reset(reset),
 	  .regWrite(regWrite),
@@ -133,7 +133,7 @@ module datapath #(parameter WIDTH = 16) (
 	  .wrData(memData), 
 	  .readData1(dstValue),
 	  .readData2(srcValue)
-	);
+    );
 
     // Flag register file
     PSR psr (
