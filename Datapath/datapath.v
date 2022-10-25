@@ -66,7 +66,8 @@
 // SADR - rTypeInstruction, COPY
 // SWR - memWrite
 //
-// NEED TO DETERMINE CONDITION CODES
+// CONDITION CODES CHECKED OUTSIDE OF DATAPATH
+//
 // BEX - pcInstruction, 000
 // BWR - pcOverwrite
 //
