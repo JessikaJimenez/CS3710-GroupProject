@@ -1,6 +1,11 @@
 // DATAPATH MODULE
 /*************************************************************/
 // 
+// FETCH - retrieveInstruction, pcContinue
+// IF DOES NOT WORK, DO THIS
+// FETCH1 - retrieveInstruction, LOAD
+// FETCH2 - retrieveInstruction, pcContinue
+//
 // ADDEX - rTypeInstruction, 000
 // ADDWR - regWrite, flagSet
 //
@@ -96,7 +101,8 @@ module datapath #(parameter WIDTH = 16) (
 	input memWrite, // Flag to write to memory
 	input storeNextInstruction, // Flag to store next instruction to register
 	input luiInstruction, // Flag to make output an 8-bit left shifted immediate
-    output reg [WIDTH - 1 : 0] instr, // The current instruction retrieved from memory
+	input retrieveInstruction, // Flag to get new instruction from memory
+    output reg [WIDTH - 1 : 0] instruction, // The current instruction retrieved from memory
     output reg [WIDTH - 1 : 0] PC, // The program counter
     output wire [WIDTH - 1 : 0] outputFlags // The current flags set
 
@@ -128,6 +134,7 @@ module datapath #(parameter WIDTH = 16) (
     reg [WIDTH - 1 : 0] resultMUXData, outputReg; // The result of this datapath
 	reg [WIDTH - 1 : 0] nextPC; // Register used to overwrite the PC
 	reg [WIDTH - 1 : 0] shiftReg; // Necessary to use shifter or LUI shift
+	reg [WIDTH - 1 : 0] readAddr; // Register used to read from memory
 
     // Instantiate modules
     RegFile rf (
@@ -179,7 +186,7 @@ module datapath #(parameter WIDTH = 16) (
 		.OutputDataB(readDataB),
 		.InputData(ioInput),
 		.data_a(dstValue),
-		.addr_a(outputReg),
+		.addr_a(readAddr),
 		.write_a(memWrite),
 		.OutputDataA(readOutput)
 	);
@@ -206,9 +213,15 @@ module datapath #(parameter WIDTH = 16) (
 
     // Flip-Flop for flags
     always @(posedge clk) begin
-	if (~reset) inputFlags <= 16'd0;
-	else inputFlags <= {11'd0, negative, zero, flag, low, carry};
+		if (~reset) inputFlags <= 16'd0;
+		else inputFlags <= {11'd0, negative, zero, flag, low, carry};
     end
+
+	// Latch for instructions
+	always @(posedge clk) begin
+		if (~reset) instruction <= 16'd0;
+		else if (retrieveInstruction) instruction <= readOutput;
+	end
 
     /* MUX */
     // MUX for instructions that modify PC or Rdest
@@ -265,6 +278,13 @@ module datapath #(parameter WIDTH = 16) (
 		if (~reset) dataWriteToReg <= outputReg;
 		else if (storeNextInstruction) dataWriteToReg <= PC + 1;
 		else dataWriteToReg <= outputReg;
+	end
+
+	// MUX for determining if address is output or PC for memory
+	always @(*) begin
+		if (~reset) readAddr <= outputReg;
+		else if (retrieveInstruction) readAddr <= PC;
+		else readAddr <= outputReg;
 	end
 	
 endmodule
