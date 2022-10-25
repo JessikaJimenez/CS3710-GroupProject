@@ -100,7 +100,7 @@ module datapath #(parameter WIDTH = 16) (
     output reg [WIDTH - 1 : 0] PC, // The program counter
     output wire [WIDTH - 1 : 0] outputFlags // The current flags set
 
-	// MEMORY
+	// MEMORY ACCESS FOR PORT B
 	input [WIDTH - 1 : 0] writeDataB; // Data to write to Port B
 	input [WIDTH - 1 : 0] addrDataB; // Address on Port B
 	input [WIDTH - 1 : 0] ioInput; // Input data from I/O space
