@@ -75,16 +75,20 @@
 //
 module datapath #(parameter WIDTH = 16) (
     // Inputs and outputs
-    input clk, reset,
-    input pcInstruction, rTypeInstruction,
-    input [1:0] outputSelect,
-    input regWrite, flagSet,
-    input [2:0] aluOp,
-    input pcOverwrite, pcContinue, zeroExtend, luiInstruction,
-    output reg [WIDTH - 1 : 0] instr, 
-    output reg [WIDTH - 1 : 0] PC, 
-    output reg [WIDTH - 1 : 0] nextPC,
-    output wire [WIDTH - 1 : 0] outputFlags
+    input clk, reset, 
+    input pcInstruction, // RDst or PC
+	input rTypeInstruction, // Rsrc or Immediate
+    input [1:0] outputSelect, // Determines output that gets written (ALU, SHIFT, COPY, STORE)
+    input regWrite, // Write output to Rdst
+	input flagSet, // Set flags
+    input [2:0] aluOp, // Which operation to execute on ALU
+    input pcOverwrite, // The next PC should be the output
+	input pcContinue, // The PC should increment
+	input zeroExtend, // Immediate is zero extended or sign extended
+	input luiInstruction, // TO DO
+    output reg [WIDTH - 1 : 0] instr, // The current instruction retrieved from memory
+    output reg [WIDTH - 1 : 0] PC, // The program counter
+    output wire [WIDTH - 1 : 0] outputFlags // The current flags set
 );
 
     // Define parameters
@@ -102,6 +106,7 @@ module datapath #(parameter WIDTH = 16) (
     reg [WIDTH - 1: 0] aluDstInput, aluSrcInput; // Inputs into the ALU
     reg [WIDTH - 1 : 0] inputFlags; // The current flags of the system
     reg [WIDTH - 1 : 0] resultMUXData, memData; // The result that gets written into a register
+	reg [WIDTH - 1 : 0] nextPC; // Register used to overwrite the PC
 
 
     // Instantiate modules
@@ -165,8 +170,10 @@ module datapath #(parameter WIDTH = 16) (
 	  .shiftResult(shiftResult)
     );
 
-    // Load instruction from memory TO DO
+    // Memory module
+	memoryMap mp (
 
+	);
 
     // Set address bits for registers
     assign dstAddr = instruction[11:8];
