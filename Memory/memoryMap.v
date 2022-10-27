@@ -16,7 +16,7 @@ module memoryMap #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16) (
 
 	wire mmIOWriteA;
 	assign mmIOWriteA = addr_a[(ADDR_WIDTH-1)] == 1'b1 & write_a;		//Given in Lab
-	flopen flop(clk, mmIOWriteA, data_a, OutputDataA);			//use the flop to set the LEDs
+	flopen flopA(clk, mmIOWriteA, data_a, OutputDataA);			//use the flop to set the LEDs
 
 
 	wire mmIOReadB;
@@ -25,7 +25,7 @@ module memoryMap #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16) (
 
 	wire mmIOWriteB;
 	assign mmIOWriteB = addr_a[(ADDR_WIDTH-1)] == 1'b1 & write_b;		//Given in Lab
-	flopen flop(clk, mmIOWriteB, data_a, OutputDataB);			//use the flop to set the LEDs
+	flopen flopB(clk, mmIOWriteB, data_b, OutputDataB);			//use the flop to set the LEDs
 
 	memory exMem(
 		.data_a(data_a),
@@ -49,10 +49,16 @@ module mux2 (
 );
 
 	assign y = s ? d1 : d0; 
+	
+endmodule
 
 module flopen
                (input                  clk, en,
                 input      [DATA_WIDTH-1:0] d, 
                 output reg [DATA_WIDTH-1:0] q);
+					 
+					 
+   always @(posedge clk)
+      if (en) q <= d;
 	
 endmodule 
