@@ -87,31 +87,35 @@
 // JWR - pcOverwrite
 // 
 module datapath #(parameter WIDTH = 16) (
-    // DATAPATH
-    input clk, reset, 
-    input pcInstruction, // RDst or PC
+   // DATAPATH
+   input clk, reset, 
+   input pcInstruction, // RDst or PC
 	input rTypeInstruction, // Rsrc or Immediate
-    input [1:0] outputSelect, // Determines output that gets written (ALU, SHIFT, COPY, STORE)
-    input regWrite, // Write output to Rdst
+   input [1:0] outputSelect, // Determines output that gets written (ALU, SHIFT, COPY, STORE)
+   input regWrite, // Write output to Rdst
 	input flagSet, // Set flags
-    input [2:0] aluOp, // Which operation to execute on ALU
-    input pcOverwrite, // The next PC should be the output
+   input [2:0] aluOp, // Which operation to execute on ALU
+   input pcOverwrite, // The next PC should be the output
 	input pcContinue, // The PC should increment
 	input zeroExtend, // Immediate is zero extended or sign extended
 	input memWrite, // Flag to write to memory
-	input storeNextInstruction, // Flag to store next instruction to register
+	input storeNextInstruction, // Flag to store next instruction in register
 	input luiInstruction, // Flag to make output an 8-bit left shifted immediate
 	input retrieveInstruction, // Flag to get new instruction from memory
-    output reg [WIDTH - 1 : 0] instruction, // The current instruction retrieved from memory
-    output reg [WIDTH - 1 : 0] PC, // The program counter
-    output wire [WIDTH - 1 : 0] outputFlags // The current flags set
+	
+	// MEMORY ACCESS FOR PORT B
+	input [WIDTH - 1 : 0] writeDataB, // Data to write to Port B
+	input [WIDTH - 1 : 0] addrDataB, // Address on Port B
+	input [WIDTH - 1 : 0] ioInput, // Input data from I/O space
+	input writeEnB, // Flag to write to port B
+	
+	// DATAPATH
+   output reg [WIDTH - 1 : 0] instruction, // The current instruction retrieved from memory
+   output reg [WIDTH - 1 : 0] PC, // The program counter
+   output wire [WIDTH - 1 : 0] outputFlags, // The current flags set
 
 	// MEMORY ACCESS FOR PORT B
-	input [WIDTH - 1 : 0] writeDataB; // Data to write to Port B
-	input [WIDTH - 1 : 0] addrDataB; // Address on Port B
-	input [WIDTH - 1 : 0] ioInput; // Input data from I/O space
-	input writeEnB; // Flag to write to port B
-	output wire [WIDTH - 1 : 0] readDataB; // Data read from Port B
+	output wire [WIDTH - 1 : 0] readDataB // Data read from Port B
 );
 
     // Define parameters

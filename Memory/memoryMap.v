@@ -3,7 +3,7 @@ module memoryMap #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16) (
 	input [(ADDR_WIDTH-1):0] addr_a, addr_b, //Address of Data
 	input write_a, write_b, clk,
    	input [(DATA_WIDTH-1):0] InputData,                   //Switches In this case
-	output reg [(DATA_WIDTH-1):0] OutputDataA, OutputDataB
+	output wire [(DATA_WIDTH-1):0] OutputDataA, OutputDataB
 );
 
 	//Read values of Data
@@ -42,7 +42,8 @@ module memoryMap #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16) (
 endmodule
 
 
-module mux2 (
+module mux2 #(parameter DATA_WIDTH = 16)
+(
 	input  [DATA_WIDTH-1:0] d0, d1, 
 	input              s, 
 	output [DATA_WIDTH-1:0] y
@@ -52,7 +53,7 @@ module mux2 (
 	
 endmodule
 
-module flopen
+module flopen #(parameter DATA_WIDTH = 16)
                (input                  clk, en,
                 input      [DATA_WIDTH-1:0] d, 
                 output reg [DATA_WIDTH-1:0] q);
