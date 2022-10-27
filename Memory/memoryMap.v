@@ -12,7 +12,7 @@ module memoryMap #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16) (
 	
 	wire mmIOReadA;
 	assign mmIOReadA = addr_a[(ADDR_WIDTH-1)] == 1'b1 & !write_a; //If in IO space and not writing
-	mux2 OutputA(read_a, InputData, mmIOWriteA, OutputDataA); //Set output data to either ExMem data or Data from IO (Switches)
+	mux2 OutputA(read_a, InputData, mmIOReadA, OutputDataA); //Set output data to either ExMem data or Data from IO (Switches)
 
 	wire mmIOWriteA;
 	assign mmIOWriteA = addr_a[(ADDR_WIDTH-1)] == 1'b1 & write_a;		//Given in Lab
