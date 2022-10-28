@@ -17,7 +17,7 @@ module memory #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16) (
 		// 	ram[i] = i[15:0]; 
 		$display("Loading Memory");
 		// you'll need to change the path to this file! 
-		$readmemb("C:/Users/danie/Documents/Homework/22 Fall/ECE 3710/Quartus/ALUandRegister/CS3710-GroupProject/Helper Files/TestReg.dat", RAM); 
+		$readmemh("INSERT FILE HERE", ram); 
 		$display("done with memory load"); 
 	end
 
