@@ -2,8 +2,11 @@ module memoryMap #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16) (
 	input [(DATA_WIDTH-1):0] data_a, data_b, //Data Written to Memory
 	input [(ADDR_WIDTH-1):0] addr_a, addr_b, //Address of Data
 	input write_a, write_b, clk,
-   	input [(DATA_WIDTH-1):0] InputData,                   //Switches In this case
-	output wire [(DATA_WIDTH-1):0] OutputDataA, OutputDataB
+   input [(DATA_WIDTH-1):0] InputData,                   //Switches In this case
+	output wire [(DATA_WIDTH-1):0] OutputReadDataA,
+	output wire [(DATA_WIDTH-1):0] OutputWriteDataA,
+	output wire [(DATA_WIDTH-1):0] OutputReadDataB,
+	output wire [(DATA_WIDTH-1):0] OutputWriteDataB
 );
 
 	//Read values of Data
@@ -11,21 +14,21 @@ module memoryMap #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16) (
 	wire [(DATA_WIDTH-1):0] read_b;
 	
 	wire mmIOReadA;
-	assign mmIOReadA = addr_a[(ADDR_WIDTH-1)] == 1'b1 & !write_a; //If in IO space and not writing
-	mux2 OutputA(read_a, InputData, mmIOReadA, OutputDataA); //Set output data to either ExMem data or Data from IO (Switches)
+	assign mmIOReadA = addr_a[(ADDR_WIDTH-1):9] > 0 & !write_a; //If in IO space and not writing
+	mux2 OutputA(read_a, InputData, mmIOReadA, OutputReadDataA); //Set output data to either ExMem data or Data from IO (Switches)
 
 	wire mmIOWriteA;
-	assign mmIOWriteA = addr_a[(ADDR_WIDTH-1)] == 1'b1 & write_a;		//Given in Lab
-	flopen flopA(clk, mmIOWriteA, data_a, OutputDataA);			//use the flop to set the LEDs
+	assign mmIOWriteA = addr_a[(ADDR_WIDTH-1):9] > 0 & write_a;	//If in IO space and Writing
+	flopen flopA(clk, mmIOWriteA, data_a, OutputWriteDataA);			//Write the data in A to IO device
 
 
 	wire mmIOReadB;
-	assign mmIOReadB = addr_b[(ADDR_WIDTH-1)] == 1'b1 & !write_b; //If in IO space and not writing
-	mux2 OutputB(read_b, InputData, mmIOReadB, OutputDataB); //Set output data to either ExMem data or Data from IO (Switches)
+	assign mmIOReadB = addr_b[(ADDR_WIDTH-1):9] > 0 & !write_b; //If in IO space and not writing
+	mux2 OutputB(read_b, InputData, mmIOReadB, OutputReadDataB); //Set output data to either ExMem data or Data from IO (Switches)
 
 	wire mmIOWriteB;
-	assign mmIOWriteB = addr_a[(ADDR_WIDTH-1)] == 1'b1 & write_b;		//Given in Lab
-	flopen flopB(clk, mmIOWriteB, data_b, OutputDataB);			//use the flop to set the LEDs
+	assign mmIOWriteB = addr_b[(ADDR_WIDTH-1):9] > 0 & write_b;	//If in IO space and Writing
+	flopen flopB(clk, mmIOWriteB, data_b, OutputWriteDataB);			//Write the data in B to IO device
 
 	memory exMem(
 		.data_a(data_a),
