@@ -90,61 +90,61 @@ module datapath #(parameter WIDTH = 16) (
    // DATAPATH
    input clk, reset, 
    input pcInstruction, // RDst or PC
-	input rTypeInstruction, // Rsrc or Immediate
+   input rTypeInstruction, // Rsrc or Immediate
    input [1:0] outputSelect, // Determines output that gets written (ALU, SHIFT, COPY, STORE)
    input regWrite, // Write output to Rdst
-	input flagSet, // Set flags
+   input flagSet, // Set flags
    input [2:0] aluOp, // Which operation to execute on ALU
    input pcOverwrite, // The next PC should be the output
-	input pcContinue, // The PC should increment
-	input zeroExtend, // Immediate is zero extended or sign extended
-	input memWrite, // Flag to write to memory
-	input storeNextInstruction, // Flag to store next instruction in register
-	input luiInstruction, // Flag to make output an 8-bit left shifted immediate
-	input retrieveInstruction, // Flag to get new instruction from memory
+   input pcContinue, // The PC should increment
+   input zeroExtend, // Immediate is zero extended or sign extended
+   input memWrite, // Flag to write to memory
+   input storeNextInstruction, // Flag to store next instruction in register
+   input luiInstruction, // Flag to make output an 8-bit left shifted immediate
+   input retrieveInstruction, // Flag to get new instruction from memory
 	
-	// MEMORY ACCESS FOR PORT B
-	input [WIDTH - 1 : 0] writeDataB, // Data to write to Port B
-	input [WIDTH - 1 : 0] addrDataB, // Address on Port B
-	input [WIDTH - 1 : 0] ioInput, // Input data from I/O space
-	input writeEnB, // Flag to write to port B
+   // MEMORY ACCESS FOR PORT B
+   input [WIDTH - 1 : 0] writeDataB, // Data to write to Port B
+   input [WIDTH - 1 : 0] addrDataB, // Address on Port B
+   input [WIDTH - 1 : 0] ioInput, // Input data from I/O space
+   input writeEnB, // Flag to write to port B
 	
-	// DATAPATH
+   // DATAPATH
    output reg [WIDTH - 1 : 0] instruction, // The current instruction retrieved from memory
    output reg [WIDTH - 1 : 0] PC, // The program counter
    output wire [WIDTH - 1 : 0] outputFlags, // The current flags set
 
-	// MEMORY ACCESS FOR PORT B
-	output wire [WIDTH - 1 : 0] readDataB, // Data read from Port B
+   // MEMORY ACCESS FOR PORT B
+   output wire [WIDTH - 1 : 0] readDataB, // Data read from Port B
 
-	// OUTPUT OF CPU FOR IO SPACE
-	output wire [WIDTH - 1 : 0] ioOutput // Output of I/O Space
+   // OUTPUT OF CPU FOR IO SPACE
+   output wire [WIDTH - 1 : 0] ioOutput // Output of I/O Space
 );
 
-    // Define parameters
-    parameter ALURESULT = 2'b00;
-    parameter SHIFTRESULT = 2'b01;
-    parameter COPYSRC = 2'b10;
-    parameter LOADINSTRUCTION = 2'b11;
+   // Define parameters
+   parameter ALURESULT = 2'b00;
+   parameter SHIFTRESULT = 2'b01;
+   parameter COPYSRC = 2'b10;
+   parameter LOADINSTRUCTION = 2'b11;
 
-    // Declare variables
-    wire [3:0] srcAddr, dstAddr; // Addresses of source and destination registers
-    wire carry, low, flag, zero, negative; // Flags of ALU
-    wire [WIDTH - 1 : 0] srcValue, dstValue; // Values read from register file
-    wire [WIDTH - 1 : 0] aluResult, shiftResult, luiOutput; // Results of ALU and Shifters
-	wire [WIDTH - 1 : 0] readOutput; // What is read from memory
-	wire [WIDTH - 1 : 0] luiImmd; // 8-bit left shifted immediate
-	reg [WIDTH - 1 : 0] dataWriteToReg; // What gets written into the register file
-    reg [WIDTH - 1 : 0]  immd; // Immediate retrieved from instruction
-    reg [WIDTH - 1: 0] aluDstInput, aluSrcInput; // Inputs into the ALU
-    reg [WIDTH - 1 : 0] inputFlags; // The current flags of the system
-    reg [WIDTH - 1 : 0] resultMUXData, outputReg; // The result of this datapath
-	reg [WIDTH - 1 : 0] nextPC; // Register used to overwrite the PC
-	reg [WIDTH - 1 : 0] shiftReg; // Necessary to use shifter or LUI shift
-	reg [WIDTH - 1 : 0] readAddr; // Register used to read from memory
+   // Declare variables
+   wire [3:0] srcAddr, dstAddr; // Addresses of source and destination registers
+   wire carry, low, flag, zero, negative; // Flags of ALU
+   wire [WIDTH - 1 : 0] srcValue, dstValue; // Values read from register file
+   wire [WIDTH - 1 : 0] aluResult, shiftResult, luiOutput; // Results of ALU and Shifters
+   wire [WIDTH - 1 : 0] readOutput; // What is read from memory
+   wire [WIDTH - 1 : 0] luiImmd; // 8-bit left shifted immediate
+   reg [WIDTH - 1 : 0] dataWriteToReg; // What gets written into the register file
+   reg [WIDTH - 1 : 0]  immd; // Immediate retrieved from instruction
+   reg [WIDTH - 1: 0] aluDstInput, aluSrcInput; // Inputs into the ALU
+   reg [WIDTH - 1 : 0] inputFlags; // The current flags of the system
+   reg [WIDTH - 1 : 0] resultMUXData, outputReg; // The result of this datapath
+   reg [WIDTH - 1 : 0] nextPC; // Register used to overwrite the PC
+   reg [WIDTH - 1 : 0] shiftReg; // Necessary to use shifter or LUI shift
+   reg [WIDTH - 1 : 0] readAddr; // Register used to read from memory
 
-    // Instantiate modules
-    RegFile rf (
+   // Instantiate modules
+   RegFile rf (
 	  .clk(clk), 
 	  .reset(reset),
 	  .regWrite(regWrite),
@@ -160,7 +160,7 @@ module datapath #(parameter WIDTH = 16) (
 	  .clk(clk),
 	  .reset(reset),
 	  .flags(inputFlags),
-      .flagSet(flagSet),
+         .flagSet(flagSet),
 	  .readFlags(outputFlags)
     );
 
@@ -186,25 +186,25 @@ module datapath #(parameter WIDTH = 16) (
     );
 
     // Memory module
-	memoryMap mp (
-		.data_b(writeDataB),
-		.addr_b(addrDataB),
-		.write_b(writeEnB),
-		.ReadDataB(readDataB),
-		.InputData(ioInput),
-		.data_a(dstValue),
-		.addr_a(readAddr),
-		.write_a(memWrite),
-		.ReadDataA(readOutput),
-		.ioOutputData(ioOutput)
+    memoryMap mp (
+	  .data_b(writeDataB),
+	  .addr_b(addrDataB),
+	  .write_b(writeEnB),
+	  .ReadDataB(readDataB),
+	  .InputData(ioInput),
+	  .data_a(dstValue),
+	  .addr_a(readAddr),
+	  .write_a(memWrite),
+	  .ReadDataA(readOutput),
+	  .ioOutputData(ioOutput)
 	);
 
     // Set address bits for registers
     assign dstAddr = instruction[11:8];
     assign srcAddr = instruction[3:0];
 	
-	// 8-Bit left shit for LUI instructions
-	assign luiImmd = immd << 8;
+   // 8-Bit left shit for LUI instructions
+   assign luiImmd = immd << 8;
 
     /* FLIP FLOPS */
     // Flip-flop for the PC
@@ -221,15 +221,15 @@ module datapath #(parameter WIDTH = 16) (
 
     // Flip-Flop for flags
     always @(posedge clk) begin
-		if (~reset) inputFlags <= 16'd0;
-		else inputFlags <= {11'd0, negative, zero, flag, low, carry};
+	if (~reset) inputFlags <= 16'd0;
+	else inputFlags <= {11'd0, negative, zero, flag, low, carry};
     end
 
-	// Latch for instructions
-	always @(posedge clk) begin
-		if (~reset) instruction <= 16'd0;
-		else if (retrieveInstruction) instruction <= readOutput;
-	end
+   // Latch for instructions
+   always @(posedge clk) begin
+	if (~reset) instruction <= 16'd0;
+	else if (retrieveInstruction) instruction <= readOutput;
+   end
 
     /* MUX */
     // MUX for instructions that modify PC or Rdest
@@ -261,12 +261,12 @@ module datapath #(parameter WIDTH = 16) (
 	  else immd <= {{8{instruction[7]}}, instruction[7:0]};
     end
 
-	// MUX for shifting either being the result of the shifter or for LUI instructions
-	always @(*) begin
-		if (~reset) shiftReg <= shiftResult;
-		else if (luiInstruction) shiftReg <= luiImmd;
-		else shiftReg <= shiftResult;
-	end
+   // MUX for shifting either being the result of the shifter or for LUI instructions
+   always @(*) begin
+	if (~reset) shiftReg <= shiftResult;
+	else if (luiInstruction) shiftReg <= luiImmd;
+	else shiftReg <= shiftResult;
+   end
 
     // MUX for the output of the datapath
     // Will either output the alu, shifter, value for the source, or what is read from memory
@@ -280,19 +280,19 @@ module datapath #(parameter WIDTH = 16) (
           endcase
     end
 
-	// MUX for what is being written into the register file
-	// Will either be the output of the datapath or from memory
-	always @(*) begin
-		if (~reset) dataWriteToReg <= outputReg;
-		else if (storeNextInstruction) dataWriteToReg <= PC + 1;
-		else dataWriteToReg <= outputReg;
-	end
+   // MUX for what is being written into the register file
+   // Will either be the output of the datapath or from memory
+   always @(*) begin
+	if (~reset) dataWriteToReg <= outputReg;
+	else if (storeNextInstruction) dataWriteToReg <= PC + 1;
+	else dataWriteToReg <= outputReg;
+   end
 
-	// MUX for determining if address is output or PC for memory
-	always @(*) begin
-		if (~reset) readAddr <= outputReg;
-		else if (retrieveInstruction) readAddr <= PC;
-		else readAddr <= outputReg;
-	end
+   // MUX for determining if address is output or PC for memory
+   always @(*) begin
+	if (~reset) readAddr <= outputReg;
+	else if (retrieveInstruction) readAddr <= PC;
+	else readAddr <= outputReg;
+   end
 	
 endmodule
