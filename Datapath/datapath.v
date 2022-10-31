@@ -115,7 +115,10 @@ module datapath #(parameter WIDTH = 16) (
    output wire [WIDTH - 1 : 0] outputFlags, // The current flags set
 
 	// MEMORY ACCESS FOR PORT B
-	output wire [WIDTH - 1 : 0] readDataB // Data read from Port B
+	output wire [WIDTH - 1 : 0] readDataB, // Data read from Port B
+
+	// OUTPUT OF CPU FOR IO SPACE
+	output wire [WIDTH - 1 : 0] ioOutput // Output of I/O Space
 );
 
     // Define parameters
@@ -187,12 +190,13 @@ module datapath #(parameter WIDTH = 16) (
 		.data_b(writeDataB),
 		.addr_b(addrDataB),
 		.write_b(writeEnB),
-		.OutputDataB(readDataB),
+		.ReadDataB(readDataB),
 		.InputData(ioInput),
 		.data_a(dstValue),
 		.addr_a(readAddr),
 		.write_a(memWrite),
-		.OutputDataA(readOutput)
+		.ReadDataA(readOutput),
+		.ioOutputData(ioOutput)
 	);
 
     // Set address bits for registers
@@ -209,7 +213,7 @@ module datapath #(parameter WIDTH = 16) (
         else PC <= nextPC;
     end
 
-    // Flip-Flop for the output that goes into the register file
+    // Flip-Flop for the output of the datapath that gets stored in registers or memory
     always @(posedge clk) begin
         if (~reset) outputReg <= 16'd0;
         else outputReg <= resultMUXData;
