@@ -8,7 +8,7 @@ module tb_memoryMap #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16) ();
   reg [(ADDR_WIDTH-1):0] addr_a, addr_b;
   reg write_a, write_b, clk;
   reg [(ADDR_WIDTH-1):0] InputData;
-  wire [(DATA_WIDTH-1):0] OutputReadDataA, OutputWriteDataA, OutputReadDataB, OutputWriteDataB;
+  wire [(DATA_WIDTH-1):0] ReadDataA, ioOutputData, ReadDataB;
   integer i;
 
   // Instantiate memoryMap module
@@ -21,10 +21,9 @@ module tb_memoryMap #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16) ();
     .write_b(write_b),
     .clk(clk),
     .InputData(InputData),
-    .OutputReadDataA(OutputReadDataA),
-	 .OutputWriteDataA(OutputWriteDataA),
-    .OutputReadDataB(OutputReadDataB),
-	 .OutputWriteDataB(OutputWriteDataB)
+    .ReadDataA(OutputReadDataA),
+	 .ioOutputData(ioOutputData),
+    .ReadDataB(ReadDataB),
   );
 
 	// Start clock
