@@ -2,7 +2,7 @@ module memoryMap #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16) (
 	input [(DATA_WIDTH-1):0] data_a, data_b, //Data Written to Memory
 	input [(ADDR_WIDTH-1):0] addr_a, addr_b, //Address of Data
 	input write_a, write_b, clk,
-   input [(DATA_WIDTH-1):0] InputData,                   //Switches In this case
+        input [(DATA_WIDTH-1):0] InputData, //Switches In this case
 	output wire [(DATA_WIDTH-1):0] ReadDataA,
 	output wire [(DATA_WIDTH-1):0] ioOutputData,
 	output wire [(DATA_WIDTH-1):0] ReadDataB
