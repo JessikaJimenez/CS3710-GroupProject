@@ -25,18 +25,18 @@ module memoryMap #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16) (
 	// else if (addr_b is in IO && write_b == 1)
 	// 	outputIOData = data_b;
 
-	data_b = ioInput;
-	OutputReadDataB = ioOutput;
+	// data_b = ioInput;
+	// OutputReadDataB = ioOutput;
 
-	if (addr_a is normal)
-		OutputReadDataA = readFromMemory;
-	else if (addr_a is io)
-		OutputReadDataB = data_b;
+	// if (addr_a is normal)
+	// 	OutputReadDataA = readFromMemory;
+	// else if (addr_a is io)
+	// 	OutputReadDataB = data_b;
 
-	if (addr_a is normal)
-		Memory = data_a;
-	else if (addr_a is io)
-		ioOutput = data_a;
+	// if (addr_a is normal)
+	// 	Memory = data_a;
+	// else if (addr_a is io)
+	// 	ioOutput = data_a;
 
 	wire mmIOReadA;
 	assign mmIOReadA = addr_a[(ADDR_WIDTH-1):9] > 0 & !write_a; //If in IO space and not writing
