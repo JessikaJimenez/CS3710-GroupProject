@@ -353,7 +353,7 @@ module controller(input clk, reset,
             WRITETOREG: nextstate <= FETCH;
             WRITETOMEM: nextstate <= FETCH;
             WRITETOPC: nextstate <= FETCH;
-            default: nextstate <= FETCH1; // should never happen
+            default: nextstate <= FETCH; // should never happen
          endcase
       end
 
