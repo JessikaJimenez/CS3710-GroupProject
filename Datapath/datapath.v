@@ -111,7 +111,6 @@ module datapath #(parameter WIDTH = 16) (
 	
    // DATAPATH
    output reg [WIDTH - 1 : 0] instruction, // The current instruction retrieved from memory
-   output reg [WIDTH - 1 : 0] PC, // The program counter
    output wire [WIDTH - 1 : 0] outputFlags, // The current flags set
 
    // MEMORY ACCESS FOR PORT B
@@ -142,6 +141,7 @@ module datapath #(parameter WIDTH = 16) (
    reg [WIDTH - 1 : 0] nextPC; // Register used to overwrite the PC
    reg [WIDTH - 1 : 0] shiftReg; // Necessary to use shifter or LUI shift
    reg [WIDTH - 1 : 0] readAddr; // Register used to read from memory
+   reg [WIDTH - 1 : 0] PC; // Register used to find place in instruction set
 
    // Instantiate modules
    RegFile rf (
@@ -160,7 +160,7 @@ module datapath #(parameter WIDTH = 16) (
 	  .clk(clk),
 	  .reset(reset),
 	  .flags(inputFlags),
-         .flagSet(flagSet),
+     .flagSet(flagSet),
 	  .readFlags(outputFlags)
     );
 

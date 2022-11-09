@@ -118,10 +118,11 @@ module controller(input clk, reset,
                   input [3:0] firstOp,
                   input [3:0] extendedOp,
                   input [4:0] flags,
-                  output reg [1:0] aluOp,
+                  output reg [2:0] aluOp,
                   output reg [1:0] outputSelect,
                   output reg regWrite, memWrite, luiInstruction, retrieveInstruction,
-                             zeroExtend, pcContinue, pcOverwrite, flagSet, rTypeInstruction);
+                             zeroExtend, pcContinue, pcOverwrite, flagSet, rTypeInstruction,
+                             pcInstruction, storeNextInstruction);
     
     // Parameters for states.
     parameter   FETCH           = 5'b00000;
