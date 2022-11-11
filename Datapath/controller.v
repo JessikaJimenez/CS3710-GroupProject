@@ -1,6 +1,11 @@
 // CONTROLLER MODULE
 /*************************************************************/
 // 
+// outputSelect is default 0 (result of the ALU)
+// outputSelect = 01 (result of shifter [SHIFT])
+// outputSelect = 10 (copies either RSrc or Immd [COPY])
+// outputSelect = 11 (reads from memory [LOAD])
+//
 // FETCH - retrieveInstruction, pcContinue
 // IF DOES NOT WORK, DO THIS
 // FETCH1 - retrieveInstruction, LOAD
@@ -357,5 +362,12 @@ module controller(input clk, reset,
             default: nextstate <= FETCH; // should never happen
          endcase
       end
+
+	// This combinational block generates the outputs from each state. 
+    always @(*) begin
+        // SET ALL OUTPUTS TO 0
+        case (state)
+        endcase
+    end
 
 endmodule
