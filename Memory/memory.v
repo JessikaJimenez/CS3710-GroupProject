@@ -9,17 +9,17 @@ module memory #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16) (
 );
 
 	// Declare the RAM variable
-	//reg [DATA_WIDTH-1:0] ram[(1<<4)-1:0]; //Depth of 16
-	reg [DATA_WIDTH-1:0] ram[(2**ADDR_WIDTH)-1:0]; //Depth of 16
+	reg [DATA_WIDTH-1:0] ram[(1<<4)-1:0]; //Depth of 16
+	//reg [DATA_WIDTH-1:0] ram[(2**ADDR_WIDTH)-1:0]; //Depth of 16
 	integer i;
 	
 	initial begin
 //		for(i=0;i<1024;i=i+1)
 //			ram[i] = i[15:0]; 
-//		$display("Loading Memory");
-//		// you'll need to change the path to this file! 
-//		$readmemb("C:/Users/danie/Documents/Homework/22 Fall/ECE 3710/Quartus/ALUandRegister/CS3710-GroupProject/Helper Files/TestReg.dat", ram); 
-//		$display("done with memory load"); 
+		$display("Loading Memory");
+		// you'll need to change the path to this file! 
+		$readmemb("C:/Users/danie/Documents/Homework/22 Fall/ECE 3710/Quartus/ALUandRegister/CS3710-GroupProject/Helper Files/TestReg.dat", ram); 
+		$display("done with memory load"); 
 	end
 
 	// Port A 
