@@ -21,9 +21,9 @@ module tb_memoryMap #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16) ();
     .write_b(write_b),
     .clk(clk),
     .InputData(InputData),
-    .ReadDataA(OutputReadDataA),
+    .ReadDataA(ReadDataA),
 	 .ioOutputData(ioOutputData),
-    .ReadDataB(ReadDataB),
+    .ReadDataB(ReadDataB)
   );
 
 	// Start clock
