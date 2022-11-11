@@ -1,0 +1,9 @@
+ADDI $1 %r1
+ADDI $2 %r2
+#ADD %r1 %r2
+#MOVI $3 %r1
+#MOV %r1 %r2
+#LSH %r2 %r1
+#LSHI $2 %r2
+ASHU %r2 %r1
+ASHUI $2 %r2
