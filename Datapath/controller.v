@@ -121,8 +121,8 @@
 // [At the end of each instruction chain, go back to FETCH]
 module controller(input clk, reset,
                   input [3:0] firstOp,
+		  input [3:0] cond,
                   input [3:0] extendedOp,
-		  input [3:0] cond,  //part of an instr. for the Bcond & Jcond instructions
                   input [4:0] flags,
                   output reg [2:0] aluOp,
                   output reg [1:0] outputSelect,
