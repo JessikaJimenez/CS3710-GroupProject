@@ -122,6 +122,7 @@
 module controller(input clk, reset,
                   input [3:0] firstOp,
                   input [3:0] extendedOp,
+		  input [3:0] cond,  //part of an instr. for the Bcond & Jcond instructions
                   input [4:0] flags,
                   output reg [2:0] aluOp,
                   output reg [1:0] outputSelect,
@@ -130,35 +131,35 @@ module controller(input clk, reset,
                              pcInstruction, storeNextInstruction);
     
     // Parameters for states.
-    parameter   FETCH           = 5'b00000;
-    parameter   DECODE          = 5'b00001;
-    parameter   SPECIALDECODE   = 5'b00010;
-    parameter   CONDITIONCHECK  = 5'b00011;
-    parameter   PASSCONDITION   = 5'b00100;
-    parameter   ADD             = 5'b00101;
-    parameter   ADDI            = 5'b00110;
-    parameter   SUB             = 5'b00111;
-    parameter   SUBI            = 5'b01000;
-    parameter   AND             = 5'b01001;
-    parameter   ANDI            = 5'b01010;
-    parameter   OR              = 5'b01011;
-    parameter   ORI             = 5'b01100;
-    parameter   XOR             = 5'b01101;
-    parameter   XORI            = 5'b01110;
-    parameter   MOVI            = 5'b01111;
-    parameter   SHFT            = 5'b10000;
-    parameter   SHFTI           = 5'b10001;
-    parameter   MOV             = 5'b10010;
-    parameter   LUI             = 5'b10011;
-    parameter   MEMLOAD         = 5'b10100;
-    parameter   BRANCH          = 5'b10101;
-    parameter   JAL             = 5'b10110;
-    parameter   JUMP            = 5'b10111;
+    parameter   FETCH            = 5'b00000;
+    parameter   DECODE           = 5'b00001;
+    parameter   SPECIALDECODE    = 5'b00010;
+    parameter   CONDITIONCHECK   = 5'b00011;
+    parameter   PASSCONDITION    = 5'b00100;
+    parameter   ADD              = 5'b00101;
+    parameter   ADDI             = 5'b00110;
+    parameter   SUB              = 5'b00111;
+    parameter   SUBI             = 5'b01000;
+    parameter   AND              = 5'b01001;
+    parameter   ANDI             = 5'b01010;
+    parameter   OR               = 5'b01011;
+    parameter   ORI              = 5'b01100;
+    parameter   XOR              = 5'b01101;
+    parameter   XORI             = 5'b01110;
+    parameter   MOVI             = 5'b01111;
+    parameter   SHFT             = 5'b10000;
+    parameter   SHFTI            = 5'b10001;
+    parameter   MOV              = 5'b10010;
+    parameter   LUI              = 5'b10011;
+    parameter   MEMLOAD          = 5'b10100;
+    parameter   BRANCH           = 5'b10101;
+    parameter   JAL              = 5'b10110;
+    parameter   JUMP             = 5'b10111;
     parameter   WRITEANDSETFLAGS = 5'b11000;
-    parameter   ONLYSETFLAGS    = 5'b11001;
-    parameter   WRITETOREG      = 5'b11010;
-    parameter   WRITETOMEM      = 5'b11011;
-    parameter   WRITETOPC       = 5'b11100;
+    parameter   ONLYSETFLAGS     = 5'b11001;
+    parameter   WRITETOREG       = 5'b11010;
+    parameter   WRITETOMEM       = 5'b11011;
+    parameter   WRITETOPC        = 5'b11100;
 
     // Parameters for condition codes
     parameter EQ    = 4'b0000;
@@ -363,11 +364,129 @@ module controller(input clk, reset,
          endcase
       end
 
-	// This combinational block generates the outputs from each state. 
+    // This combinational block generates the outputs from each state. 
     always @(*) begin
-        // SET ALL OUTPUTS TO 0
-        case (state)
-        endcase
+         // Set all outputs to 0.
+	  aluOp                <= 3'b000;
+	  outputSelect         <= 2'b00;
+	  regWrite             <= 0;
+	  memWrite             <= 0;
+	  luiInstruction       <= 0;
+	  retrieveInstruction  <= 0;
+	  zeroExtend           <= 0;
+	  pcContinue           <= 0;
+	  pcOverwrite          <= 0;
+	  flagSet              <= 0;
+	  rTypeInstruction     <= 0;
+	  pcInstruction        <= 0;
+	  storeNextInstruction <= 0;
+	  // Based on state, set outputs.
+          case (state)
+		FETCH: begin
+				retrieveInstruction <= 1;
+				pcContinue <= 1;						
+			end
+		DECODE: begin
+				// ***TODO --
+			end
+		SPECIALDECODE: begin
+				// ***TODO --
+			end
+		CONDITIONCHECK: begin
+				// ***TODO --
+			end
+		PASSCONDITION: begin
+				// ***TODO --
+			end
+		ADD: begin
+				rTypeInstruction <= 1;
+				aluOp <= 3'b000;
+			end
+		ADDI: begin
+				aluOp <= 3'b000;
+			end
+		SUB: begin
+				rTypeInstruction <= 1;
+				aluOp <= 3'b100;
+			end
+		SUBI: begin
+				aluOp <= 3'b100;
+			end
+		AND: begin
+				rTypeInstruction <= 1;
+				aluOp <= 3'b001;
+			end
+		ANDI: begin
+				zeroExtend <= 1;
+				aluOp <= 3'b001;
+			end
+		OR: begin
+				rTypeInstruction <= 1;
+				aluOp <= 3'b010;
+			end
+		ORI: begin
+				zeroExtend <= 1;
+				aluOp <= 3'b010;
+			end
+		XOR: begin
+				rTypeInstruction <= 1;
+				aluOp <= 3'b011;
+			end
+		XORI: begin
+				zeroExtend <= 1;
+				aluOp <= 3'b011;
+			end
+		MOVI: begin
+				zeroExtend <= 1;
+				outputSelect <= 2'b10; //COPY
+			end
+		SHFT: begin
+				rTypeInstruction <= 1;
+				outputSelect <= 2'b01; //SHIFT
+			end
+		SHFTI: begin
+				outputSelect <= 2'b01; //SHIFT					
+			end
+		MOV: begin
+				rTypeInstruction <= 1;
+				outputSelect <= 2'b10; //COPY
+			end
+		LUI: begin
+				luiInstruction <= 1;
+				outputSelect <= 2'b01; //SHIFT
+			end
+		MEMLOAD: begin
+				outputSelect <= 2'b11; //LOAD
+			end
+		BRANCH: begin
+				pcInstruction <= 1;
+			end
+		JAL: begin
+				storeNextInstruction <= 1;
+				regWrite <= 1;
+			end
+		JUMP: begin
+				pcInstruction <= 1;
+				rTypeInstruction <= 1;
+				outputSelect <= 2'b10; //COPY
+			end
+		WRITEANDSETFLAGS: begin
+				regWrite <= 1;
+				flagSet <= 1;
+			end
+		ONLYSETFLAGS: begin
+				flagSet <= 1; //CMP and CMPI
+			end
+		WRITETOREG: begin
+				regWrite <= 1;
+			end
+		WRITETOMEM: begin
+				memWrite <= 1;
+			end
+		WRITETOPC: begin
+				pcOverwrite <= 1;
+			end		
+          endcase
     end
 
-endmodule
+endmodule 
