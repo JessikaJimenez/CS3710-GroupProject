@@ -387,16 +387,16 @@ module controller(input clk, reset,
 				pcContinue <= 1;						
 			end
 		DECODE: begin
-				// ***TODO --
+				// No flags - does nothing
 			end
 		SPECIALDECODE: begin
-				// ***TODO --
+				// No flags - does nothing
 			end
 		CONDITIONCHECK: begin
-				// ***TODO --
+				// No flags - does nothing
 			end
 		PASSCONDITION: begin
-				// ***TODO --
+				// No flags - does nothing
 			end
 		ADD: begin
 				rTypeInstruction <= 1;
