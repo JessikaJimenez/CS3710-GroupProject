@@ -38,6 +38,7 @@ module GeneralCPU #(parameter WIDTH = 16) (
         .reset(reset),
         .firstOp(instr[15:12]),
         .extendedOp(instr[7:4]),
+        .cond(instr[11:8]),
         .flags(flags),
         .pcInstruction(pcInstruction),
         .rTypeInstruction(rTypeInstruction),
