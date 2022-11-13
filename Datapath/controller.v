@@ -121,7 +121,7 @@
 // [At the end of each instruction chain, go back to FETCH]
 module controller(input clk, reset,
                   input [3:0] firstOp,
-		  input [3:0] cond,
+		  input [3:0] condition,
                   input [3:0] extendedOp,
                   input [4:0] flags,
                   output reg [2:0] aluOp,
@@ -133,9 +133,9 @@ module controller(input clk, reset,
     // Parameters for states.
     parameter   FETCH            = 5'b00000;
     parameter   DECODE           = 5'b00001;
-    parameter   SPECIALDECODE    = 5'b00010;
-    parameter   CONDITIONCHECK   = 5'b00011;
-    parameter   PASSCONDITION    = 5'b00100;
+    // parameter   SPECIALDECODE    = 5'b00010;
+    // parameter   CONDITIONCHECK   = 5'b00011;
+    // parameter   PASSCONDITION    = 5'b00100;
     parameter   ADD              = 5'b00101;
     parameter   ADDI             = 5'b00110;
     parameter   SUB              = 5'b00111;
@@ -194,136 +194,147 @@ module controller(input clk, reset,
       if(~reset) state <= FETCH;
       else state <= nextstate;
 
+    // Functions for decoding
+    // This function will check the extended op code
+    function [4:0] specialDecode(input [3:0] extendedOpCode);
+        case(extendedOpCode)
+            4'b0000: specialDecode = MOV; // LOAD
+            4'b0001: specialDecode = AND;
+            4'b0010: specialDecode = OR;
+            4'b0011: specialDecode = XOR;
+            4'b0100: specialDecode = MOV; // STOR
+            4'b0101: specialDecode = AND;
+            4'b1000: specialDecode = JAL;
+            4'b1001: specialDecode = SUB;
+            4'b1011: specialDecode = SUB;
+            4'b1100: specialDecode = conditionCheck(condition);
+            4'b1101: specialDecode = MOV;
+            default: specialDecode = FETCH; // should never happen
+        endcase
+    endfunction
+
+    // This function will check the condition code
+    function [4:0] conditionCheck(input [3:0] cond);
+        case(cond)
+            EQ: begin
+                    if (zero) // EQUAL (EQ)
+                        conditionCheck = passCondition(firstOp[3]);
+                    else
+                        conditionCheck = FETCH;
+                end
+            NE: begin
+                    if (!zero) // NOT EQUAL (NE)
+                        conditionCheck = passCondition(firstOp[3]);
+                    else
+                        conditionCheck = FETCH;
+                end
+            CS: begin
+                    if (carry) // CARRY SET (CS)
+                        conditionCheck = passCondition(firstOp[3]);
+                    else
+                        conditionCheck = FETCH;
+                end
+            CC: begin
+                    if (!carry) // CARRY CLEAR (CC)
+                        conditionCheck = passCondition(firstOp[3]);
+                    else
+                        conditionCheck = FETCH;
+                end
+            HI: begin
+                    if (low) // HIGHER THAN (HI)
+                        conditionCheck = passCondition(firstOp[3]);
+                    else
+                        conditionCheck = FETCH;
+                end
+            LS: begin
+                    if (!low) // LOWER THAN OR SAME AS (LS)
+                        conditionCheck = passCondition(firstOp[3]);
+                    else
+                        conditionCheck = FETCH;
+                end
+            GT: begin
+                    if (negative) // GREATER THAN (GT)
+                        conditionCheck = passCondition(firstOp[3]);
+                    else
+                        conditionCheck = FETCH;
+                end
+            LE: begin
+                    if (!negative) // LESS THAN OR EQUAL (LE)
+                        conditionCheck = passCondition(firstOp[3]);
+                    else
+                        conditionCheck = FETCH;
+                end
+            FS: begin
+                    if (flag) // FLAG SET (FS)
+                        conditionCheck = passCondition(firstOp[3]);
+                    else
+                        conditionCheck = FETCH;
+                end
+            FC: begin
+                    if (!flag) // FLAG CLEAR (FC)
+                        conditionCheck = passCondition(firstOp[3]);
+                    else
+                        conditionCheck = FETCH;
+                end
+            LO: begin
+                    if (!low && !zero) // LOWER THAN (LO)
+                        conditionCheck = passCondition(firstOp[3]);
+                    else
+                        conditionCheck = FETCH;
+                end
+            HS: begin
+                    if (low || zero) // HIGHER THAN OR SAME AS (HS)
+                        conditionCheck = passCondition(firstOp[3]);
+                    else
+                        conditionCheck = FETCH;
+                end
+            LT: begin
+                    if (!negative && !zero) // LESS THAN (LT)
+                        conditionCheck = passCondition(firstOp[3]);
+                    else
+                        conditionCheck = FETCH;
+                end
+            GE: begin
+                    if (negative || zero) // GREATER THAN OR EQUAL (GE)
+                        conditionCheck = passCondition(firstOp[3]);
+                    else
+                        conditionCheck = FETCH;
+                end
+            UC: conditionCheck = passCondition(firstOp[3]); // UNCONDITIONAL (UC)
+            NJ: conditionCheck = FETCH; // NEVER JUMP ()
+            default: conditionCheck = FETCH; // should never happen
+        endcase
+    endfunction
+
+    // This function will decide a branch or jump
+    function [4:0] passCondition(input startBranch);
+        if (startBranch) passCondition = BRANCH;
+        else passCondition = JUMP;
+    endfunction       
+
     // next state logic (combinational)
     always @(*)
       begin
          case(state)
             FETCH:  nextstate <= DECODE;
             DECODE:  case(firstOp)
-                        0000: nextstate <= SPECIALDECODE; // R-Type Instructions
-                        0001: nextstate <= ANDI;
-                        0010: nextstate <= ORI;
-                        0011: nextstate <= XORI;
-                        0100: begin
+                        4'b0000: nextstate <= specialDecode(extendedOp); // R-Type Instructions
+                        4'b0001: nextstate <= ANDI;
+                        4'b0010: nextstate <= ORI;
+                        4'b0011: nextstate <= XORI;
+								4'b0100: begin
                                 if (extendedOp[2]) nextstate <= SHFT; // LSH, ASHU
                                 else nextstate <= SHFTI; // LSHI, ASHUI 
                             end
-                        0101: nextstate <= ADDI;
-                        1000: nextstate <= SPECIALDECODE; // Special Instructions
-                        1001: nextstate <= SUBI;
-                        1011: nextstate <= SUBI;
-                        1100: nextstate <= CONDITIONCHECK;
-                        1101: nextstate <= MOVI;
-                        1111: nextstate <= LUI;
+                        4'b0101: nextstate <= ADDI;
+                        4'b1000: nextstate <= specialDecode(extendedOp); // Special Instructions
+                        4'b1001: nextstate <= SUBI;
+                        4'b1011: nextstate <= SUBI;
+                        4'b1100: nextstate <= conditionCheck(condition);
+                        4'b1101: nextstate <= MOVI;
+                        4'b1111: nextstate <= LUI;
                         default: nextstate <= FETCH; // should never happen
                      endcase
-            SPECIALDECODE: case(extendedOp)
-                            0000: nextstate <= MOV; // LOAD
-                            0001: nextstate <= AND;
-                            0010: nextstate <= OR;
-                            0011: nextstate <= XOR;
-                            0100: nextstate <= MOV; // STOR
-                            0101: nextstate <= AND;
-                            1000: nextstate <= JAL;
-                            1001: nextstate <= SUB;
-                            1011: nextstate <= SUB;
-                            1100: nextstate <= CONDITIONCHECK;
-                            1101: nextstate <= MOV;
-                            default: nextstate <= FETCH; // should never happen
-                        endcase
-            CONDITIONCHECK: case(cond)
-                                EQ: begin
-                                        if (zero) // EQUAL (EQ)
-                                            nextstate <= PASSCONDITION;
-                                        else
-                                            nextstate <= FETCH;
-                                    end
-                                NE: begin
-                                        if (!zero) // NOT EQUAL (NE)
-                                            nextstate <= PASSCONDITION;
-                                        else
-                                            nextstate <= FETCH;
-                                    end
-                                CS: begin
-                                        if (carry) // CARRY SET (CS)
-                                            nextstate <= PASSCONDITION;
-                                        else
-                                            nextstate <= FETCH;
-                                    end
-                                CC: begin
-                                        if (!carry) // CARRY CLEAR (CC)
-                                            nextstate <= PASSCONDITION;
-                                        else
-                                            nextstate <= FETCH;
-                                    end
-                                HI: begin
-                                        if (low) // HIGHER THAN (HI)
-                                            nextstate <= PASSCONDITION;
-                                        else
-                                            nextstate <= FETCH;
-                                    end
-                                LS: begin
-                                        if (!low) // LOWER THAN OR SAME AS (LS)
-                                            nextstate <= PASSCONDITION;
-                                        else
-                                            nextstate <= FETCH;
-                                    end
-                                GT: begin
-                                        if (negative) // GREATER THAN (GT)
-                                            nextstate <= PASSCONDITION;
-                                        else
-                                            nextstate <= FETCH;
-                                    end
-                                LE: begin
-                                        if (!negative) // LESS THAN OR EQUAL (LE)
-                                            nextstate <= PASSCONDITION;
-                                        else
-                                            nextstate <= FETCH;
-                                    end
-                                FS: begin
-                                        if (flag) // FLAG SET (FS)
-                                            nextstate <= PASSCONDITION;
-                                        else
-                                            nextstate <= FETCH;
-                                    end
-                                FC: begin
-                                        if (!flag) // FLAG CLEAR (FC)
-                                            nextstate <= PASSCONDITION;
-                                        else
-                                            nextstate <= FETCH;
-                                    end
-                                LO: begin
-                                        if (!low && !zero) // LOWER THAN (LO)
-                                            nextstate <= PASSCONDITION;
-                                        else
-                                            nextstate <= FETCH;
-                                    end
-                                HS: begin
-                                        if (low || zero) // HIGHER THAN OR SAME AS (HS)
-                                            nextstate <= PASSCONDITION;
-                                        else
-                                            nextstate <= FETCH;
-                                    end
-                                LT: begin
-                                        if (!negative && !zero) // LESS THAN (LT)
-                                            nextstate <= PASSCONDITION;
-                                        else
-                                            nextstate <= FETCH;
-                                    end
-                                GE: begin
-                                        if (negative || zero) // GREATER THAN OR EQUAL (GE)
-                                            nextstate <= PASSCONDITION;
-                                        else
-                                            nextstate <= FETCH;
-                                    end
-                                UC: nextstate <= PASSCONDITION; // UNCONDITIONAL (UC)
-                                NJ: nextstate <= FETCH; // NEVER JUMP ()
-                                default: nextstate <= FETCH; // should never happen
-                            endcase
-            PASSCONDITION: begin
-                            if (opCode[3]) nextstate <= BRANCH;
-                            else nexstate <= JUMP;
-                        end
             ADD: nextstate <= WRITEANDSETFLAGS;
             ADDI: nextstate <= WRITEANDSETFLAGS;
             SUB: begin
@@ -331,7 +342,7 @@ module controller(input clk, reset,
                     else nextstate <= WRITEANDSETFLAGS; // SUB
                 end
             SUBI: begin
-                    if (opCode[1]) nextstate <= ONLYSETFLAGS; // CMPI
+                    if (firstOp[1]) nextstate <= ONLYSETFLAGS; // CMPI
                     else nextstate <= WRITEANDSETFLAGS; // SUBI
                 end
             AND: nextstate <= WRITETOREG;
@@ -344,7 +355,7 @@ module controller(input clk, reset,
             SHFT: nextstate <= WRITETOREG;
             SHFTI: nextstate <= WRITETOREG;
             MOV: begin
-                    if (opCode == 4'b0000) nextstate <= WRITETOREG; // MOV
+                    if (firstOp == 4'b0000) nextstate <= WRITETOREG; // MOV
                     else begin
                         if (extendedOp[2]) nextstate <= WRITETOMEM; // STOR
                         else nextstate <= MEMLOAD; // LOAD
@@ -352,7 +363,7 @@ module controller(input clk, reset,
                 end
             LUI: nextstate <= MEMLOAD;
             MEMLOAD: nextstate <= WRITETOREG;
-            BRANCH: nextsate <= WRITETOPC;
+            BRANCH: nextstate <= WRITETOPC;
             JAL: nextstate <= JUMP;
             JUMP: nextstate <= WRITETOPC;
             WRITEANDSETFLAGS: nextstate <= FETCH;
@@ -387,15 +398,6 @@ module controller(input clk, reset,
 				pcContinue <= 1;						
 			end
 		DECODE: begin
-				// No flags - does nothing
-			end
-		SPECIALDECODE: begin
-				// No flags - does nothing
-			end
-		CONDITIONCHECK: begin
-				// No flags - does nothing
-			end
-		PASSCONDITION: begin
 				// No flags - does nothing
 			end
 		ADD: begin
@@ -486,7 +488,10 @@ module controller(input clk, reset,
 		WRITETOPC: begin
 				pcOverwrite <= 1;
 			end		
-          endcase
+		default: begin
+			// does nothing
+			end
+      endcase
     end
 
 endmodule 
