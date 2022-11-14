@@ -204,7 +204,7 @@ module controller(input clk, reset,
             4'b0010: specialDecode = OR;
             4'b0011: specialDecode = XOR;
             4'b0100: specialDecode = MOV; // STOR
-            4'b0101: specialDecode = AND;
+            4'b0101: specialDecode = ADD;
             4'b1000: specialDecode = JAL;
             4'b1001: specialDecode = SUB;
             4'b1011: specialDecode = SUB;
@@ -324,12 +324,12 @@ module controller(input clk, reset,
                         4'b0001: nextstate <= ANDI;
                         4'b0010: nextstate <= ORI;
                         4'b0011: nextstate <= XORI;
-								4'b0100: begin
+						4'b0100: nextstate <= specialDecode(extendedOp); // Special Instructions
+                        4'b0101: nextstate <= ADDI;
+                        4'b1000: begin
                                 if (extendedOp[2]) nextstate <= SHFT; // LSH, ASHU
                                 else nextstate <= SHFTI; // LSHI, ASHUI 
                             end
-                        4'b0101: nextstate <= ADDI;
-                        4'b1000: nextstate <= specialDecode(extendedOp); // Special Instructions
                         4'b1001: nextstate <= SUBI;
                         4'b1011: nextstate <= SUBI;
                         4'b1100: nextstate <= conditionCheck(condition);
