@@ -101,7 +101,7 @@ module datapath #(parameter WIDTH = 16) (
    input memWrite, // Flag to write to memory
    input storeNextInstruction, // Flag to store next instruction in register
    input luiInstruction, // Flag to make output an 8-bit left shifted immediate
-   input retrieveInstruction, // Flag to get new instruction from memory
+   input loadPC, retrieveInstruction, // Flags to get new instruction from memory
 	
    // MEMORY ACCESS FOR PORT B
    input [WIDTH - 1 : 0] writeDataB, // Data to write to Port B
@@ -293,7 +293,7 @@ module datapath #(parameter WIDTH = 16) (
    // MUX for determining if address is output or PC for memory
    always @(*) begin
 	if (~reset) readAddr <= outputReg;
-	else if (retrieveInstruction) readAddr <= PC;
+	else if (loadPC) readAddr <= PC;
 	else readAddr <= outputReg;
    end
 	

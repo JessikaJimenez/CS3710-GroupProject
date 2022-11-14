@@ -128,7 +128,7 @@ module controller(input clk, reset,
                   output reg [1:0] outputSelect,
                   output reg regWrite, memWrite, luiInstruction, retrieveInstruction,
                              zeroExtend, pcContinue, pcOverwrite, flagSet, rTypeInstruction,
-                             pcInstruction, storeNextInstruction);
+                             pcInstruction, storeNextInstruction, loadPC);
     
     // Parameters for states.
     parameter   FETCH1           = 5'b00000;
@@ -393,13 +393,15 @@ module controller(input clk, reset,
 	  rTypeInstruction     <= 0;
 	  pcInstruction        <= 0;
 	  storeNextInstruction <= 0;
+      loadPC               <= 0;
 	  // Based on state, set outputs.
           case (state)
 		FETCH1: begin
-				retrieveInstruction <= 1;
+				loadPC <= 1;
 				outputSelect <= 2'b11; //LOAD				
 			end
         FETCH2: begin
+                loadPC <= 1;
                 retrieveInstruction <= 1;
                 pcContinue <= 1;
             end

@@ -25,7 +25,7 @@ module GeneralCPU #(parameter WIDTH = 16) (
     wire memWrite; // Flag to write to memory
     wire storeNextInstruction; // Flag to store next instruction in register
     wire luiInstruction; // Flag to make output an 8-bit left shifted immediate
-    wire retrieveInstruction; // Flag to get new instruction from memory
+    wire loadPC, retrieveInstruction; // Flags to get new instruction from memory
 
     // Flags computed by ALU for condition codes
     wire [WIDTH - 1 : 0] outputFlags;
@@ -52,7 +52,8 @@ module GeneralCPU #(parameter WIDTH = 16) (
         .memWrite(memWrite),
         .storeNextInstruction(storeNextInstruction),
         .luiInstruction(luiInstruction),
-        .retrieveInstruction(retrieveInstruction)
+        .retrieveInstruction(retrieveInstruction),
+        .loadPC(loadPC)
         );
 
    datapath    dp(
@@ -71,6 +72,7 @@ module GeneralCPU #(parameter WIDTH = 16) (
         .storeNextInstruction(storeNextInstruction),
         .luiInstruction(luiInstruction),
         .retrieveInstruction(retrieveInstruction),
+        .loadPC(loadPC),
         .instruction(instr),
         .outputFlags(outputFlags),
         .writeDataB(memData),
