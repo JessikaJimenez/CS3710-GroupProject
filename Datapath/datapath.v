@@ -196,7 +196,9 @@ module datapath #(parameter WIDTH = 16) (
 	  .addr_a(readAddr),
 	  .write_a(memWrite),
 	  .ReadDataA(readOutput),
-	  .ioOutputData(ioOutput)
+	  .ioOutputData(ioOutput),
+     .clk(clk),
+     .reset(reset)
 	);
 
     // Set address bits for registers

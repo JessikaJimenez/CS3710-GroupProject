@@ -28,7 +28,11 @@ module tb_GeneralCPU #(parameter WIDTH = 16) ();
 	initial begin
 	   clk <= 0;
 	   reset <= 0;
-		#20;
+	   memData <= 16'd0;
+	   addr <= 16'd0;
+	   IOinput <= 16'd0;
+	   writeEnable <= 16'd0;
+		#100;
 		reset <= 1;
 	end
 		
