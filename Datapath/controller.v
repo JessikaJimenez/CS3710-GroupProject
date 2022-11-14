@@ -131,7 +131,8 @@ module controller(input clk, reset,
                              pcInstruction, storeNextInstruction);
     
     // Parameters for states.
-    parameter   FETCH            = 5'b00000;
+    parameter   FETCH1           = 5'b00000;
+    parameter   FETCH2           = 5'b11111;
     parameter   DECODE           = 5'b00001;
     // parameter   SPECIALDECODE    = 5'b00010;
     // parameter   CONDITIONCHECK   = 5'b00011;
@@ -191,7 +192,7 @@ module controller(input clk, reset,
 
     // state register
     always @(posedge clk)
-      if(~reset) state <= FETCH;
+      if(~reset) state <= FETCH1;
       else state <= nextstate;
 
     // Functions for decoding
@@ -209,7 +210,7 @@ module controller(input clk, reset,
             4'b1011: specialDecode = SUB;
             4'b1100: specialDecode = conditionCheck(condition);
             4'b1101: specialDecode = MOV;
-            default: specialDecode = FETCH; // should never happen
+            default: specialDecode = FETCH1; // should never happen
         endcase
     endfunction
 
@@ -220,89 +221,89 @@ module controller(input clk, reset,
                     if (zero) // EQUAL (EQ)
                         conditionCheck = passCondition(firstOp[3]);
                     else
-                        conditionCheck = FETCH;
+                        conditionCheck = FETCH1;
                 end
             NE: begin
                     if (!zero) // NOT EQUAL (NE)
                         conditionCheck = passCondition(firstOp[3]);
                     else
-                        conditionCheck = FETCH;
+                        conditionCheck = FETCH1;
                 end
             CS: begin
                     if (carry) // CARRY SET (CS)
                         conditionCheck = passCondition(firstOp[3]);
                     else
-                        conditionCheck = FETCH;
+                        conditionCheck = FETCH1;
                 end
             CC: begin
                     if (!carry) // CARRY CLEAR (CC)
                         conditionCheck = passCondition(firstOp[3]);
                     else
-                        conditionCheck = FETCH;
+                        conditionCheck = FETCH1;
                 end
             HI: begin
                     if (low) // HIGHER THAN (HI)
                         conditionCheck = passCondition(firstOp[3]);
                     else
-                        conditionCheck = FETCH;
+                        conditionCheck = FETCH1;
                 end
             LS: begin
                     if (!low) // LOWER THAN OR SAME AS (LS)
                         conditionCheck = passCondition(firstOp[3]);
                     else
-                        conditionCheck = FETCH;
+                        conditionCheck = FETCH1;
                 end
             GT: begin
                     if (negative) // GREATER THAN (GT)
                         conditionCheck = passCondition(firstOp[3]);
                     else
-                        conditionCheck = FETCH;
+                        conditionCheck = FETCH1;
                 end
             LE: begin
                     if (!negative) // LESS THAN OR EQUAL (LE)
                         conditionCheck = passCondition(firstOp[3]);
                     else
-                        conditionCheck = FETCH;
+                        conditionCheck = FETCH1;
                 end
             FS: begin
                     if (flag) // FLAG SET (FS)
                         conditionCheck = passCondition(firstOp[3]);
                     else
-                        conditionCheck = FETCH;
+                        conditionCheck = FETCH1;
                 end
             FC: begin
                     if (!flag) // FLAG CLEAR (FC)
                         conditionCheck = passCondition(firstOp[3]);
                     else
-                        conditionCheck = FETCH;
+                        conditionCheck = FETCH1;
                 end
             LO: begin
                     if (!low && !zero) // LOWER THAN (LO)
                         conditionCheck = passCondition(firstOp[3]);
                     else
-                        conditionCheck = FETCH;
+                        conditionCheck = FETCH1;
                 end
             HS: begin
                     if (low || zero) // HIGHER THAN OR SAME AS (HS)
                         conditionCheck = passCondition(firstOp[3]);
                     else
-                        conditionCheck = FETCH;
+                        conditionCheck = FETCH1;
                 end
             LT: begin
                     if (!negative && !zero) // LESS THAN (LT)
                         conditionCheck = passCondition(firstOp[3]);
                     else
-                        conditionCheck = FETCH;
+                        conditionCheck = FETCH1;
                 end
             GE: begin
                     if (negative || zero) // GREATER THAN OR EQUAL (GE)
                         conditionCheck = passCondition(firstOp[3]);
                     else
-                        conditionCheck = FETCH;
+                        conditionCheck = FETCH1;
                 end
             UC: conditionCheck = passCondition(firstOp[3]); // UNCONDITIONAL (UC)
-            NJ: conditionCheck = FETCH; // NEVER JUMP ()
-            default: conditionCheck = FETCH; // should never happen
+            NJ: conditionCheck = FETCH1; // NEVER JUMP ()
+            default: conditionCheck = FETCH1; // should never happen
         endcase
     endfunction
 
@@ -316,7 +317,8 @@ module controller(input clk, reset,
     always @(*)
       begin
          case(state)
-            FETCH:  nextstate <= DECODE;
+            FETCH1:  nextstate <= FETCH2;
+            FETCH2:  nextstate <= DECODE;
             DECODE:  case(firstOp)
                         4'b0000: nextstate <= specialDecode(extendedOp); // R-Type Instructions
                         4'b0001: nextstate <= ANDI;
@@ -333,7 +335,7 @@ module controller(input clk, reset,
                         4'b1100: nextstate <= conditionCheck(condition);
                         4'b1101: nextstate <= MOVI;
                         4'b1111: nextstate <= LUI;
-                        default: nextstate <= FETCH; // should never happen
+                        default: nextstate <= FETCH1; // should never happen
                      endcase
             ADD: nextstate <= WRITEANDSETFLAGS;
             ADDI: nextstate <= WRITEANDSETFLAGS;
@@ -366,12 +368,12 @@ module controller(input clk, reset,
             BRANCH: nextstate <= WRITETOPC;
             JAL: nextstate <= JUMP;
             JUMP: nextstate <= WRITETOPC;
-            WRITEANDSETFLAGS: nextstate <= FETCH;
-            ONLYSETFLAGS: nextstate <= FETCH;
-            WRITETOREG: nextstate <= FETCH;
-            WRITETOMEM: nextstate <= FETCH;
-            WRITETOPC: nextstate <= FETCH;
-            default: nextstate <= FETCH; // should never happen
+            WRITEANDSETFLAGS: nextstate <= FETCH1;
+            ONLYSETFLAGS: nextstate <= FETCH1;
+            WRITETOREG: nextstate <= FETCH1;
+            WRITETOMEM: nextstate <= FETCH1;
+            WRITETOPC: nextstate <= FETCH1;
+            default: nextstate <= FETCH1; // should never happen
          endcase
       end
 
@@ -393,10 +395,14 @@ module controller(input clk, reset,
 	  storeNextInstruction <= 0;
 	  // Based on state, set outputs.
           case (state)
-		FETCH: begin
+		FETCH1: begin
 				retrieveInstruction <= 1;
-				pcContinue <= 1;						
+				outputSelect <= 2'b11; //LOAD				
 			end
+        FETCH2: begin
+                retrieveInstruction <= 1;
+                pcContinue <= 1;
+            end
 		DECODE: begin
 				// No flags - does nothing
 			end
