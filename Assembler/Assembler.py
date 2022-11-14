@@ -263,7 +263,7 @@ class Assembler():
                         if ((firstReg in self.REGISTERS) and (secondReg in self.REGISTERS)):
                             firstRegNum = '{0:04b}'.format(int(firstReg.replace('%r', '')))
                             secondRegNum = '{0:04b}'.format(int(secondReg.replace('%r', '')))
-                            data = '0000' + secondRegNum + self.instrCode(instr) + firstRegNum
+                            data = '0000' + firstRegNum + self.instrCode(instr) + secondRegNum
                             wf.write(data + '\n')
                         else:
                             sys.exit('Syntax Error: R-type needs two registers')
@@ -271,8 +271,8 @@ class Assembler():
                         sys.exit('Syntax Error: R-type needs two args')
                 elif (instr in self.Immediates):
                     if (len(parts) == 2):
-                        Immd = parts.pop(0)
                         secondReg = parts.pop(0)
+                        Immd = parts.pop(0)
                         if ((Immd[0] in '$') and (secondReg in self.REGISTERS)):
                             immdInt = int(Immd.replace('$', ''))
                             if ((immdInt > 127) or (-128 > immdInt)):
