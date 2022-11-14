@@ -1,9 +1,8 @@
-ADDI $1 %r1
-ADDI $2 %r2
-#ADD %r1 %r2
-#MOVI $3 %r1
-#MOV %r1 %r2
-#LSH %r2 %r1
-#LSHI $2 %r2
-ASHU %r2 %r1
-ASHUI $2 %r2
+ADDI $7 %r1 #Use r1 as pointer to memory slot 1
+ADDI $9 %r2 #Use r2 as pointer to memory slot 3
+LOAD %r3 %r1 #Load data at r1 into r3
+LOAD %r4 %r2 #Load data at r2 into r4
+ADD %r4 %r3 #Add r4 and r3
+STOR %r4 %r1 #Store r4 into memory slot 1
+
+
