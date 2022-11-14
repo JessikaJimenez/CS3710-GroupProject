@@ -2,7 +2,7 @@
 /*************************************************************/
 `timescale 1ns/1ns
 
-module tb_GenearalCPU #(parameter WIDTH = 16) ();
+module tb_GeneralCPU #(parameter WIDTH = 16) ();
 	
 	reg clk, reset;
 	reg [WIDTH - 1 : 0] memData;
