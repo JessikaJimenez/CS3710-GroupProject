@@ -23,7 +23,7 @@ module memory #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16) (
 	end
 
 	// Memory block
-	always @ (posedge clk) begin
+	always @ (negedge clk) begin
 		if (~reset) begin
 			$display("Loading Memory");
 			// you'll need to change the path to this file! 
