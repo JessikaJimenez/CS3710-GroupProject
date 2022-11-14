@@ -40,11 +40,5 @@ module tb_GeneralCPU #(parameter WIDTH = 16) ();
 	always #10 begin
 	   clk = ~clk;
 	end
-		
-	initial begin
-	   ////////Test for Register File
-	   ///TestWriting & Reading
-		#20000;
-	end
 	
 endmodule 

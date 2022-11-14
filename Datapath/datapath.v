@@ -130,7 +130,7 @@ module datapath #(parameter WIDTH = 16) (
    wire [3:0] srcAddr, dstAddr; // Addresses of source and destination registers
    wire carry, low, flag, zero, negative; // Flags of ALU
    wire [WIDTH - 1 : 0] srcValue, dstValue; // Values read from register file
-   wire [WIDTH - 1 : 0] aluResult, shiftResult, luiOutput; // Results of ALU and Shifters
+   wire [WIDTH - 1 : 0] aluResult, shiftResult; // Results of ALU and Shifters
    wire [WIDTH - 1 : 0] readOutput; // What is read from memory
    wire [WIDTH - 1 : 0] luiImmd; // 8-bit left shifted immediate
    reg [WIDTH - 1 : 0] dataWriteToReg; // What gets written into the register file
