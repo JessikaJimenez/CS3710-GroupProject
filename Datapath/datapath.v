@@ -97,7 +97,7 @@ module datapath #(parameter WIDTH = 16) (
    input [2:0] aluOp, // Which operation to execute on ALU
    input pcOverwrite, // The next PC should be the output
    input pcContinue, // The PC should increment
-   input zeroExtend, // Immediate is zero extended or sign extended
+   input zeroExtend, // Immediate is zero extended or sign extended. Also determines logical or arithmetic shifts
    input memWrite, // Flag to write to memory
    input storeNextInstruction, // Flag to store next instruction in register
    input luiInstruction, // Flag to make output an 8-bit left shifted immediate
@@ -182,6 +182,7 @@ module datapath #(parameter WIDTH = 16) (
 	  .shiftInput(aluDstInput), 
 	  .shiftAmount(aluSrcInput[3 : 0]), 
 	  .rightShift(aluSrcInput[4]), 
+     .arithmeticShift(zeroExtend),
 	  .shiftResult(shiftResult)
     );
 
