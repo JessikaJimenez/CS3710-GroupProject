@@ -1,0 +1,8 @@
+MOVI %r1 $1          #Move 1 into r1 (MOVI)
+ADDI %r2 $1          #ADD 1 into r2  (ADDI)
+ADD %r2 %r1          #ADD r2 += r1    (ADD) r2 = 2
+MOV %r3 %r2          #MOV r2 into r3 (MOV) r3 = 2
+ADDI %r3 $4          #ADD 4 into r3  (ADD) r3 = 6
+SUB %r3 %r2          #SUB r3 -= r2   (SUB) r3 = 4
+SUBI %r3 $3          #SUB 3 from r3  (SUBI)r3 = 1
+MOV %r15 %r3         #MOV r3 into r15 (MOV) r15 = 1
