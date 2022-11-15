@@ -452,11 +452,11 @@ module controller(input clk, reset,
 			end
 		SHFT: begin
 				rTypeInstruction <= 1;
-                zeroExtend <= !extendedOpCode[1]; // LSH = 1, ASHU = 0
+                zeroExtend <= !extendedOp[1]; // LSH = 1, ASHU = 0
 				outputSelect <= 2'b01; //SHIFT
 			end
 		SHFTI: begin
-                zeroExtend <= !extendedOpCode[1]; // LSHI = 1, ASHU = 0
+                zeroExtend <= !extendedOp[1]; // LSHI = 1, ASHU = 0
 				outputSelect <= 2'b01; //SHIFT					
 			end
 		MOV: begin

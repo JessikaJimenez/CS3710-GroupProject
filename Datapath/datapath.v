@@ -182,7 +182,7 @@ module datapath #(parameter WIDTH = 16) (
 	  .shiftInput(aluDstInput), 
 	  .shiftAmount(aluSrcInput[3 : 0]), 
 	  .rightShift(aluSrcInput[4]), 
-     .arithmeticShift(zeroExtend),
+     .logicalShift(zeroExtend),
 	  .shiftResult(shiftResult)
     );
 
