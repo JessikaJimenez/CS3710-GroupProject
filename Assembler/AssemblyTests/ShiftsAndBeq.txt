@@ -4,7 +4,9 @@ LSH %r1 %r2          #Shift r1 by 1  (LSH)   r1 = 20
 LSHI %r1 $1          #Shift r1 by 1  (LSHI)  r1 = 40
 SUBI %r2 $2          #Sub   r2 by 2         r2 = -1
 ASHU %r1 %r2         #Shift r1 by -1 (ASHU)  r1 = 20
-ASHUI %r1 $-2        #Shift r1 by -2 (ASHUI) r1 = 5
+ASHU %r1 %r2         #Shift r1 by -1 (ASHU)  r1 = 10
+ASHU %r1 %r2         #Shift r1 by -1 (ASHU)  r1 = 5
+ASHUI %r1 $1         #Shift r1 by 1 (ASHUI) r1 = 10
 CMPI %r1 $5          #Check r1 = 5   (CMPI)
 BEQ $2               #Branch 3 instructions
 MOVI %r1 $0          #Set to zero if failed  r1 = 0
