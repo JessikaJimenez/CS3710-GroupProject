@@ -1,0 +1,10 @@
+ADDI %r6 $2
+ADDI %r7 $4
+MOVI %r1 $14 # r1 points to mem14
+MOVI %r2 $15 # r2 points to mem15
+STOR %r6 %r1 # Store r6(2) into mem14
+STOR %r7 %r2 # Store r7(4) into mem15
+LOAD %r3 %r1 # Load mem14 into r3 (should be 2)
+LOAD %r4 %r2 # Load mem15 into r4 (should be 4)
+ADD %r4 %r3  #Add r4(4) += r3(2) => r4 = 6
+MOV %r15 %r4 #End with r15 as 6
