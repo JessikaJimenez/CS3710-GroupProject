@@ -296,7 +296,7 @@ class Assembler():
                         if ((firstReg in self.REGISTERS) and (secondReg in self.REGISTERS)):
                             firstRegNum = '{0:04b}'.format(int(firstReg.replace('%r', '')))
                             secondRegNum = '{0:04b}'.format(int(secondReg.replace('%r', '')))
-                            data = '1000' + secondRegNum + self.instrCode(instr) + firstRegNum
+                            data = '1000' + firstRegNum + self.instrCode(instr) + secondRegNum
                             wf.write(data + '\n')
                         else:
                             sys.exit('Syntax Error: shifts needs two self.REGISTERS')
@@ -304,8 +304,8 @@ class Assembler():
                        sys.exit('Syntax Error: shifts needs two args')
                 elif (instr in self.ImmdShift):
                     if (len(parts) == 2):
-                        Immd = parts.pop(0)
                         secondReg = parts.pop(0)
+                        Immd = parts.pop(0)
                         if ((Immd[0] in '$') and (secondReg in self.REGISTERS)):
                             immdInt = int(Immd.replace('$', ''))
                             if ((immdInt > 15) or (0 > immdInt)):
@@ -316,7 +316,7 @@ class Assembler():
                             data = '1000' + secondRegNum + self.instrCode(instr) + immediate
                             wf.write(data + '\n')
                         else:
-                            sys.exit('Syntax Error: Immediate shifts need an immd then a register')
+                            sys.exit('Syntax Error: Immediate shifts need a register then an immd')
                     else:
                         sys.exit('Syntax Error: Immediate shifts need two args')
                 elif (instr in self.Branch):

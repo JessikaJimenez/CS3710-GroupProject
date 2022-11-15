@@ -6,3 +6,5 @@ ADDI %r3 $4          #ADD 4 into r3  (ADD) r3 = 6
 SUB %r3 %r2          #SUB r3 -= r2   (SUB) r3 = 4
 SUBI %r3 $3          #SUB 3 from r3  (SUBI)r3 = 1
 MOV %r15 %r3         #MOV r3 into r15 (MOV) r15 = 1
+
+# THIS FILE PASSES TESTBENCH

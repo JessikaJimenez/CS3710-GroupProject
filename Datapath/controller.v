@@ -73,8 +73,8 @@
 // XORI - zeroExtend, 011
 // MOV - rTypeInstruction, COPY
 // MOVI - zeroExtend, COPY
-// SHFT - rTypeInstruction, SHIFT
-// SHFTI - SHIFT
+// SHFT - rTypeInstruction, SHIFT, zeroExtend = !EXTENDEDOPCODE[1]
+// SHFTI - SHIFT, zeroExtend = !EXTENDEDOPCODE[1]
 // |
 // v
 // WRITETOREG - regWrite
@@ -452,9 +452,11 @@ module controller(input clk, reset,
 			end
 		SHFT: begin
 				rTypeInstruction <= 1;
+                zeroExtend <= !extendedOp[1]; // LSH = 1, ASHU = 0
 				outputSelect <= 2'b01; //SHIFT
 			end
 		SHFTI: begin
+                zeroExtend <= !extendedOp[1]; // LSHI = 1, ASHU = 0
 				outputSelect <= 2'b01; //SHIFT					
 			end
 		MOV: begin
