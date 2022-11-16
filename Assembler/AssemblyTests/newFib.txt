@@ -1,0 +1,28 @@
+MOVI %r3 $14
+MOVI %r4 $1
+MOVI %r5 $-1
+MOVI %r6 $127
+ADDI %r6 $1
+ADDI %r1 $127
+ADDI %r1 $127
+ADDI %r1 $1
+
+.loop
+CMPI %r3 $0   #Set Flags
+BEQ .final    #Check if We need to Branch
+ADD %r4 %r5   #calculate f1
+MOV %r7 %r4   #Save r4 into r7(f1)
+SUB %r4 %r5   #calculate f2
+MOV %r5 %r4   #Move r4(f2) into r5
+MOV %r4 %r7   #Restore r4(f1)
+ADDI %r3 $-1  #Decrement
+STOR %r4 %r6  #Store result in memory (this into that)
+
+ADDI %r6 $1   #Increment memory
+BUC .loop
+
+.final
+LOAD %r4 %r1
+ADDI %r4 $128
+LOAD %r5 %r4
+STOR %r5 %r1
