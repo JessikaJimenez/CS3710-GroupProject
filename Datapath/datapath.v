@@ -124,7 +124,7 @@ module datapath #(parameter WIDTH = 16) (
    parameter ALURESULT = 2'b00;
    parameter SHIFTRESULT = 2'b01;
    parameter COPYSRC = 2'b10;
-   parameter LOADINSTRUCTION = 2'b11;
+   parameter LOAD = 2'b11;
 
    // Declare variables
    wire [3:0] srcAddr, dstAddr; // Addresses of source and destination registers
@@ -279,7 +279,7 @@ module datapath #(parameter WIDTH = 16) (
               ALURESULT: resultMUXData <= aluResult;
               SHIFTRESULT: resultMUXData <= shiftReg;
               COPYSRC: resultMUXData <= aluSrcInput;
-              LOADINSTRUCTION: resultMUXData <= readOutput;
+              LOAD: resultMUXData <= readOutput;
           endcase
     end
 

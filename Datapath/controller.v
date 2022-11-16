@@ -34,10 +34,10 @@
 // 0011 - XOR -> WRITETOREG
 // 0100 - MOV -> [Check OPCODE[2]] -> WRITETOMEM (STOR)
 // 0101 - ADD -> WRITEANDSETFLAGS
-// 1000 - JAL -> JUMP -> WRITETOPC
+// 1000 - JAL -> (MOV -> WRITETOPC) (JUMP)
 // 1001 - SUB -> [Check OPCODE[1]] -> WRITEANDSETFLAGS
 // 1011 - SUB -> [Check OPCODE[1]] -> ONLYSETFLAGS (CMP)
-// 1100 - [Check Conditions] -> JUMP -> WRITETOPC (JUMP)
+// 1100 - [Check Conditions] -> MOV -> WRITETOPC (JUMP)
 // 1101 - MOV -> WRITETOREG
 // SHIFTS
 // 000s - SHFTI -> WRITETOREG (LSHI)
@@ -103,8 +103,13 @@
 // WRITETOMEM - memWrite
 //
 // [These next two instructions must have passed condition checks before executing]
+// (JUMP)
+// MOV - rTypeInstruction, COPY
+// | OPCODE[3] == 1
+// v
+// WRITETOPC - pcOverwrite
+//
 // BRANCH - pcInstruction, 000
-// JUMP - pcInstruction, rTypeInstruction, COPY
 // |
 // v
 // WRITETOPC - pcOverwrite
@@ -113,10 +118,7 @@
 // JAL - storeNextInstruction, regWrite
 // |
 // v
-// JUMP - pcInstruction, rTypeInstruction, COPY
-// |
-// v
-// WRITETOPC - pcOverwrite
+// (JUMP)
 // 
 // [At the end of each instruction chain, go back to FETCH]
 module controller(input clk, reset,
@@ -155,7 +157,7 @@ module controller(input clk, reset,
     parameter   MEMLOAD          = 5'b10100;
     parameter   BRANCH           = 5'b10101;
     parameter   JAL              = 5'b10110;
-    parameter   JUMP             = 5'b10111;
+    // parameter   JUMP             = 5'b10111;
     parameter   WRITEANDSETFLAGS = 5'b11000;
     parameter   ONLYSETFLAGS     = 5'b11001;
     parameter   WRITETOREG       = 5'b11010;
@@ -310,7 +312,7 @@ module controller(input clk, reset,
     // This function will decide a branch or jump
     function [4:0] passCondition(input startBranch);
         if (startBranch) passCondition = BRANCH;
-        else passCondition = JUMP;
+        else passCondition = MOV; // Jump
     endfunction       
 
     // next state logic (combinational)
@@ -359,15 +361,15 @@ module controller(input clk, reset,
             MOV: begin
                     if (firstOp == 4'b0000) nextstate <= WRITETOREG; // MOV
                     else begin
-                        if (extendedOp[2]) nextstate <= WRITETOMEM; // STOR
+                        if (extendedOp[3]) nextstate <= WRITETOPC; // JUMP
+                        else if (extendedOp[2]) nextstate <= WRITETOMEM; // STOR
                         else nextstate <= MEMLOAD; // LOAD
                     end
                 end
             LUI: nextstate <= MEMLOAD;
             MEMLOAD: nextstate <= WRITETOREG;
             BRANCH: nextstate <= WRITETOPC;
-            JAL: nextstate <= JUMP;
-            JUMP: nextstate <= WRITETOPC;
+            JAL: nextstate <= MOV; // Performs a jump
             WRITEANDSETFLAGS: nextstate <= FETCH1;
             ONLYSETFLAGS: nextstate <= FETCH1;
             WRITETOREG: nextstate <= FETCH1;
@@ -476,11 +478,6 @@ module controller(input clk, reset,
 		JAL: begin
 				storeNextInstruction <= 1;
 				regWrite <= 1;
-			end
-		JUMP: begin
-				pcInstruction <= 1;
-				rTypeInstruction <= 1;
-				outputSelect <= 2'b10; //COPY
 			end
 		WRITEANDSETFLAGS: begin
 				regWrite <= 1;
