@@ -346,7 +346,7 @@ class Assembler():
                             data = '1100' + self.instrCode(instr.replace('B', '')) + Displacement
                             wf.write(data + '\n')
                         elif (Disp[0] == '.'):
-                            dispInt = self.labels[Disp] - address
+                            dispInt = self.labels[Disp] - address - 1
                             if ((dispInt > 255) or (-255 > dispInt)):
                                 sys.exit('Syntax Error: Branch can not be larger then 255 or less then -255')
                             elif (dispInt >= 0): 
