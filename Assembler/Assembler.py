@@ -53,6 +53,9 @@ class Assembler():
 
     def LSHI():
         return '0000'
+    
+    def LSHIN():
+        return '0001'
 
     def RSH():
         return '0101'
@@ -125,6 +128,9 @@ class Assembler():
 
     def ASHUI():
         return '0010'
+    
+    def ASHUIN():
+        return '0011'
 
     switcher = {
         'ADD': ADD,
@@ -149,6 +155,7 @@ class Assembler():
         'XORI': XOR,
         'LSH': LSH,
         'LSHI': LSHI,
+        'LSHIN' : LSHIN,
         'RSH': RSH,
         'RSHI': RSHI,
         'ALSH': ALSH,
@@ -157,6 +164,7 @@ class Assembler():
         'ARSHI': ARSHI,
         'ASHU' : ASHU,
         'ASHUI' : ASHUI,
+        'ASHUIN': ASHUIN,
         'EQ' : EQ,
         'NE' : NE,
         'GE' : GE,
@@ -308,10 +316,15 @@ class Assembler():
                         Immd = parts.pop(0)
                         if ((Immd[0] in '$') and (secondReg in self.REGISTERS)):
                             immdInt = int(Immd.replace('$', ''))
-                            if ((immdInt > 15) or (0 > immdInt)):
-                                sys.exit('Syntax Error: Immediate can not be larger then 15 or less then 0')
+                            if(immdInt < 0):
+                                instr += 'N'
+                                immdInt = immdInt*-1
+                            
+                            if (immdInt > 15):
+                                sys.exit('Syntax Error: Immediate can not be larger then 15')
                             else:  
                                 immediate = '{0:04b}'.format(immdInt)
+                            
                             secondRegNum = '{0:04b}'.format(int(secondReg.replace('%r', '')))
                             data = '1000' + secondRegNum + self.instrCode(instr) + immediate
                             wf.write(data + '\n')
