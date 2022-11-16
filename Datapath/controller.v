@@ -244,25 +244,25 @@ module controller(input clk, reset,
                         conditionCheck = FETCH1;
                 end
             HI: begin
-                    if (low) // HIGHER THAN (HI)
+                    if (!low) // HIGHER THAN (HI)
                         conditionCheck = passCondition(firstOp[3]);
                     else
                         conditionCheck = FETCH1;
                 end
             LS: begin
-                    if (!low) // LOWER THAN OR SAME AS (LS)
+                    if (low) // LOWER THAN OR SAME AS (LS)
                         conditionCheck = passCondition(firstOp[3]);
                     else
                         conditionCheck = FETCH1;
                 end
             GT: begin
-                    if (negative) // GREATER THAN (GT)
+                    if (!negative) // GREATER THAN (GT)
                         conditionCheck = passCondition(firstOp[3]);
                     else
                         conditionCheck = FETCH1;
                 end
             LE: begin
-                    if (!negative) // LESS THAN OR EQUAL (LE)
+                    if (negative) // LESS THAN OR EQUAL (LE)
                         conditionCheck = passCondition(firstOp[3]);
                     else
                         conditionCheck = FETCH1;
@@ -280,25 +280,25 @@ module controller(input clk, reset,
                         conditionCheck = FETCH1;
                 end
             LO: begin
-                    if (!low && !zero) // LOWER THAN (LO)
+                    if (low && !zero) // LOWER THAN (LO)
                         conditionCheck = passCondition(firstOp[3]);
                     else
                         conditionCheck = FETCH1;
                 end
             HS: begin
-                    if (low || zero) // HIGHER THAN OR SAME AS (HS)
+                    if (!low || zero) // HIGHER THAN OR SAME AS (HS)
                         conditionCheck = passCondition(firstOp[3]);
                     else
                         conditionCheck = FETCH1;
                 end
             LT: begin
-                    if (!negative && !zero) // LESS THAN (LT)
+                    if (negative && !zero) // LESS THAN (LT)
                         conditionCheck = passCondition(firstOp[3]);
                     else
                         conditionCheck = FETCH1;
                 end
             GE: begin
-                    if (negative || zero) // GREATER THAN OR EQUAL (GE)
+                    if (!negative || zero) // GREATER THAN OR EQUAL (GE)
                         conditionCheck = passCondition(firstOp[3]);
                     else
                         conditionCheck = FETCH1;

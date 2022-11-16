@@ -1,0 +1,19 @@
+ADDI %r1 $10         #ADD 10 into r1         r1 = 10 (1010)
+ADDI %r2 $2          #                       r2 = 2  (0010)
+AND %r1 %r2          #AND 1010 and 0010      r1 = 2  (0010)
+ADDI %r3 $15         #                       r3 = 15 (1111)
+XOR %r2 %r3          #XOR 0010 and 1111      r2 = 13 (1101)
+ADDI %r4 $12         #                       r4 = 12 (1100)
+OR %r4 %r1           #OR 1100 and 0010       r4 = 14 (1110)
+ANDI %r3 $10         #AND 1111 and 1010      r3 = 10 (1010)
+#XORI %r1 $9          #XOR 0010 and 1001      r1 = 11 (1011)
+#ORI %r2 $20          #OR 01101 and 10100     r2 = 29 (11101)
+#CMPI %r2 $13         # comp 1101 and 11101
+#BNE $3               #Skip 3 instructions
+#MOVI %r1 $0          #Set to 0 if failed
+#MOVI %r2 $0          #Set to 0 if failed
+#MOVI %r3 $0          #Set to 0 if failed
+#MOV %r15 %r1         #                       r15 = 11 (1011) 
+#MOV %r14 %r2         #                       r14 = 29 (11101) 
+#MOV %r13 %r3         #                       r13 = 10 (1010) 
+#MOV %r12 %r4         #                       r12 = 14 (1110) 
