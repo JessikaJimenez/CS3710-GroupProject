@@ -8,3 +8,5 @@ LOAD %r3 %r1 # Load mem14 into r3 (should be 2)
 LOAD %r4 %r2 # Load mem15 into r4 (should be 4)
 ADD %r4 %r3  #Add r4(4) += r3(2) => r4 = 6
 MOV %r15 %r4 #End with r15 as 6
+
+# THIS FILE PASSES TESTBENCH
