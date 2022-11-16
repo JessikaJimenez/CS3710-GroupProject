@@ -142,6 +142,7 @@ module datapath #(parameter WIDTH = 16) (
    reg [WIDTH - 1 : 0] shiftReg; // Necessary to use shifter or LUI shift
    reg [WIDTH - 1 : 0] readAddr; // Register used to read from memory
    reg [WIDTH - 1 : 0] PC; // Register used to find place in instruction set
+   reg [3:0] shiftAmount; // Register used to determine shift amount
 
    // Instantiate modules
    RegFile rf (
@@ -180,7 +181,7 @@ module datapath #(parameter WIDTH = 16) (
     Shifter sb (
 	  .reset(reset), 
 	  .shiftInput(aluDstInput), 
-	  .shiftAmount(aluSrcInput[3 : 0]), 
+	  .shiftAmount(shiftAmount), 
 	  .rightShift(aluSrcInput[4]), 
      .logicalShift(zeroExtend),
 	  .shiftResult(shiftResult)
@@ -296,6 +297,12 @@ module datapath #(parameter WIDTH = 16) (
 	if (~reset) readAddr <= outputReg;
 	else if (loadPC) readAddr <= PC;
 	else readAddr <= outputReg;
+   end
+
+   // MUX for determining whether to invert the shift amount for register shifts
+   always @(*) begin
+      if (rTypeInstruction && aluSrcInput[4]) shiftAmount <= -aluSrcInput[3:0]; 
+      else shiftAmount <= aluSrcInput[3:0];
    end
 	
 endmodule
