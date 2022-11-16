@@ -1,0 +1,166 @@
+BUC .jEQ
+BUC .jNE
+BUC .jGE
+BUC .jCS
+BUC .jCC
+BUC .jHI
+BUC .jLS
+BUC .jLO
+BUC .jHS
+BUC .jGT
+BUC .jLE
+BUC .jFS
+BUC .jFC
+BUC .jLT
+BUC .jUC
+BUC $129
+
+.jEQ
+MOVI %r1 $1    # r1 = 1
+MOVI %r2 $1    # r2 = 1
+CMP %r2 %r1    # check for equality
+MOVI %r14 $1
+JEQ %r14
+MOVI %r15 $1   #shouldn't happen
+MOVI %r14 $15  #shouldn't happen
+JUC %r14       #jump to end if fail
+
+.jNE
+MOVI %r1 $1    # r1 = 1
+MOVI %r2 $2    # r2 = 2
+CMP %r2 %r1    # check for equality (should be unequal)
+MOVI %r14 $2
+JNE %r14
+MOVI %r15 $2   #shouldn't happen
+MOVI %r14 $15  #shouldn't happen
+JUC %r14       #jump to end if fail
+
+
+.jGE
+MOVI %r1 $-1    # r1 = -1
+MOVI %r2 $-2    # r2 = -2
+CMP %r1 %r2    # check that r1 > r2
+MOVI %r14 $3
+JGE %r14        #jump to next test
+MOVI %r15 $3    #shouldn't happen
+MOVI %r14 $15  #shouldn't happen
+JUC %r14       #jump to end if fail
+
+.jCS
+MOVI %r1 $127    # r1 = 1
+ADDI %r1 $2    # Cause Carry C=1
+MOVI %r14 $4
+JCS %r14
+MOVI %r15 $4    #shouldn't happen
+MOVI %r14 $15   #shouldn't happen
+JUC %r14        #jump to end if fail
+
+.jCC
+MOVI %r1 $1    # r1 = 1
+ADDI %r1 $1    # Cause Carry C=0
+MOVI %r14 $5
+JCC %r14
+MOVI %r15 $5    #shouldn't happen
+MOVI %r14 $15   #shouldn't happen
+JUC %r14        #jump to end if fail
+
+
+.jHI
+MOVI %r1 $1    # r1 = 2
+MOVI %r2 $2    # r2 = 1
+CMP %r2 %r1    # check that r1 is higher than r2 L = 1
+MOVI %r14 $6
+JHI %r14        #jump to next test
+MOVI %r15 $6    #shouldn't happen
+MOVI %r14 $15   #shouldn't happen
+JUC %r14        #jump to end if fail
+
+.jLS
+MOVI %r1 $1    # r1 = 1
+MOVI %r2 $2    # r2 = 2
+CMP %r2 %r1    # check that r1 is lower than r2 L = 0
+MOVI %r14 $7
+JLS %r14        #jump to next test
+MOVI %r15 $7    #shouldn't happen
+MOVI %r14 $15   #shouldn't happen
+JUC %r14        #jump to end if fail
+
+
+.jLO
+MOVI %r1 $1    # r1 = 1
+MOVI %r2 $2    # r2 = 2
+CMP %r2 %r1    # check that r1 is lower than r2 L = 0
+MOVI %r14 $8
+JLO %r14        #jump to next test
+MOVI %r15 $8    #shouldn't happen
+MOVI %r14 $15   #shouldn't happen
+JUC %r14        #jump to end if fail
+
+.jHS
+MOVI %r1 $1    # r1 = 2
+MOVI %r2 $2    # r2 = 1
+CMP %r2 %r1    # check that r1 is higher than r2 L = 1
+MOVI %r14 $9
+JHS %r14        #jump to next test
+MOVI %r15 $9    #shouldn't happen
+MOVI %r14 $15   #shouldn't happen
+JUC %r14        #jump to end if fail
+
+.jGT
+MOVI %r1 $-1    # r1 = -1
+MOVI %r2 $-2    # r2 = -2
+CMP %r1 %r2     # check that r1 > r2
+MOVI %r14 $10
+JGT %r14        #jump to next test
+MOVI %r15 $10   #shouldn't happen
+MOVI %r14 $15   #shouldn't happen
+JUC %r14        #jump to end if fail
+
+.jLE
+MOVI %r1 $-1    # r1 = -1
+MOVI %r2 $-2    # r2 = -2
+CMP %r1 %r2     # check that r2 < r1(dest)
+MOVI %r14 $11
+JLE %r14        #jump to next test
+MOVI %r15 $11   #shouldn't happen
+MOVI %r14 $15   #shouldn't happen
+JUC %r14        #jump to end if fail
+
+
+.jFS
+MOVI %r1 $127    # r1 = 127
+ADDI %r1 $125    # Cause Overflow F = 1
+MOVI %r14 $12
+JFS %r14        #jump to next test
+MOVI %r15 $12   #shouldn't happen
+MOVI %r14 $15   #shouldn't happen
+JUC %r14        #jump to end if fail
+
+.jFC
+MOVI %r1 $-1    # r1 = -1
+ADDI %r1 $1     #Clear Overflow F = 0
+MOVI %r14 $13
+JFC %r14        #jump to next test
+MOVI %r15 $13   #shouldn't happen
+MOVI %r14 $15   #shouldn't happen
+JUC %r14        #jump to end if fail
+
+.jLT
+MOVI %r1 $-1    # r1 = -1
+MOVI %r2 $-2    # r2 = -2
+CMP %r1 %r2     # check that r2 < r1(dest)
+MOVI %r14 $14
+JLT %r14        #jump to next test
+MOVI %r15 $14   #shouldn't happen
+MOVI %r14 $15   #shouldn't happen
+JUC %r14        #jump to end if fail
+
+.jUC
+MOVI %r14 $15
+JUC %r14        #jump to next test
+MOVI %r15 $14   #shouldn't happen
+MOVI %r14 $15   #shouldn't happen
+JUC %r14        #jump to end if fail
+
+.jEND
+MOVI %r15 $33   #All tests complete
