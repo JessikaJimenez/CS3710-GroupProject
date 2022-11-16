@@ -223,7 +223,7 @@ class Assembler():
                        
                     count = 0
                     # reduce to shift for 8-bit immediate
-                    while labelAddress > 127:
+                    while labelAddress > 255:
                        labelAddress /= 2
                        count += 1
 
