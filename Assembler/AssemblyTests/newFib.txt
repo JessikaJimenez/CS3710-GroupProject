@@ -1,11 +1,11 @@
 MOVI %r3 $14
 MOVI %r4 $1
-MOVI %r5 $-1
-MOVI %r6 $127
-ADDI %r6 $1
-ADDI %r1 $127
-ADDI %r1 $127
-ADDI %r1 $1
+ADDI %r5 $-1
+MOVI %r6 $64
+#ADDI %r6 $1
+ADDI %r1 $100
+#ADDI %r1 $127
+#ADDI %r1 $1
 
 .loop
 CMPI %r3 $0   #Set Flags
@@ -23,6 +23,7 @@ BUC .loop
 
 .final
 LOAD %r4 %r1
-ADDI %r4 $128
+ADDI %r4 $64
 LOAD %r5 %r4
 STOR %r5 %r1
+BUC .final
