@@ -1,0 +1,11 @@
+# Potential setup code
+
+# Start of program, sets up Capman game then proceeds with infinite loop
+#
+# %r1 - Capman State (1 is Capman is alive, 0 if Capman is dead)
+# %r2 - Capman X Position
+# %r3 - Capman Y Position
+#
+#
+.START # START OF GAME
+MOVI %r1 $1 # r1 = 1
