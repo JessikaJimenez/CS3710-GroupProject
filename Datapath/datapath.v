@@ -61,7 +61,6 @@
 // ASHUIWR - regWrite
 //
 // LUIEX - luiInstruction, SHIFT
-// LUIREAD - LOAD
 // LUIWR - regWrite
 //
 // LADR - rTypeInstruction, COPY
@@ -206,9 +205,6 @@ module datapath #(parameter WIDTH = 16) (
     // Set address bits for registers
     assign dstAddr = instruction[11:8];
     assign srcAddr = instruction[3:0];
-	
-   // 8-Bit left shit for LUI instructions
-   assign luiImmd = immd << 8;
 
     /* FLIP FLOPS */
     // Flip-flop for the PC
@@ -268,7 +264,7 @@ module datapath #(parameter WIDTH = 16) (
    // MUX for shifting either being the result of the shifter or for LUI instructions
    always @(*) begin
 	if (~reset) shiftReg <= shiftResult;
-	else if (luiInstruction) shiftReg <= luiImmd;
+	else if (luiInstruction) shiftReg <= {immd, aluDstInput[7:0]};
 	else shiftReg <= shiftResult;
    end
 

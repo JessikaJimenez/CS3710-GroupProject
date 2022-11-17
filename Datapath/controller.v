@@ -82,9 +82,6 @@
 // LUI - luiInstruction, SHIFT
 // |
 // v
-// MEMLOAD - LOAD
-// |
-// v
 // WRITETOREG - regWrite
 //
 // (LOAD)
@@ -366,7 +363,7 @@ module controller(input clk, reset,
                         else nextstate <= MEMLOAD; // LOAD
                     end
                 end
-            LUI: nextstate <= MEMLOAD;
+            LUI: nextstate <= WRITETOREG;
             MEMLOAD: nextstate <= WRITETOREG;
             BRANCH: nextstate <= WRITETOPC;
             JAL: nextstate <= MOV; // Performs a jump

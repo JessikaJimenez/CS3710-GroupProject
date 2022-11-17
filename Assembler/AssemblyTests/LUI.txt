@@ -1,2 +1,4 @@
-ADDI %r1 $77        #ADD 10 into r1         r1 = 77 (1001101)
+ADDI %r1 $77        # ADD 77 into r1         r1 = 77 (1001101)
 LUI %r1 $77         #                       r1 = 19789 (0100110101001101)
+
+# THIS FILE PASSES TESTBENCH
