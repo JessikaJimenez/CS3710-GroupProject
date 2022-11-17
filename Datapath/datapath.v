@@ -137,10 +137,10 @@ module datapath #(parameter WIDTH = 16) (
    reg [WIDTH - 1: 0] aluDstInput, aluSrcInput; // Inputs into the ALU
    reg [WIDTH - 1 : 0] inputFlags; // The current flags of the system
    reg [WIDTH - 1 : 0] resultMUXData, outputReg; // The result of this datapath
-   reg [WIDTH - 1 : 0] nextPC; // Register used to overwrite the PC
+   reg unsigned [WIDTH - 1 : 0] nextPC; // Register used to overwrite the PC
    reg [WIDTH - 1 : 0] shiftReg; // Necessary to use shifter or LUI shift
    reg [WIDTH - 1 : 0] readAddr; // Register used to read from memory
-   reg [WIDTH - 1 : 0] PC; // Register used to find place in instruction set
+   reg unsigned [WIDTH - 1 : 0] PC; // Register used to find place in instruction set
    reg [3:0] shiftAmount; // Register used to determine shift amount
 
    // Instantiate modules
