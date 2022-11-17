@@ -247,7 +247,7 @@ module datapath #(parameter WIDTH = 16) (
     always @(*) begin
         if (~reset) nextPC <= PC;
         else if (pcContinue) nextPC <= PC + 1;
-        else if (pcOverwrite) nextPC <= outputReg;
+        else if (pcOverwrite) nextPC <= outputReg - 1; // Subtract 1 to account for PC increment on fetch
         else nextPC <= PC;
     end
 

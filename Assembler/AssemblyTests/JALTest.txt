@@ -1,0 +1,13 @@
+MOVI %r1 $1 # r1 = 1
+MOVI %r15 .FUNCTION # r15 = .FUNCTION address
+JAL %r9 %r15 # Jump to .FUNCTION, save next address
+MOV %r15 %r1 # r15 = 2 if success, r15 = 1 if failed
+BUC .END
+
+.FUNCTION
+MOVI %r1 $2 # r1 = 2
+JUC %r9 # RETURN
+
+.END
+
+# THIS FILE PASSES TESTBENCH
