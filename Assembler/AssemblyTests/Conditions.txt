@@ -1,0 +1,154 @@
+.EQ
+MOVI %r1 $1 # r1 = 1
+CMP %r1 %r0 # check r1 == r0
+BEQ $2 # should not branch
+CMPI %r1 $1 # check r1 == 1
+BEQ .NE
+MOVI %r15 $1 # shouldn't happen
+BUC .END
+
+.NE
+MOVI %r1 $1 # r1 = 1
+CMPI %r1 $1 # check r1 == 1
+BNE $2 # should not branch
+CMP %r1 %r0
+BNE .GE
+MOVI %r15 $2 # shouldn't happen
+BUC .END
+
+.GE
+MOVI %r1 $1 # r1 = 1
+CMPI %r1 $2 # check r1 >= 2
+BGE $5 # should not branch
+CMP %r1 %r1 # check r1 >= r1
+BGE $1
+MOVI %r14 $3 # shouldn't happen
+CMP %r1 %r0 # check r1 >= r0
+BGE .CS
+MOVI %r15 $3 # shouldn't happen
+BUC .END
+
+.CS
+MOV %r1 %r0 # r1 = 0
+ADDI %r1 $1 # r1 = 1 | C = 0
+BCS $2 # should not branch
+SUBI %r1 $2 # r1 = -1 | C = 1
+BCS .CC
+MOVI %r15 $4 # shouldn't happen
+BUC .END
+
+.CC
+MOV %r1 %r0 # r1 = 0
+SUBI %r1 $1 # r1 = -1 | C = 1
+BCC $2 # should not branch
+SUBI %r1 $1 # r1 = -2 | C = 0
+BCC .HI
+MOVI %r15 $5 # shouldn't happen
+BUC .END
+
+.HI
+MOVI %r1 $1 # r1 = 1
+CMPI %r1 $2 # check r1 higher than 2
+BHI $4 # should not branch
+CMP %r1 %r1 # check r1 higher than r1
+BHI $2 # should not branch
+CMP %r1 %r0 # check r1 higher than 0
+BHI .LS
+MOVI %r15 $6 # shouldn't happen
+BUC .END
+
+.LS
+MOVI %r1 $1 # r1 = 1
+CMP %r1 %r0 # check r1 lower than or same as 0
+BLS $4 # should not branch
+CMP %r1 %r1 # check r1 lower than or same as r1
+BLS $1
+MOVI %r14 $7 # shouldn't happen
+CMPI %r1 $2 # check r1 lower than or same as 2
+BLS .LO
+MOVI %r15 $7 # shouldn't happen
+BUC .END
+
+.LO
+MOVI %r1 $1 # r1 = 1
+CMP %r1 %r0 # check r1 lower than 0
+BLO $4 # should not branch
+CMP %r1 %r1 # check r1 lower than r1
+BLO $2 # should not branch
+CMPI %r1 $2 # check r1 lower than 2
+BLO .HS
+MOVI %r15 $8 # shouldn't happen
+BUC .END
+
+.HS
+MOVI %r1 $1 # r1 = 1
+CMPI %r1 $2 # check r1 higher than or same as 2
+BHS $4 # should not branch
+CMP %r1 %r1 # check r1 higher than or same as r1
+BHS $1
+MOVI %r14 $9 # shouldn't happen
+CMP %r1 %r0 # check r1 higher than or same as 0
+BHS .GT
+MOVI %r15 $9 # shouldn't happen
+BUC .END
+
+.GT
+MOVI %r1 $1 # r1 = 1
+CMPI %r1 $2 # check r1 > 2
+BGT $4 # should not branch
+CMP %r1 %r1 # check r1 > r1
+BGT $2 # should not branch
+CMP %r1 %r0 # check r1 > 0
+BGT .LE
+MOVI %r15 $10 # shouldn't happen
+BUC .END
+
+.LE
+MOVI %r1 $1 # r1 = 1
+CMP %r1 %r0 # check r1 <= 0
+BLE $5 # should not branch
+CMP %r1 %r1 # check r1 <= r1
+BLE $1
+MOVI %r14 $11 # shouldn't happen
+CMPI %r1 $2 # check r1 <= 2
+BLE .FS
+MOVI %r15 $11 # shouldn't happen
+BUC .END
+
+.FS
+MOVI %r1 $1 # r1 = 1
+ADDI %r1 $1 # r1 = 2 | F = 0
+BFS $3 # should not branch
+ASHUI %r1 $14 # r1 = -32768
+SUBI %r1 $1 # r1 = 32767 | F = 1
+BFS .FC
+MOVI %r15 $12 # shouldn't happen
+BUC .END
+
+.FC
+MOVI %r1 $1 # r1 = 1
+ASHUI %r1 $15 # r1 = -32768
+SUBI %r1 $1 # r1 = 32767 | F = 1
+BFC $2 # should not branch
+SUBI %r1 $1 # r1 = 32766 | F = 0
+BFC .LT
+MOVI %r15 $13 # shouldn't happen
+BUC .END
+
+.LT
+MOVI %r1 $1 # r1 = 1
+CMP %r1 %r0 # check r1 < 0
+BLT $4 # should not branch
+CMP %r1 %r1 # check r1 < r1
+BLT $2 # should not branch
+CMPI %r1 $2 # check r1 < 2
+BLT .UC
+MOVI %r15 $14 # shouldn't happen
+BUC .END
+
+.UC
+MOVI %r15 $15 # Reached end of tests successfully
+
+.END
+
+# THIS FILE PASSES TESTBENCH

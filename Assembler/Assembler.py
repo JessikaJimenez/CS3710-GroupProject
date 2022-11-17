@@ -5,7 +5,7 @@ class Assembler():
     labels = {}
     jpoint_instrs = {}
     RType = ['ADD', 'ADDU', 'ADDC', 'ADDCU', 'SUB', 'CMP', 'CMPU', 'AND', 'OR', 'XOR', 'MOV']
-    Immediates = ['ADDI', 'ADDUI', 'ADDCI', 'ADDCUI', 'SUBI', 'CMPI', 'CMPUI', 'ANDI', 'ORI', 'XORI', 'MOVI']
+    Immediates = ['ADDI', 'ADDUI', 'ADDCI', 'ADDCUI', 'SUBI', 'CMPI', 'CMPUI', 'ANDI', 'ORI', 'XORI', 'MOVI', 'LUI']
     Shift = ['LSH', 'RSH', 'ALSH', 'ARSH', 'ASHU']
     ImmdShift = ['LSHI', 'RSHI', 'ALSHI', 'ARSHI', 'ASHUI']
     Branch = ['BEQ', 'BNE', 'BGE', 'BCS', 'BCC', 'BHI', 'BLS', 'BLO', 'BHS', 'BGT', 'BLE', 'BFS', 'BFC', 'BLT', 'BUC']
@@ -131,6 +131,9 @@ class Assembler():
     
     def ASHUIN():
         return '0011'
+    
+    def LUI():
+        return '1111'
 
     switcher = {
         'ADD': ADD,
@@ -181,7 +184,8 @@ class Assembler():
         'LT' : LT,
         'UC' : UC,
         'MOVI': MOV,
-        'MOV': MOV
+        'MOV': MOV,
+        'LUI': LUI 
     }
 
     def instrCode(self, name):
@@ -223,7 +227,7 @@ class Assembler():
                        
                     count = 0
                     # reduce to shift for 8-bit immediate
-                    while labelAddress > 127:
+                    while labelAddress > 255:
                        labelAddress /= 2
                        count += 1
 
