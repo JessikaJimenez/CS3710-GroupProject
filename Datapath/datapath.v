@@ -132,6 +132,7 @@ module datapath #(parameter WIDTH = 16) (
    wire [WIDTH - 1 : 0] aluResult, shiftResult; // Results of ALU and Shifters
    wire [WIDTH - 1 : 0] readOutput; // What is read from memory
    wire [WIDTH - 1 : 0] luiImmd; // 8-bit left shifted immediate
+   wire flagSetArithmetic, flagSetCompare; // Difference between arithmetic and CMP/CMPI flag sets
    reg [WIDTH - 1 : 0] dataWriteToReg; // What gets written into the register file
    reg [WIDTH - 1 : 0]  immd; // Immediate retrieved from instruction
    reg [WIDTH - 1: 0] aluDstInput, aluSrcInput; // Inputs into the ALU
@@ -146,7 +147,6 @@ module datapath #(parameter WIDTH = 16) (
    // Instantiate modules
    RegFile rf (
 	  .clk(clk), 
-	  .reset(reset),
 	  .regWrite(regWrite),
 	  .sourceAddr(srcAddr), 
 	  .destAddr(dstAddr), 
@@ -160,7 +160,8 @@ module datapath #(parameter WIDTH = 16) (
 	  .clk(clk),
 	  .reset(reset),
 	  .flags(inputFlags),
-     .flagSet(flagSet),
+     .flagSetArithmetic(flagSetArithmetic),
+     .flagSetCompare(flagSetCompare),
 	  .readFlags(outputFlags)
     );
 
@@ -198,13 +199,16 @@ module datapath #(parameter WIDTH = 16) (
 	  .write_a(memWrite),
 	  .ReadDataA(readOutput),
 	  .ioOutputData(ioOutput),
-     .clk(clk),
-     .reset(reset)
+     .clk(clk)
 	);
 
     // Set address bits for registers
     assign dstAddr = instruction[11:8];
     assign srcAddr = instruction[3:0];
+
+    // Set different flags to set the PSR
+    assign flagSetCompare = flagSet && !regWrite; // CMP/CMPI only have flagSet on for write stage
+    assign flagSetArithmetic = flagSet && regWrite; // ADD/ADDI/SUB/SUBI have flagSet and regWrite on for write stage
 
     /* FLIP FLOPS */
     // Flip-flop for the PC
@@ -264,7 +268,7 @@ module datapath #(parameter WIDTH = 16) (
    // MUX for shifting either being the result of the shifter or for LUI instructions
    always @(*) begin
 	if (~reset) shiftReg <= shiftResult;
-	else if (luiInstruction) shiftReg <= {immd, aluDstInput[7:0]};
+	else if (luiInstruction) shiftReg <= {immd[7:0], aluDstInput[7:0]};
 	else shiftReg <= shiftResult;
    end
 
