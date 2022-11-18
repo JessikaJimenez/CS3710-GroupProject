@@ -3,9 +3,10 @@
 # Start of program, sets up Capman game then proceeds with infinite loop
 #
 # %r1 - Capman State (1 is Capman is alive, 0 if Capman is dead)
-# %r2 - Capman X Position
-# %r3 - Capman Y Position
-#
+# %r2 - Capman X Position (Cannot exceed 640)
+# %r3 - Capman Y Position (Cannot exceed 480)
+# %r4 - Capman Direction (00 = Down, 01 = Right, 10 = Left, 11 = Up)
+# %r5 - Capman Position Jump (Determines speed, hardcoded to ?)
 #
 .START # START OF GAME
 MOVI %r1 $1 # r1 = 1
