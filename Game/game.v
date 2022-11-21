@@ -2,9 +2,11 @@
 /* Top-level module for our game: Cap Man */
 /*************************************************************/
 module game (
-	input clk,                //Onboard 50MHz clock
-	input reset,              //Reset switch
-	// add other inputs here
+	input        clk,         //Onboard 50MHz clock
+	input        reset,       //Reset switch
+	input  [9:0] sw,          //Switches
+	output [9:0] LED,         //LEDs
+	// add other inputs/outputs here
 	
 	// stuff for VGA
 	output       VGA_CLK,     //VGA clock
