@@ -8,22 +8,20 @@ module game (
 	
 	// stuff for VGA
 	output       VGA_CLK,     //VGA clock
-  output       VGA_HS,      //VGA horizontal sync 
-  output       VGA_VS,      //VGA vertical sync
-  output       VGA_BLANK_N, //VGA BLANK
-  output       VGA_SYNC_N,  //VGA N SYNC
-  output [7:0] VGA_R,       //VGA Red[7:0]
-  output [7:0] VGA_G,       //VGA Green[7:0]
-  output [7:0] VGA_B        //VGA Blue[7:0]
+	output       VGA_HS,      //VGA horizontal sync 
+	output       VGA_VS,      //VGA vertical sync
+	output       VGA_BLANK_N, //VGA BLANK
+	output       VGA_SYNC_N,  //VGA N SYNC
+	output [7:0] VGA_R,       //VGA Red[7:0]
+	output [7:0] VGA_G,       //VGA Green[7:0]
+	output [7:0] VGA_B        //VGA Blue[7:0]
 );
-
 
 	//**TODO - do game stuff
 
-
 	//Instantiate VGA Controller
 	VGAController VGA(
-	  .clk(clk),
+	        .clk(clk),
 		.reset(reset),
 		.VGA_CLK(VGA_CLK),
 		.VGA_HS(VGA_HS),
@@ -35,13 +33,11 @@ module game (
 		.VGA_B(VGA_B)
 		//**TODO - actually make VGA controller
 	);
-
 	
 	//Instantiate NES Controller
 	NESController NES (
 		//**TODO - actually make game controller 
 	);
-	
-	
+		
 
 endmodule 
