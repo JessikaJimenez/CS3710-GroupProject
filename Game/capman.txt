@@ -1,12 +1,175 @@
 # Potential setup code
-
+#########################################################################
 # Start of program, sets up Capman game then proceeds with infinite loop
 #
 # %r1 - Capman State (1 is Capman is alive, 0 if Capman is dead)
 # %r2 - Capman X Position (Cannot exceed 640)
 # %r3 - Capman Y Position (Cannot exceed 480)
-# %r4 - Capman Direction (00 = Down, 01 = Right, 10 = Left, 11 = Up)
-# %r5 - Capman Position Jump (Determines speed, hardcoded to ?)
-#
+# %r4 - Capman Direction (0 = Down, 1 = Right, 2 = Left, 3 = Up)
+# %r5 - Capman Position Jump (Determines speed, hardcoded to 1)
+# %r6 - Ghost X Position (Cannot exceed 640)
+# %r7 - Ghost Y Position (Cannot exceed 480)
+# %r8 - Ghost Direction (0 = Down, 1 = Right, 2 = Left, 3 = Up)
+# %r9 - Ghost Position Jump (Determines speed, hardcoded to 2)
 .START # START OF GAME
-MOVI %r1 $1 # r1 = 1
+MOVI %r1 $1 # r1 = 1 (alive)
+
+# Capman starts at (300, 240) which is the top left of his sprite
+MOVI %r2 $150 # r2 = 150
+ASHUI %r2 $1 # r2 = 300 (Capman xPos)
+MOVI %r3 $240 # r3 = 240 (Capman yPos)
+
+MOVI %r4 $2 # r4 = Left (Capman Direction)
+MOVI %r5 $1 # r5 = 1 (Capman Speed)
+
+# Ghost starts at (320, 20) which is the top left of his sprite
+MOVI %r6 $160 # r6 = 160
+ASHUI %r6 $1 # r6 = 320 (Ghost xPos)
+MOVI %r7 $20 # r7 = 20 (Ghost yPos)
+
+MOVI %r8 $1 # r8 = Right (Ghost Direction)
+MOVI %r9 $2 # r9 = 2 (Ghost Speed)
+#######################################################################
+# Infinite loop for game
+#
+# %r10 - User input
+# %r11 - xPosOnGrid
+# %r12 - yPosOnGrid
+.CHECKDIRECTION # Start of infinite loop for game, updates Capman based on direction pressed
+
+# *statement to load I/O to %r10*
+# *CMPI statement to check direction as left*
+BEQ .LEFT
+# *CMPI statement to check direction as right*
+BEQ .RIGHT
+# *CMPI statement to check direction as up*
+BEQ .UP
+# *CMPI statement to check direction as down*
+BEQ .DOWN
+
+.UPDATEGAME # Label for updating game
+
+# Check for ghost collision
+# Check for pacdot collision
+# Update ghost position
+CMPI %r1 $1
+BEQ .CHECKDIRECTION
+BUC .ENDGAME
+###########################################################################
+# Function for when the player holds the left direction
+# Capman will go left only if there are no collisions present
+# If Capman reaches the edge of the screen, he will come out the other end
+.LEFT
+MOVI %r4 $2 # r4 = LEFT
+SUB %r2 %r5 # xPos -= Speed
+CMPI %r2 $0
+BGE .LEFTCONVERSION # If xPos < 0, don't need to check for collision
+MOVI %r15 $160 # %r15 = 160
+ASHUI %r15 $2 # r15 = 640
+ADD %r2 %r15 # xPos += 640
+BUC .UPDATEGAME
+.LEFTCONVERSION
+MOVI %r15 .CONVERTCAPMAN # r15 = .CONVERTCAPMAN address
+JAL %r0 %r15 # CALL .CONVERTCAPMAN
+# Somehow check the grid position for collision
+# IF COLLIDES 
+ADD %r2 %r5 # Redo position update
+BUC .UPDATEGAME
+###############################################################################3
+# Function for when the player holds the right direction
+# Capman will go right only if there are no collisions present
+# If Capman reaches the edge of the screen, he will come out the other end
+.RIGHT
+MOVI %r4 $1 # r4 = RIGHT
+ADD %r2 %r5 # xPos += Speed
+MOVI %r15 $160 # %r15 = 160
+ASHUI %r15 $2 # r15 = 640
+CMP %r2 %r15
+BLT .RIGHTCONVERSION # If xPos >= 640, don't need to check for collision
+SUB %r2 %r15 # xPos -= 640
+BUC .UPDATEGAME
+.RIGHTCONVERSION
+MOVI %r15 .CONVERTCAPMAN # r15 = .CONVERTCAPMAN address
+JAL %r0 %r15 # CALL .CONVERTCAPMAN
+# Somehow check the grid position for collision
+# IF COLLIDES 
+SUB %r2 %r5 # Redo position update
+BUC .UPDATEGAME
+##################################################################################
+# Function for when the player holds the up direction
+# Capman will go up only if there are no collisions present
+.UP
+MOVI %r4 $3 # r4 = UP
+ADD %r3 %r5 # yPos += Speed
+MOVI %r15 .CONVERTCAPMAN # r15 = .CONVERTCAPMAN address
+JAL %r0 %r15 # CALL .CONVERTCAPMAN
+# Somehow check the grid position for collision
+# IF COLLIDES 
+SUB %r3 %r5 # Redo position update
+BUC .UPDATEGAME
+################################################################################
+# Function for when the player holds the down direction
+# Capman will go down only if there are no collisions present
+.DOWN
+MOVI %r4 $0 # r4 = DOWN
+SUB %r3 %r5 # yPos -= Speed
+MOVI %r15 .CONVERTCAPMAN # r15 = .CONVERTCAPMAN address
+JAL %r0 %r15 # CALL .CONVERTCAPMAN
+# Somehow check the grid position for collision
+# IF COLLIDES 
+ADD %r3 %r5 # Redo position update
+BUC .UPDATEGAME
+###################################################################################
+# This function converts the xPos and yPos of Capman to positions on a 32x24 grid
+# Will update %r11 and %r12 to the positions on the grid
+.CONVERTCAPMAN
+MOVI %r11 $0 # r11 = 0
+MOVI %r12 $0 # r12 = 0
+MOVI %r13 $0 # r13 = 0
+MOV %r14 %r2 # r14 = xPos
+SUBI %r14 $20 # r14 -= 20
+.CONVERTLOOP
+CMPI %r14 $0
+BLT .CONVERTLOOPEND
+ADDI %r13 $1 # r13 += 1
+SUBI %r14 $20 # r14 -= 20
+BUC .CONVERTLOOP
+.CONVERTLOOPEND
+# If the xPosOnGrid hasn't been updated yet, update it
+# Otherwise, update yPosOnGrid and exit function
+CMPI %r11 $0
+BNE $4
+MOV %r11 %r13 # r11 = r13
+MOVI %r13 $0 # r13 = 0
+MOV %r14 %r3 # r14 = yPos
+BUC .CONVERTLOOP
+MOV %r12 %r13 # r12 = r13
+JUC %r0
+#####################################################################################
+# This function converts the xPos and yPos of the ghost to positions on a 32x24 grid
+# Will update %r11 and %r12 to the positions on the grid
+.CONVERTGHOST
+MOVI %r11 $0 # r11 = 0
+MOVI %r12 $0 # r12 = 0
+MOVI %r13 $0 # r13 = 0
+MOV %r14 %r6 # r14 = xPos
+SUBI %r14 $20 # r14 -= 20
+.CONVERTLOOP
+CMPI %r14 $0
+BLT .CONVERTLOOPEND
+ADDI %r13 $1 # r13 += 1
+SUBI %r14 $20 # r14 -= 20
+BUC .CONVERTLOOP
+.CONVERTLOOPEND
+# If the xPosOnGrid hasn't been updated yet, update it
+# Otherwise, update yPosOnGrid and exit function
+CMPI %r11 $0
+BNE $4
+MOV %r11 %r13 # r11 = r13
+MOVI %r13 $0 # r13 = 0
+MOV %r14 %r7 # r14 = yPos
+BUC .CONVERTLOOP
+MOV %r12 %r13 # r12 = r13
+JUC %r0
+####################################################################################3
+.ENDGAME
