@@ -4,7 +4,8 @@ module nesInterface
     input nesData,
     output nesClock,
     output nesLatch,
-	 output reg [7:0] controllerData
+	 output reg [7:0] controllerData,
+	 output reg [15:0] assemblyButton
 );
 
 reg [15:0] clkCount = 16'd0;
@@ -35,12 +36,33 @@ always @(negedge clkDiv) begin
         pulseState <= pulseState + 16'd1;
     end
     else if ((pulseState > 0) && (pulseState < 9)) begin
-        dataIn[pulseState-1] <= nesData;
+        dataIn[pulseState] <= nesData;
         pulseState <= pulseState + 16'd1;
     end
     else begin
 		controllerData <= dataIn;
-      pulseState <= 0;
+        if (dataIn[4] == 0) begin
+            assemblyButton <= 16'd4;
+        end
+        else if (dataIn[5] == 0) begin
+            assemblyButton <= 16'd1;
+        end
+        else if (dataIn[6] == 0) begin
+            assemblyButton <= 16'd3;
+        end
+        else if (dataIn[7] == 0) begin
+            assemblyButton <= 16'd2;
+        end
+        else if (dataIn[0] == 0) begin
+            assemblyButton <= 16'b1111111111111111;
+        end
+        else if (dataIn == 8'b11111111) begin
+            assemblyButton <= 16'd0;
+        end
+        else begin
+            assemblyButton <= 16'd0;
+        end
+        pulseState <= 0;
     end
 end
 
