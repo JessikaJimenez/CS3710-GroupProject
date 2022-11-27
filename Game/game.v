@@ -21,6 +21,13 @@ module game (
 	
 	//**TODO - do game stuff
 	
+	// Read in game logic assembly file
+	initial begin
+		$display("Loading CapMan game from memory");
+		// **TODO - fix file path 
+		$readmemb("C:/Users/sizzl/OneDrive/Documents/School Documents/CS 3710/Project/CS3710-GroupProject/Helper Files/TestMem.dat", ram); 
+		$display("Done with memory load"); 
+	end	
 
 	//Instantiate VGA Controller
 	VGAController VGA(
