@@ -18,8 +18,9 @@ module game (
 	output [7:0] VGA_G,       //VGA Green[7:0]
 	output [7:0] VGA_B        //VGA Blue[7:0]
 );
-
+	
 	//**TODO - do game stuff
+	
 
 	//Instantiate VGA Controller
 	VGAController VGA(
@@ -37,8 +38,13 @@ module game (
 	);
 	
 	//Instantiate NES Controller
-	NESController NES (
-		//**TODO - actually make game controller 
+	nesOnBoard NES (
+		.clk(clk),
+		.nesData(nesData),
+		.nesClock(nesClock),
+		.nesLatch(nesLatch),
+		.leds(leds),
+		.hexOut(hexOut)
 	);
 		
 
