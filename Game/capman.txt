@@ -36,7 +36,9 @@ MOVI %r9 $2 # r9 = 2 (Ghost Speed)
 # %r12 - yPosOnGrid
 .CHECKDIRECTION # Start of infinite loop for game, updates Capman based on direction pressed
 MOV %r10 %r4 # r10 = r4 (store original direction)
-# *statement to load I/O into %r4
+MOVI %r15 $-1 # r15 = 00FF
+LUI %r15 $-1 # r15 = FFFF
+LOAD %r4 %r15 # Load user input into %r4
 CMPI %r4 $0 
 BGT $1 # If r4 is less than 0, execute next instruction which will keep capman going the same direction
 MOV %r4 %r10 # r4 = r10 (original direction)

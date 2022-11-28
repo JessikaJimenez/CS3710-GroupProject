@@ -1,7 +1,7 @@
 
-/* Top-level module for our game: Cap Man */
+/* Top-level module for our game: CapMan */
 /*************************************************************/
-module game (
+module CapMan (
 	input        clk,         //Onboard 50MHz clock
 	input        reset,       //Reset switch
 	input  [9:0] sw,          //Switches
@@ -18,8 +18,16 @@ module game (
 	output [7:0] VGA_G,       //VGA Green[7:0]
 	output [7:0] VGA_B        //VGA Blue[7:0]
 );
-
+	
 	//**TODO - do game stuff
+	
+	// Read in game logic assembly file
+	initial begin
+		$display("Loading CapMan game from memory");
+		// **TODO - fix file path 
+		$readmemb("C:/Users/sizzl/OneDrive/Documents/School Documents/CS 3710/Project/CS3710-GroupProject/Helper Files/TestMem.dat", ram); 
+		$display("Done with memory load"); 
+	end	
 
 	//Instantiate VGA Controller
 	VGAController VGA(
@@ -37,8 +45,13 @@ module game (
 	);
 	
 	//Instantiate NES Controller
-	NESController NES (
-		//**TODO - actually make game controller 
+	nesOnBoard NES (
+		.clk(clk),
+		.nesData(nesData),
+		.nesClock(nesClock),
+		.nesLatch(nesLatch),
+		.leds(leds),
+		.hexOut(hexOut)
 	);
 		
 
