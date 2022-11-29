@@ -11,6 +11,12 @@
 //
 // ADDIEX - 000
 // ADDIWR - regWrite, flagSet
+//
+// MULEX - rTypeInstruction, 111
+// MULWR - regWrite
+//
+// MULIEX - 111
+// MULIWR - regWrite
 // 
 // SUBEX - rTypeInstruction, 100
 // SUBWR - regWrite, flagSet

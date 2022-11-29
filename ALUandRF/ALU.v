@@ -3,7 +3,7 @@
 // A 16-bit two's complement ALU that will take two registers
 // as arguments and output a 16-bit result.
 //
-// Supports Add, Subtract, And, Or, Xor operations
+// Supports Add, Subtract, And, Or, Xor, and Mul operations
 //
 // The ALU also must generate condition flags:
 /*
@@ -35,12 +35,16 @@ module ALU #(parameter WIDTH = 16) (regSrc, regDst, aluOp, aluResult, carry, low
 	assign negative = ((regDst < regSrc) && sameSign)||(regDst[WIDTH - 1] == 1'b1 && !sameSign); 
 
 	always@(*) begin
-		case(aluOp[1:0])
-			2'b00: aluResult <= sum; // Add/Sub
-			2'b01: aluResult <= regDst & regSrc; // Logical And
-			2'b10: aluResult <= regDst | regSrc; // Logical Or
-			2'b11: aluResult <= regDst ^ regSrc; // Logical Xor
-		endcase
+		if (aluOp == 3'b111)
+			aluResult <= regDst * regSrc; // Mul
+		else begin
+			case(aluOp[1:0])
+				2'b00: aluResult <= sum; // Add/Sub
+				2'b01: aluResult <= regDst & regSrc; // Logical And
+				2'b10: aluResult <= regDst | regSrc; // Logical Or
+				2'b11: aluResult <= regDst ^ regSrc; // Logical Xor
+			endcase
+		end
 	end
 
 endmodule

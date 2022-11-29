@@ -52,6 +52,8 @@
 //
 // ADD - rTypeInstruction, 000
 // ADDI - 000
+// MUL - rTypeInstruction, 111
+// MULI - 111
 // |
 // v
 // WRITEANDSETFLAGS - regWrite, flagSet
@@ -160,6 +162,8 @@ module controller(input clk, reset,
     parameter   WRITETOREG       = 5'b11010;
     parameter   WRITETOMEM       = 5'b11011;
     parameter   WRITETOPC        = 5'b11100;
+    parameter   MUL              = 5'b11101;
+    parameter   MULI             = 5'b11110;
 
     // Parameters for condition codes
     parameter EQ    = 4'b0000;
@@ -209,6 +213,7 @@ module controller(input clk, reset,
             4'b1011: specialDecode = SUB;
             4'b1100: specialDecode = conditionCheck(condition);
             4'b1101: specialDecode = MOV;
+            4'b1110: specialDecode = MUL;
             default: specialDecode = FETCH1; // should never happen
         endcase
     endfunction
@@ -333,6 +338,7 @@ module controller(input clk, reset,
                         4'b1011: nextstate <= SUBI;
                         4'b1100: nextstate <= conditionCheck(condition);
                         4'b1101: nextstate <= MOVI;
+                        4'b1110: nextstate <= MULI;
                         4'b1111: nextstate <= LUI;
                         default: nextstate <= FETCH1; // should never happen
                      endcase
@@ -352,6 +358,8 @@ module controller(input clk, reset,
             ORI: nextstate <= WRITETOREG;
             XOR: nextstate <= WRITETOREG;
             XORI: nextstate <= WRITETOREG;
+            MUL: nextstate <= WRITETOREG;
+            MULI: nextstate <= WRITETOREG;
             MOVI: nextstate <= WRITETOREG;
             SHFT: nextstate <= WRITETOREG;
             SHFTI: nextstate <= WRITETOREG;
@@ -445,6 +453,13 @@ module controller(input clk, reset,
 				zeroExtend <= 1;
 				aluOp <= 3'b011;
 			end
+        MUL: begin
+                rTypeInstruction <= 1;
+                aluOp <= 3'b111;
+            end
+        MULI: begin
+                aluOp <= 3'b111;
+            end
 		MOVI: begin
 				zeroExtend <= 1;
 				outputSelect <= 2'b10; //COPY

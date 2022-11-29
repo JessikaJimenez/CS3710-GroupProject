@@ -4,8 +4,8 @@ import argparse
 class Assembler():
     labels = {}
     jpoint_instrs = {}
-    RType = ['ADD', 'ADDU', 'ADDC', 'ADDCU', 'SUB', 'CMP', 'CMPU', 'AND', 'OR', 'XOR', 'MOV']
-    Immediates = ['ADDI', 'ADDUI', 'ADDCI', 'ADDCUI', 'SUBI', 'CMPI', 'CMPUI', 'ANDI', 'ORI', 'XORI', 'MOVI', 'LUI']
+    RType = ['ADD', 'ADDU', 'ADDC', 'ADDCU', 'MUL', 'SUB', 'CMP', 'CMPU', 'AND', 'OR', 'XOR', 'MOV']
+    Immediates = ['ADDI', 'ADDUI', 'ADDCI', 'ADDCUI', 'MULI', 'SUBI', 'CMPI', 'CMPUI', 'ANDI', 'ORI', 'XORI', 'MOVI', 'LUI']
     Shift = ['LSH', 'RSH', 'ALSH', 'ARSH', 'ASHU']
     ImmdShift = ['LSHI', 'RSHI', 'ALSHI', 'ARSHI', 'ASHUI']
     Branch = ['BEQ', 'BNE', 'BGE', 'BCS', 'BCC', 'BHI', 'BLS', 'BLO', 'BHS', 'BGT', 'BLE', 'BFS', 'BFC', 'BLT', 'BUC']
@@ -26,6 +26,9 @@ class Assembler():
 
     def ADDCUI():
         return '1010'
+
+    def MUL():
+        return '1110'
 
     def SUB():
         return '1001'
@@ -140,6 +143,7 @@ class Assembler():
         'ADDU': ADDU,
         'ADDC': ADDC,
         'ADDCU': ADDCU,
+        'MUL': MUL,
         'SUB': SUB,
         'CMP': CMP,
         'CMPU': CMPU,
@@ -150,6 +154,7 @@ class Assembler():
         'ADDUI': ADDU,
         'ADDCI': ADDC,
         'ADDCUI': ADDCUI,
+        'MULI': MUL,
         'SUBI': SUB,
         'CMPI': CMP,
         'CMPUI': CMPUI,
