@@ -41,6 +41,12 @@ ADDI %r15 $1 # r15 = CC34
 STOR %r6 %r15 # Store yPosOnGhost(16) into r15(CC34)
 ADDI %r15 $1 # r15 = CC35
 STOR %r7 %r15 # Store Ghost Direction (2) into r15(CC35)
+ADDI %r15 $1 # r15 = CC36
+MOVI %r8 $207 # r8 = 207
+ASHUI %r8 $1 # r8 = 414
+STOR %r8 %r15 # Store Pacdot Count (414) into r15(CC36)
+ADDI %r15 $1 # r15 = CC37
+STOR %r1 %r15 # Store Pacman State (1) into r15(CC37)
 #######################################################################
 # Infinite loop for game
 .CHECKDIRECTION # Start of infinite loop for game, updates Capman based on direction pressed
@@ -333,7 +339,10 @@ MOVI %r14 $254 # r14 = 00FE
 LUI %r14 $255 # r14 = FFFE
 STOR %r0 %r14 # Store last return address in memory
 
-# LOAD MEMORY FOR NUMBER OF PACDOTS IN GAME in %r10
+# Load the number of pacdots in the game into %r10
+MOVI %r9 $54 # r9 = 0036
+LUI %r9 $204 # r9 = CC36
+LOAD %r10 %r9 # Load memory at r9(CC36) into r10 (number of pacdots)
 MOVI %r15 .GETSPRITEID # r15 = .GETSPRITEID address
 JAL %r0 %r15 # CALL .GETSPRITEID (Returns %r13 as sprite ID, %r14 as sprite ID address)
 CMPI %r13 $1
@@ -341,7 +350,7 @@ BNE .CHECKEDFORDOT # Branches if block on grid isn't a pacdot
 MOVI %r13 $0 # r13 = 0
 STOR %r13 %r14 # Store r13(0) into the address in r14 (sprite ID address)
 SUBI %r10 $1 # r10 -= 1
-# STORE r10 (count - 1) in PACDOT COUNT
+STOR %r10 %r9 # Decrement pacdot count in memory
 .CHECKEDFORDOT
 # Return address was overwritten, get it back from memory
 MOVI %r14 $254 # r14 = 00FE
@@ -372,12 +381,12 @@ JUC %r0
 ####################################################################################
 # This function is called when the user either wins or loses, allows to play again
 .ENDGAME
-CMPI %r1 $1
-BEQ .ENDLOOP # Branches if Capman is still alive
-# STORE CAPMAN'S STATE AS DEAD
-.ENDLOOP
+MOVI %r15 $55 # r15 = 0037
+LUI %r15 $204 # r15 = CC37
+STOR %r1 %r15 # Store Capman's state into memory, whether alive or dead
 MOVI %r15 $255 # r15 = 00FF
 LUI %r15 $255 # r15 = FFFF
+.ENDLOOP
 LOAD %r4 %r15 # Load user input into %r4
 CMPI %r4 $-1
 BNE .ENDLOOP # Branches if user does not press A (play again button)
