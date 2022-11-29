@@ -10,19 +10,6 @@
 # %r7 - Ghost Direction (1 = Down, 2 = Right, 3 = Left, 4 = Up)
 .START # START OF GAME
 
-# Fill in the board with pacdots
-MOVI %r13 $1 # r13 = 1
-MOVI %r15 $0 # r15 = 0000
-LUI %r15 $-51 # r15 = CD00
-.STARTLOOP
-LOAD %r14 %r15 # Load r14 (address of pacdot) from r15 (pacdots array index)
-CMPI %r14 $0 
-BEQ .PACDOTSMAPPED # Branch if we are complete storing pacdot sprite ID's
-STOR %r13 %r14 # Store the pacdot sprite ID (1) into the sprite block (r14)
-ADDI %r15 $1 # r15 += 1
-BUC .STARTLOOP
-
-.PACDOTSMAPPED
 MOVI %r1 $1 # r1 = 1 (alive)
 
 # Capman starts at (320, 368) which is the top left of his sprite
@@ -60,6 +47,19 @@ MULI %r8 $6 # r8 *= 6 (r8 = 414)
 STOR %r8 %r15 # Store Pacdot Count (414) into r15(CC36)
 ADDI %r15 $1 # r15 = CC37
 STOR %r1 %r15 # Store Pacman State (1) into r15(CC37)
+
+# Fill in the board with pacdots
+MOVI %r13 $1 # r13 = 1
+MOVI %r15 $0 # r15 = 0000
+LUI %r15 $-51 # r15 = CD00
+.PACDOTLOOP
+LOAD %r14 %r15 # Load r14 (address of pacdot) from r15 (pacdots array index)
+STOR %r13 %r14 # Store the pacdot sprite ID (1) into the sprite block (r14)
+ADDI %r15 $1 # r15 += 1
+SUBI %r8 $1 # r8 -= 1 (Decrement pacdot count)
+CMPI %r8 $0
+BEQ .CHECKDIRECTION # Branch if there are no more pacdots to fill
+BUC .PACDOTLOOP
 #######################################################################
 # Infinite loop for game
 .CHECKDIRECTION # Start of infinite loop for game, updates Capman based on direction pressed
