@@ -13,23 +13,23 @@
 MOVI %r1 $1 # r1 = 1 (alive)
 
 # Capman starts at (320, 368) which is the top left of his sprite
-MOVI %r2 $160 # r2 = 160
-ASHUI %r2 $1 # r2 = 320 (Capman xPos)
-MOVI %r3 $184 # r3 = 184
-ASHUI %r3 $1 # r3 = 368 (Capman yPos)
+MOVI %r2 $80 # r2 = 80
+ASHUI %r2 $2 # r2 = 320 (Capman xPos)
+MOVI %r3 $92 # r3 = 92
+ASHUI %r3 $2 # r3 = 368 (Capman yPos)
 
 MOVI %r4 $3 # r4 = Left (Capman Direction)
 
 # Ghost starts at (304, 16) which is the top left of his sprite
-MOVI %r5 $152 # r5 = 152
-ASHUI %r5 $1 # r5 = 304 (xPosOnGhost)
+MOVI %r5 $76 # r5 = 76
+ASHUI %r5 $2 # r5 = 304 (xPosOnGhost)
 MOVI %r6 $16 # r6 = 16 (yPosOnGhost)
 
 MOVI %r7 $2 # r7 = Right (Ghost Direction)
 
 # Store starting information into memory
 MOVI %r15 $48 # r15 = 0030
-LUI %r15 $204 # r15 = CC30
+LUI %r15 $-52 # r15 = CC30
 STOR %r2 %r15 # Store xPos(320) into r15(CC30)
 ADDI %r15 $1 # r15 = CC31
 STOR %r3 %r15 # Store yPos(368) into r15(CC31)
@@ -42,16 +42,16 @@ STOR %r6 %r15 # Store yPosOnGhost(16) into r15(CC34)
 ADDI %r15 $1 # r15 = CC35
 STOR %r7 %r15 # Store Ghost Direction (2) into r15(CC35)
 ADDI %r15 $1 # r15 = CC36
-MOVI %r8 $207 # r8 = 207
-ASHUI %r8 $1 # r8 = 414
+MOVI %r8 $69 # r8 = 69
+MULI %r8 $6 # r8 *= 6 (r8 = 414)
 STOR %r8 %r15 # Store Pacdot Count (414) into r15(CC36)
 ADDI %r15 $1 # r15 = CC37
 STOR %r1 %r15 # Store Pacman State (1) into r15(CC37)
 #######################################################################
 # Infinite loop for game
 .CHECKDIRECTION # Start of infinite loop for game, updates Capman based on direction pressed
-MOVI %r15 $255 # r15 = 00FF
-LUI %r15 $255 # r15 = FFFF
+MOVI %r15 $-1 # r15 = 00FF
+LUI %r15 $-1 # r15 = FFFF
 LOAD %r8 %r15 # Load user input into %r8
 CMPI %r8 $0 
 BLE $1 # If r4 greater than 0, execute next instruction which will overwrite capman's direction
@@ -100,8 +100,8 @@ BUC .CHECKDIRECTION # Loop back to beginning
 SUBI %r2 $1 # xPos -= 1
 CMPI %r2 $0
 BGE .LEFTCONVERSION # Execute next few instruction if we need to loop
-MOVI %r15 $160 # %r15 = 160
-ASHUI %r15 $2 # r15 = 640
+MOVI %r15 $64 # r15 = 64
+MULI %r15 $10 # r15 *= 10 (r15 = 640)
 ADD %r2 %r15 # xPos += 640
 .LEFTCONVERSION
 MOVI %r15 .CONVERTCAPMAN # r15 = .CONVERTCAPMAN address
@@ -118,8 +118,8 @@ BUC .UPDATEGAME
 # If Capman reaches the edge of the screen, he will come out the other end
 .CAPMANRIGHT
 ADDI %r2 $1 # xPos += 1
-MOVI %r15 $160 # %r15 = 160
-ASHUI %r15 $2 # r15 = 640
+MOVI %r15 $64 # r15 = 64
+MULI %r15 $10 # r15 *= 10 (r15 = 640)
 CMP %r2 %r15
 BLT .RIGHTCONVERSION # Execute next instruction if we need to loop
 SUB %r2 %r15 # xPos -= 640
@@ -166,8 +166,8 @@ BUC .UPDATEGAME
 SUBI %r5 $2 # xPosOnGhost -= 2
 CMPI %r5 $0
 BGE .LEFTCONVERSIONGHOST # Execute next few instruction if we need to loop
-MOVI %r15 $160 # %r15 = 160
-ASHUI %r15 $2 # r15 = 640
+MOVI %r15 $64 # r15 = 64
+MULI %r15 $10 # r15 *= 10 (r15 = 640)
 ADD %r5 %r15 # xPosOnGhost += 640
 .LEFTCONVERSIONGHOST
 MOVI %r15 .CONVERTGHOST # r15 = .CONVERTGHOST address
@@ -186,8 +186,8 @@ BUC .UPORDOWN
 # Otherwise, it picks a new direction
 .GHOSTRIGHT
 ADDI %r5 $2 # xPosOnGhost += 2
-MOVI %r15 $160 # %r15 = 160
-ASHUI %r15 $2 # r15 = 640
+MOVI %r15 $64 # r15 = 64
+MULI %r15 $10 # r15 *= 10 (r15 = 640)
 CMP %r5 %r15
 BLT .RIGHTCONVERSION # Execute next instruction if we need to loop
 SUB %r5 %r15 # xPosOnGhost -= 640
@@ -306,8 +306,8 @@ JUC %r0
 # %r10 - 1 if collides, 0 if not
 .CHECKWALLCOLLISION
 # Need to store the return address for the end of the function
-MOVI %r14 $254 # r14 = 00FE
-LUI %r14 $255 # r14 = FFFE
+MOVI %r14 $-2 # r14 = 00FE
+LUI %r14 $-1 # r14 = FFFE
 STOR %r0 %r14 # Store last return address in memory
 
 # Assume that capman does not collide
@@ -322,8 +322,8 @@ MOVI %r10 $1 # r10 = 1 (Player collides)
 .CHECKEDFORWALL
 
 # Return address was overwritten, get it back from memory
-MOVI %r14 $254 # r14 = 00FE
-LUI %r14 $255 # r14 = FFFE
+MOVI %r14 $-2 # r14 = 00FE
+LUI %r14 $-1 # r14 = FFFE
 LOAD %r0 %r14 # Load last return address from memory
 JUC %r0
 ####################################################################################
@@ -335,13 +335,13 @@ JUC %r0
 # %r10 - Number of pacdots left in the game
 .CHECKDOTCOLLISION
 # Need to store the return address for the end of the function
-MOVI %r14 $254 # r14 = 00FE
-LUI %r14 $255 # r14 = FFFE
+MOVI %r14 $-2 # r14 = 00FE
+LUI %r14 $-1 # r14 = FFFE
 STOR %r0 %r14 # Store last return address in memory
 
 # Load the number of pacdots in the game into %r10
 MOVI %r9 $54 # r9 = 0036
-LUI %r9 $204 # r9 = CC36
+LUI %r9 $-52 # r9 = CC36
 LOAD %r10 %r9 # Load memory at r9(CC36) into r10 (number of pacdots)
 MOVI %r15 .GETSPRITEID # r15 = .GETSPRITEID address
 JAL %r0 %r15 # CALL .GETSPRITEID (Returns %r13 as sprite ID, %r14 as sprite ID address)
@@ -353,8 +353,8 @@ SUBI %r10 $1 # r10 -= 1
 STOR %r10 %r9 # Decrement pacdot count in memory
 .CHECKEDFORDOT
 # Return address was overwritten, get it back from memory
-MOVI %r14 $254 # r14 = 00FE
-LUI %r14 $255 # r14 = FFFE
+MOVI %r14 $-2 # r14 = 00FE
+LUI %r14 $-1 # r14 = FFFE
 LOAD %r0 %r14 # Load last return address from memory
 JUC %r0
 ####################################################################################
@@ -366,7 +366,7 @@ JUC %r0
 .GETSPRITEID
 # Loads r13 from [C000 + xPosOnGrid + (40*yPosOnGrid)]
 MOVI %r14 $0 # r14 = 0000
-LUI %r14 $192 # r14 = C000
+LUI %r14 $-64 # r14 = C000
 ADD %r14 %r11 # r14 += xPosOnGrid (C000 + xPosOnGrid)
 MOVI %r15 $40 # r15 = 40
 MUL %r15 %r12 # r15 *= yPosOnGrid
@@ -382,10 +382,10 @@ JUC %r0
 # This function is called when the user either wins or loses, allows to play again
 .ENDGAME
 MOVI %r15 $55 # r15 = 0037
-LUI %r15 $204 # r15 = CC37
+LUI %r15 $-52 # r15 = CC37
 STOR %r1 %r15 # Store Capman's state into memory, whether alive or dead
-MOVI %r15 $255 # r15 = 00FF
-LUI %r15 $255 # r15 = FFFF
+MOVI %r15 $-1 # r15 = 00FF
+LUI %r15 $-1 # r15 = FFFF
 .ENDLOOP
 LOAD %r4 %r15 # Load user input into %r4
 CMPI %r4 $-1
