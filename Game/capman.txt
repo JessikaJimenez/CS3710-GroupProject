@@ -6,11 +6,9 @@
 # %r2 - Capman X Position (Cannot exceed 640)
 # %r3 - Capman Y Position (Cannot exceed 480)
 # %r4 - Capman Direction (0 = neutral, 1 = Down, 2 = Right, 3 = Left, 4 = Up, -1 = A)
-# %r5 - Capman Position Jump (Determines speed, hardcoded to 1)
-# %r6 - Ghost X Position (Cannot exceed 640)
-# %r7 - Ghost Y Position (Cannot exceed 480)
-# %r8 - Ghost Direction (0 = neutral, 1 = Down, 2 = Right, 3 = Left, 4 = Up, -1 = A)
-# %r9 - Ghost Position Jump (Determines speed, hardcoded to 2)
+# %r5 - Ghost X Position (Cannot exceed 640)
+# %r6 - Ghost Y Position (Cannot exceed 480)
+# %r7 - Ghost Direction (1 = Down, 2 = Right, 3 = Left, 4 = Up)
 .START # START OF GAME
 MOVI %r1 $1 # r1 = 1 (alive)
 
@@ -21,15 +19,13 @@ MOVI %r3 $184 # r3 = 184
 ASHUI %r3 $1 # r3 = 368 (Capman yPos)
 
 MOVI %r4 $3 # r4 = Left (Capman Direction)
-MOVI %r5 $1 # r5 = 1 (Capman Speed)
 
 # Ghost starts at (304, 16) which is the top left of his sprite
-MOVI %r6 $152 # r6 = 152
-ASHUI %r6 $1 # r6 = 304 (xPosOnGhost)
-MOVI %r7 $16 # r7 = 16 (yPosOnGhost)
+MOVI %r5 $152 # r5 = 152
+ASHUI %r5 $1 # r5 = 304 (xPosOnGhost)
+MOVI %r6 $16 # r6 = 16 (yPosOnGhost)
 
-MOVI %r8 $2 # r8 = Right (Ghost Direction)
-MOVI %r9 $2 # r9 = 2 (Ghost Speed)
+MOVI %r7 $2 # r7 = Right (Ghost Direction)
 
 # Store starting information into memory
 MOVI %r15 $48 # r15 = 0030
@@ -40,29 +36,28 @@ STOR %r3 %r15 # Store yPos(368) into r15(CC31)
 ADDI %r15 $1 # r15 = CC32
 STOR %r4 %r15 # Store Capman Direction (3) into r15(CC32)
 ADDI %r15 $1 # r15 = CC33
-STOR %r6 %r15 # Store xPosOnGhost(304) into r15(CC33)
+STOR %r5 %r15 # Store xPosOnGhost(304) into r15(CC33)
 ADDI %r15 $1 # r15 = CC34
-STOR %r7 %r15 # Store yPosOnGhost(16) into r15(CC34)
+STOR %r6 %r15 # Store yPosOnGhost(16) into r15(CC34)
 ADDI %r15 $1 # r15 = CC35
-STOR %r8 %r15 # Store Ghost Direction (2) into r15(CC35)
+STOR %r7 %r15 # Store Ghost Direction (2) into r15(CC35)
 #######################################################################
 # Infinite loop for game
 .CHECKDIRECTION # Start of infinite loop for game, updates Capman based on direction pressed
-MOV %r10 %r4 # r10 = r4 (store original direction)
 MOVI %r15 $255 # r15 = 00FF
 LUI %r15 $255 # r15 = FFFF
-LOAD %r4 %r15 # Load user input into %r4
-CMPI %r4 $0 
-BGT $1 # If r4 is less than 0, execute next instruction which will keep capman going the same direction
-MOV %r4 %r10 # r4 = r10 (original direction)
+LOAD %r8 %r15 # Load user input into %r8
+CMPI %r8 $0 
+BLE $1 # If r4 greater than 0, execute next instruction which will overwrite capman's direction
+MOV %r4 %r8 # r4 = r8
 CMPI %r4 $1
-BEQ .DOWN
+BEQ .CAPMANDOWN
 CMPI %r4 $2
-BEQ .RIGHT
+BEQ .CAPMANRIGHT
 CMPI %r4 $3
-BEQ .LEFT
+BEQ .CAPMANLEFT
 CMPI %r4 $4
-BEQ .UP
+BEQ .CAPMANUP
 
 .UPDATEGAME # Label for updating game, %r11 and %r12 are updated as Capman's position on grid
 
@@ -72,22 +67,33 @@ JAL %r0 %r15 # CALL .CHECKDOTCOLLISION (Returns %r10 as number of pacdots left)
 CMPI %r10 $0
 BEQ .ENDGAME # End the game if there are no pacdots left
 
-# Update ghost position
+# Update ghost position based on its current direction
+# If the ghost collides, goes back to this label with a new direction
+.UPDATEGHOST
+CMPI %r7 $1
+BEQ .GHOSTDOWN
+CMPI %r7 $2
+BEQ .GHOSTRIGHT
+CMPI %r7 $3
+BEQ .GHOSTLEFT
+CMPI %r7 $4
+BEQ .GHOSTUP
 
-
-# Check for ghost collision
-.CHECKGHOSTCOLLISION
+# Check if Capman has died, if so end the game
+.CAPMANSTATE
+MOVI %r15 .CHECKGHOSTCOLLISION # r15 = .CHECKGHOSTCOLLISION address
+JAL %r0 %r15 # Call .CHECKGHOSTCOLLISION (Will update r1 if characters hit each other)
 CMPI %r1 $0
 BEQ .ENDGAME # End the game if Capman is dead
 BUC .CHECKDIRECTION # Loop back to beginning
 ###########################################################################
-# Function for when the player holds the left direction
-# Capman will go left only if there are no collisions present
-# If Capman reaches the edge of the screen, he will come out the other end
-.LEFT
-SUB %r2 %r5 # xPos -= Speed
+# Function for character going the left direction
+# Goes left if there are no collisions present
+# If a character reaches the edge of the screen, they will come out the other end
+.CAPMANLEFT
+SUBI %r2 $1 # xPos -= 1
 CMPI %r2 $0
-BGE .LEFTCONVERSION # If xPos < 0, don't need to check for collision
+BGE .LEFTCONVERSION # Execute next few instruction if we need to loop
 MOVI %r15 $160 # %r15 = 160
 ASHUI %r15 $2 # r15 = 640
 ADD %r2 %r15 # xPos += 640
@@ -98,18 +104,18 @@ MOVI %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
 BEQ .UPDATEGAME # Branches if capman does not collide
-ADD %r2 %r5 # Redo position update
+ADDI %r2 $1 # Redo position update
 BUC .UPDATEGAME
 ###############################################################################3
 # Function for when the player holds the right direction
 # Capman will go right only if there are no collisions present
 # If Capman reaches the edge of the screen, he will come out the other end
-.RIGHT
-ADD %r2 %r5 # xPos += Speed
+.CAPMANRIGHT
+ADDI %r2 $1 # xPos += 1
 MOVI %r15 $160 # %r15 = 160
 ASHUI %r15 $2 # r15 = 640
 CMP %r2 %r15
-BLT .RIGHTCONVERSION # If xPos >= 640, don't need to check for collision
+BLT .RIGHTCONVERSION # Execute next instruction if we need to loop
 SUB %r2 %r15 # xPos -= 640
 .RIGHTCONVERSION
 MOVI %r15 .CONVERTCAPMAN # r15 = .CONVERTCAPMAN address
@@ -118,34 +124,134 @@ MOVI %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
 BEQ .UPDATEGAME # Branches if capman does not collide
-SUB %r2 %r5 # Redo position update
+SUBI %r2 $1 # Redo position update
 BUC .UPDATEGAME
 ##################################################################################
 # Function for when the player holds the up direction
 # Capman will go up only if there are no collisions present
-.UP
-ADD %r3 %r5 # yPos += Speed
+.CAPMANUP
+SUBI %r3 $1 # yPos -= 1
 MOVI %r15 .CONVERTCAPMAN # r15 = .CONVERTCAPMAN address
 JAL %r0 %r15 # CALL .CONVERTCAPMAN (Returns %r11 and %r12 as positions on grid)
 MOVI %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
 BEQ .UPDATEGAME # Branches if capman does not collide
-SUB %r3 %r5 # Redo position update
+ADDI %r3 $1 # Redo position update
 BUC .UPDATEGAME
 ################################################################################
 # Function for when the player holds the down direction
 # Capman will go down only if there are no collisions present
-.DOWN
-SUB %r3 %r5 # yPos -= Speed
+.CAPMANDOWN
+ADDI %r3 $1 # yPos += 1
 MOVI %r15 .CONVERTCAPMAN # r15 = .CONVERTCAPMAN address
 JAL %r0 %r15 # CALL .CONVERTCAPMAN (Returns %r11 and %r12 as positions on grid)
 MOVI %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
 BEQ .UPDATEGAME # Branches if capman does not collide
-ADD %r3 %r5 # Redo position update
+SUBI %r3 $1 # Redo position update
 BUC .UPDATEGAME
+###################################################################################
+# Function for when the ghost goes left
+# The ghost will go left only if there are no collisions present
+# Otherwise, it picks a new direction
+.GHOSTLEFT
+SUBI %r5 $2 # xPosOnGhost -= 2
+CMPI %r5 $0
+BGE .LEFTCONVERSIONGHOST # Execute next few instruction if we need to loop
+MOVI %r15 $160 # %r15 = 160
+ASHUI %r15 $2 # r15 = 640
+ADD %r5 %r15 # xPosOnGhost += 640
+.LEFTCONVERSIONGHOST
+MOVI %r15 .CONVERTGHOST # r15 = .CONVERTGHOST address
+JAL %r0 %r15 # CALL .CONVERTGHOST (Returns %r11 and %r12 as positions on grid)
+MOVI %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
+JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
+CMPI %r10 $0
+BEQ .CAPMANSTATE # Branches if the ghost does not collide
+ADDI %r5 $2 # Redo position update
+
+# Need to pick new direction, either up or down
+BUC .UPORDOWN
+###################################################################################
+# Function for when the ghost goes right
+# The ghost will go right only if there are no collisions present
+# Otherwise, it picks a new direction
+.GHOSTRIGHT
+ADDI %r5 $2 # xPosOnGhost += 2
+MOVI %r15 $160 # %r15 = 160
+ASHUI %r15 $2 # r15 = 640
+CMP %r5 %r15
+BLT .RIGHTCONVERSION # Execute next instruction if we need to loop
+SUB %r5 %r15 # xPosOnGhost -= 640
+.RIGHTCONVERSIONGHOST
+MOVI %r15 .CONVERTGHOST # r15 = .CONVERTGHOST address
+JAL %r0 %r15 # CALL .CONVERTGHOST (Returns %r11 and %r12 as positions on grid)
+MOVI %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
+JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
+CMPI %r10 $0
+BEQ .CAPMANSTATE # Branches if the ghost does not collide
+SUBI %r5 $2 # Redo position update
+
+# Need to pick new direction, either up or down
+BUC .UPORDOWN
+##################################################################################
+# Function for when the ghost goes up
+# The ghost will go up only if there are no collisions present
+# Otherwise, it picks a new direction
+.GHOSTUP
+SUBI %r6 $2 # yPosOnGhost -= 2
+MOVI %r15 .CONVERTGHOST # r15 = .CONVERTGHOST address
+JAL %r0 %r15 # CALL .CONVERTGHOST (Returns %r11 and %r12 as positions on grid)
+MOVI %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
+JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
+CMPI %r10 $0
+BEQ .CAPMANSTATE # Branches if the ghost does not collide
+ADDI %r6 $2 # Redo position update
+
+# Need to pick new direction, either left or right
+BUC .LEFTORRIGHT
+###################################################################################
+# Function for when the ghost goes down
+# The ghost will go down only if there are no collisions present
+# Otherwise, it picks a new direction
+.GHOSTDOWN
+ADDI %r6 $2 # yPosOnGhost += 2
+MOVI %r15 .CONVERTGHOST # r15 = .CONVERTGHOST address
+JAL %r0 %r15 # CALL .CONVERTGHOST (Returns %r11 and %r12 as positions on grid)
+MOVI %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
+JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
+CMPI %r10 $0
+BEQ .CAPMANSTATE # Branches if the ghost does not collide
+SUBI %r6 $2 # Redo position update
+
+# Need to pick new direction, either left or right
+BUC .LEFTORRIGHT
+###################################################################################
+# This function will pick a new direction for the ghost, either up or down
+# The logic for this will determine on the current direction capman is going
+# If capman is going up, the ghost will go down (and vice versa)
+.UPORDOWN
+CMPI %r4 $4
+BEQ .GOESUP
+MOVI %r7 $4 # Capman is going down, so the ghost will go up
+BUC .UPDATEGHOST
+.GOESUP
+MOVI %r7 $0 # Capman is going up, so the ghost will go down
+BUC .UPDATEGHOST
+###################################################################################
+# This function will pick a new direction for the ghost, either left or right
+# The logic for this will determine on the current direction capman is going
+# If capman is going left, the ghost will go right (and vice versa)
+.LEFTORRIGHT
+CMPI %r4 $2
+BEQ .GOESRIGHT
+MOVI %r7 $2 # Capman is going left, so the ghost will go right
+BUC .UPDATEGHOST
+.GOESRIGHT
+MOVI %r7 $3 # Capman is going right, so the ghost will go left
+BUC .UPDATEGHOST
 ###################################################################################
 # This function converts the xPos and yPos of Capman to positions on a 40x30 grid
 # Will update %r11 and %r12 to the positions on the grid
@@ -174,9 +280,9 @@ JUC %r0
 # %r11 as the xPosOnGrid
 # %r12 as the yPosOnGrid
 .CONVERTGHOST
-MOV %r13 %r6 # r13 = xPosOnGhost
-MOV %r14 %r7 # r14 = yPosOnGhost
-CMPI %r8 $3
+MOV %r13 %r5 # r13 = xPosOnGhost
+MOV %r14 %r6 # r14 = yPosOnGhost
+CMPI %r7 $3
 BGE .CONTINUEGHOSTCONVERSION # Branch if direction is left or up, otherwise focus point must be on bottom right of sprite
 ADDI %r13 $16 # r13 += 16
 ADDI %r14 $16 # r14 += 16
