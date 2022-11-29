@@ -1,4 +1,3 @@
-# Potential setup code
 #########################################################################
 # Start of program, sets up Capman game then proceeds with infinite loop
 #
@@ -10,6 +9,20 @@
 # %r6 - Ghost Y Position (Cannot exceed 480)
 # %r7 - Ghost Direction (1 = Down, 2 = Right, 3 = Left, 4 = Up)
 .START # START OF GAME
+
+# Fill in the board with pacdots
+MOVI %r13 $1 # r13 = 1
+MOVI %r15 $0 # r15 = 0000
+LUI %r15 $-51 # r15 = CD00
+.STARTLOOP
+LOAD %r14 %r15 # Load r14 (address of pacdot) from r15 (pacdots array index)
+CMPI %r14 $0 
+BEQ .PACDOTSMAPPED # Branch if we are complete storing pacdot sprite ID's
+STOR %r13 %r14 # Store the pacdot sprite ID (1) into the sprite block (r14)
+ADDI %r15 $1 # r15 += 1
+BUC .STARTLOOP
+
+.PACDOTSMAPPED
 MOVI %r1 $1 # r1 = 1 (alive)
 
 # Capman starts at (320, 368) which is the top left of his sprite
@@ -106,6 +119,13 @@ ADD %r2 %r15 # xPos += 640
 .LEFTCONVERSION
 MOVI %r15 .CONVERTCAPMAN # r15 = .CONVERTCAPMAN address
 JAL %r0 %r15 # CALL .CONVERTCAPMAN (Returns %r11 and %r12 as positions on grid)
+
+# When Capman goes left, Capman's yPos will be divisible by 16
+# If it isn't divisible by 16, Capman can't go left so no need for collision checking
+MOV %r10 %r3 # r10 = yPos
+MOVI %r13 $15 # r13 = 000F
+AND %r10 %r13 # r10 & r13 (r10 = yPos & 000F) 
+CMPI %r10 $1
 MOVI %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
