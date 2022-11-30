@@ -28,19 +28,8 @@ MOVI %r6 $16 # r6 = 16 (yPosOnGhost)
 MOVI %r7 $2 # r7 = Right (Ghost Direction)
 
 # Store starting information into memory
-MOVI %r15 $48 # r15 = 0030
-LUI %r15 $-52 # r15 = CC30
-STOR %r2 %r15 # Store xPos(320) into r15(CC30)
-ADDI %r15 $1 # r15 = CC31
-STOR %r3 %r15 # Store yPos(368) into r15(CC31)
-ADDI %r15 $1 # r15 = CC32
-STOR %r4 %r15 # Store Capman Direction (3) into r15(CC32)
-ADDI %r15 $1 # r15 = CC33
-STOR %r5 %r15 # Store xPosOnGhost(304) into r15(CC33)
-ADDI %r15 $1 # r15 = CC34
-STOR %r6 %r15 # Store yPosOnGhost(16) into r15(CC34)
-ADDI %r15 $1 # r15 = CC35
-STOR %r7 %r15 # Store Ghost Direction (2) into r15(CC35)
+MOVI %r15 .STOREDRAWINGINFORMATION # r15 = .STOREDRAWINGINFORMATION address
+JAL %r0 %r15 # CALL .STOREDRAWINGINFORMATION (returns %r15 as CC35)
 ADDI %r15 $1 # r15 = CC36
 MOVI %r8 $69 # r8 = 69
 MULI %r8 $6 # r8 *= 6 (r8 = 414)
@@ -101,10 +90,14 @@ BEQ .GHOSTLEFT
 CMPI %r7 $4
 BEQ .GHOSTUP
 
-# Check if Capman has died, if so end the game
+# Check if Capman has died
 .CAPMANSTATE
 MOVI %r15 .CHECKGHOSTCOLLISION # r15 = .CHECKGHOSTCOLLISION address
 JAL %r0 %r15 # Call .CHECKGHOSTCOLLISION (Will update r1 if characters hit each other)
+
+# Store necessary drawing information
+MOVI %r15 .STOREDRAWINGINFORMATION # r15 = .STOREDRAWINGINFORMATION address
+JAL %r0 %r15 # CALL .STOREDRAWINGINFORMATION
 CMPI %r1 $0
 BEQ .ENDGAME # End the game if Capman is dead
 BUC .CHECKDIRECTION # Loop back to beginning
@@ -482,11 +475,31 @@ JUC %r0
 .CHECKGHOSTCOLLISION
 JUC %r0
 ####################################################################################
+# This function will store this drawing information:
+# Capman xPos, yPos, Direction
+# Ghost xPos, yPos, Direction
+# Capman State (Alive or Dead)
+#
+# RETURNS
+# %r15 as CC35
+.STOREDRAWINGINFORMATION
+MOVI %r15 $48 # r15 = 0030
+LUI %r15 $-52 # r15 = CC30
+STOR %r2 %r15 # Store xPos(320) into r15(CC30)
+ADDI %r15 $1 # r15 = CC31
+STOR %r3 %r15 # Store yPos(368) into r15(CC31)
+ADDI %r15 $1 # r15 = CC32
+STOR %r4 %r15 # Store Capman Direction (3) into r15(CC32)
+ADDI %r15 $1 # r15 = CC33
+STOR %r5 %r15 # Store xPosOnGhost(304) into r15(CC33)
+ADDI %r15 $1 # r15 = CC34
+STOR %r6 %r15 # Store yPosOnGhost(16) into r15(CC34)
+ADDI %r15 $1 # r15 = CC35
+STOR %r7 %r15 # Store Ghost Direction (2) into r15(CC35)
+JUC %r0
+####################################################################################
 # This function is called when the user either wins or loses, allows to play again
 .ENDGAME
-MOVI %r15 $55 # r15 = 0037
-LUI %r15 $-52 # r15 = CC37
-STOR %r1 %r15 # Store Capman's state into memory, whether alive or dead
 MOVI %r15 $-1 # r15 = 00FF
 LUI %r15 $-1 # r15 = FFFF
 .ENDLOOP
