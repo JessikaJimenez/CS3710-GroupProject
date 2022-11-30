@@ -87,8 +87,11 @@ CMPI %r10 $0
 BEQ .ENDGAME # End the game if there are no pacdots left
 
 # Update ghost position based on its current direction
-# If the ghost collides, goes back to this label with a new direction
-.UPDATEGHOST
+# A ghost will turn at forks loosely based on player input
+.UPDATEGHOSTBEGIN
+MOVI %r8 $0 # r8 = 0 (This will be used to avoid infinite loop with ghost)
+BUC .PICKDIRECTION
+.UPDATEGHOSTCONTINUE
 CMPI %r7 $1
 BEQ .GHOSTDOWN
 CMPI %r7 $2
@@ -124,8 +127,9 @@ JAL %r0 %r15 # CALL .CONVERTCAPMAN (Returns %r11 and %r12 as positions on grid)
 # If it isn't divisible by 16, Capman can't go left so no need for collision checking
 MOV %r10 %r3 # r10 = yPos
 MOVI %r13 $15 # r13 = 000F
-AND %r10 %r13 # r10 & r13 (r10 = yPos & 000F) 
-CMPI %r10 $1
+AND %r10 %r13 # r10 & r13 (r10 = Last 4 bits of yPos) 
+CMPI %r10 $0
+BNE $4 # Branch if yPos is not divisible by 6
 MOVI %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
@@ -146,6 +150,14 @@ SUB %r2 %r15 # xPos -= 640
 .RIGHTCONVERSION
 MOVI %r15 .CONVERTCAPMAN # r15 = .CONVERTCAPMAN address
 JAL %r0 %r15 # CALL .CONVERTCAPMAN (Returns %r11 and %r12 as positions on grid)
+
+# When Capman goes right, Capman's yPos will be divisible by 16
+# If it isn't divisible by 16, Capman can't go right so no need for collision checking
+MOV %r10 %r3 # r10 = yPos
+MOVI %r13 $15 # r13 = 000F
+AND %r10 %r13 # r10 & r13 (r10 = Last 4 bits of yPos) 
+CMPI %r10 $0
+BNE $4 # Branch if yPos is not divisible by 6
 MOVI %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
@@ -159,6 +171,14 @@ BUC .UPDATEGAME
 SUBI %r3 $1 # yPos -= 1
 MOVI %r15 .CONVERTCAPMAN # r15 = .CONVERTCAPMAN address
 JAL %r0 %r15 # CALL .CONVERTCAPMAN (Returns %r11 and %r12 as positions on grid)
+
+# When Capman goes up, Capman's xPos will be divisible by 16
+# If it isn't divisible by 16, Capman can't go up so no need for collision checking
+MOV %r10 %r2 # r10 = xPos
+MOVI %r13 $15 # r13 = 000F
+AND %r10 %r13 # r10 & r13 (r10 = Last 4 bits of xPos) 
+CMPI %r10 $0
+BNE $4 # Branch if xPos is not divisible by 6
 MOVI %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
@@ -172,6 +192,14 @@ BUC .UPDATEGAME
 ADDI %r3 $1 # yPos += 1
 MOVI %r15 .CONVERTCAPMAN # r15 = .CONVERTCAPMAN address
 JAL %r0 %r15 # CALL .CONVERTCAPMAN (Returns %r11 and %r12 as positions on grid)
+
+# When Capman goes down, Capman's xPos will be divisible by 16
+# If it isn't divisible by 16, Capman can't go down so no need for collision checking
+MOV %r10 %r2 # r10 = xPos
+MOVI %r13 $15 # r13 = 000F
+AND %r10 %r13 # r10 & r13 (r10 = Last 4 bits of xPos) 
+CMPI %r10 $0
+BNE $4 # Branch if xPos is not divisible by 6
 MOVI %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
@@ -255,29 +283,84 @@ SUBI %r6 $2 # Redo position update
 # Need to pick new direction, either left or right
 BUC .LEFTORRIGHT
 ###################################################################################
-# This function will pick a new direction for the ghost, either up or down
-# The logic for this will determine on the current direction capman is going
-# If capman is going up, the ghost will go down (and vice versa)
-.UPORDOWN
-CMPI %r4 $4
-BEQ .GOESUP
-MOVI %r7 $4 # Capman is going down, so the ghost will go up
-BUC .UPDATEGHOST
-.GOESUP
-MOVI %r7 $0 # Capman is going up, so the ghost will go down
-BUC .UPDATEGHOST
-###################################################################################
-# This function will pick a new direction for the ghost, either left or right
-# The logic for this will determine on the current direction capman is going
-# If capman is going left, the ghost will go right (and vice versa)
+# This function will pick a new direction for the ghost if it can
+.PICKDIRECTION
+# Check which direction the ghost is going
+CMP %r7 %r4
+BEQ .UPDATEGHOSTCONTINUE # Keep going if both are going same direction (chasing)
+
+.NEWDIRECTION
+CMPI %r7 $1
+BEQ .GOINGVERTICAL
+CMPI %r7 $4
+BEQ .GOINGVERTICAL
+CMPI %r7 $2
+BEQ .GOINGHORIZONTAL
+CMPI %r7 $3
+BEQ .GOINGHORIZONTAL
+
+# When going vertical, only change direction if valid
+# This is when the xPosOnGhost is divisible by 16
+.GOINGVERTICAL
+MOV %r10 %r5 # r10 = xPosOnGhost
+MOVI %r13 $15 # r13 = 000F
+AND %r10 %r13 # r10 & r13 (r10 = Last 4 bits of xPosOnGhost) 
+CMPI %r10 $0
+BEQ .LEFTORRIGHT
+BUC .UPDATEGHOSTCONTINUE
+
+# When going horizontal, only change direction if valid
+# This is when the yPosOnGhost is divisible by 16
+.GOINGHORIZONTAL
+MOV %r10 %r6 # r10 = yPosOnGhost
+MOVI %r13 $15 # r13 = 000F
+AND %r10 %r13 # r10 & r13 (r10 = Last 4 bits of yPosOnGhost) 
+CMPI %r10 $0
+BEQ .UPORDOWN
+BUC .UPDATEGHOSTCONTINUE
+
 .LEFTORRIGHT
-CMPI %r4 $2
-BEQ .GOESRIGHT
-MOVI %r7 $2 # Capman is going left, so the ghost will go right
-BUC .UPDATEGHOST
-.GOESRIGHT
-MOVI %r7 $3 # Capman is going right, so the ghost will go left
-BUC .UPDATEGHOST
+CMPI %r8 $0
+BNE .FAILSAFE # Branches if this isn't the first time a new direction has been selected
+MOVI %r8 %r7 # Store original direction
+MOVI %r7 $2 # Make ghost go right
+CMPI %r4 $3
+BLT $1
+MOVI %r7 $3 # Make ghost go left
+BUC .UPDATEGHOSTCONTINUE
+
+.UPORDOWN
+CMPI %r8 $0
+BNE .FAILSAFE # Branches if this isn't the first time a new direction has been selected
+MOVI %r8 %r7 # Store original direction
+MOVI %r7 $1 # Make ghost go down
+CMPI %r4 $3
+BLT $1
+MOVI %r7 $4 # Make ghost go up
+BUC .UPDATEGHOSTCONTINUE
+
+# This is if the ghost may potentially be stuck in an infinite loop
+.FAILSAFE
+CMPI %r8 $1
+BNE $3 # Branches if original direction wasn't down
+MOV %r8 %r7 # Will either be left or right now
+MOVI %r7 $4 # Make the ghost go up instead
+BUC .UPDATEGHOSTCONTINUE
+CMPI %r8 $2
+BNE $3 # Branches if original direction wasn't right
+MOV %r8 %r7 # Will either be up or down now
+MOVI %r7 $3 # Make the ghost go left instead
+BUC .UPDATEGHOSTCONTINUE
+CMPI %r8 $3
+BNE $3 # Branches if original direction wasn't left
+MOV %r8 %r7 # Will either be up or down now
+MOVI %r7 $2 # Make the ghost go right instead
+BUC .UPDATEGHOSTCONTINUE
+CMPI %r8 $4
+BNE $3 # Branches if original direction wasn't left
+MOV %r8 %r7 # Will either be left or right now
+MOVI %r7 $1 # Make the ghost go down instead
+BUC.UPDATEGHOSTCONTINUE
 ###################################################################################
 # This function converts the xPos and yPos of Capman to positions on a 40x30 grid
 # Will update %r11 and %r12 to the positions on the grid
