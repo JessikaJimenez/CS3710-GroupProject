@@ -1,6 +1,8 @@
 import sys
 import argparse
 
+from numpy import insert
+
 class Assembler():
     labels = {}
     jpoint_instrs = {}
@@ -232,9 +234,9 @@ class Assembler():
                        
                     count = 0
                     # reduce to shift for 8-bit immediate
-                    while labelAddress > 255:
-                       labelAddress /= 2
-                       count += 1
+                    # while labelAddress > 255:
+                    #    labelAddress /= 2
+                    #    count += 1
 
                     label = parts.pop(0)
 
@@ -257,6 +259,7 @@ class Assembler():
         f.close()
 
         print(self.labels)
+        print(self.jpoint_instrs)
 
         f = open(args.file, 'r')
         out_name = str(args.file.rsplit('.', 1)[0] + '.bin')
@@ -447,36 +450,57 @@ class Assembler():
                        sys.exit('Syntax Error: NOP has no arguments!')
 
                 # pseudo-instruction to point to jump addresses
+                # elif (instr == 'JPT'):
+                #     if (len(parts) != 2):
+                #         sys.exit('Syntax Error: JPT needs a pointer and a register')
+                #     reg = parts.pop(0)
+                #     pointer = parts.pop(0)
+                #     if not pointer in self.jpoint_instrs:
+                #         sys.exit('Syntax Error: pointer not found: ' + pointer)
+                #     if (reg not in self.REGISTERS):
+                #         sys.exit('Invalid register')
+
+                #     instr_data = self.jpoint_instrs[pointer]
+                #     immediate = '{0:08b}'.format(instr_data['initial_immd'])
+                #     regNumber = '{0:04b}'.format(int(reg.replace('%r', '')))
+                #     shift_amt = '{0:04b}'.format(instr_data['shift_count'])
+                #     zero_out = self.instrCode('ANDI') + regNumber + '00000000'
+                #     or_in = self.instrCode('ORI') + regNumber + immediate
+                #     shift = '1000' + regNumber + self.instrCode('LSHI') + shift_amt
+                #     if instr_data['is_odd']:
+                #        add = self.instrCode('ADDI') + regNumber + '00000001'
+                #     else:
+                #        add = self.instrCode('ADDI') + regNumber + '00000000'
+                #     wf.write(zero_out + '\n')
+                #     wf.write(or_in + '\n')
+                #     wf.write(shift + '\n')
+                #     wf.write(add + '\n')
+                #     # increment address to adjust for the extra instructions
+                #     address += 3
+                # else:
+                #     sys.exit('Syntax Error: not a valid instruction: ' + line)
                 elif (instr == 'JPT'):
                     if (len(parts) != 2):
                         sys.exit('Syntax Error: JPT needs a pointer and a register')
-                    pointer = parts.pop(0)
                     reg = parts.pop(0)
-                    if not self.jpoint_instrs.has_key(pointer):
+                    pointer = parts.pop(0)
+                    if not pointer in self.jpoint_instrs:
                         sys.exit('Syntax Error: pointer not found: ' + pointer)
                     if (reg not in self.REGISTERS):
                         sys.exit('Invalid register')
 
                     instr_data = self.jpoint_instrs[pointer]
-                    immediate = '{0:08b}'.format(instr_data['initial_immd'])
+                    immediate = '{0:016b}'.format(instr_data['initial_immd'])
                     regNumber = '{0:04b}'.format(int(reg.replace('%r', '')))
-                    shift_amt = '{0:04b}'.format(instr_data['shift_count'])
-                    zero_out = self.instrCode('ANDI') + regNumber + '00000000'
-                    or_in = self.instrCode('ORI') + regNumber + immediate
-                    shift = '1000' + regNumber + self.instrCode('LSHI') + shift_amt
-                    if instr_data['is_odd']:
-                       add = self.instrCode('ADDI') + regNumber + '00000001'
-                    else:
-                       add = self.instrCode('ADDI') + regNumber + '00000000'
-                    wf.write(zero_out + '\n')
-                    wf.write(or_in + '\n')
-                    wf.write(shift + '\n')
-                    wf.write(add + '\n')
+                    #shift_amt = '{0:04b}'.format(instr_data['shift_count'])
+                    insert_lower = self.instrCode("MOVI") + regNumber + immediate[8:16]
+                    insert_higher = self.instrCode('LUI') + regNumber + immediate[0:8]
+                    wf.write(insert_lower + '\n')
+                    wf.write(insert_higher + '\n')
                     # increment address to adjust for the extra instructions
-                    address += 3
+                    address += 1
                 else:
                     sys.exit('Syntax Error: not a valid instruction: ' + line)
-
         while(address < 1023):
             wf.write('0000000000000000\n')
             address = address + 1
