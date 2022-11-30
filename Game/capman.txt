@@ -293,21 +293,21 @@ CMPI %r7 $3
 BEQ .GOINGHORIZONTAL
 
 # When going vertical, only change direction if valid
-# This is when the xPosOnGhost is divisible by 16
+# This is when the yPosOnGhost is divisible by 16
 .GOINGVERTICAL
-MOV %r10 %r5 # r10 = xPosOnGhost
+MOV %r10 %r6 # r10 = yPosOnGhost
 MOVI %r13 $15 # r13 = 000F
-AND %r10 %r13 # r10 & r13 (r10 = Last 4 bits of xPosOnGhost) 
+AND %r10 %r13 # r10 & r13 (r10 = Last 4 bits of yPosOnGhost) 
 CMPI %r10 $0
 BEQ .LEFTORRIGHT
 BUC .UPDATEGHOSTCONTINUE
 
 # When going horizontal, only change direction if valid
-# This is when the yPosOnGhost is divisible by 16
+# This is when the xPosOnGhost is divisible by 16
 .GOINGHORIZONTAL
-MOV %r10 %r6 # r10 = yPosOnGhost
+MOV %r10 %r5 # r10 = xPosOnGhost
 MOVI %r13 $15 # r13 = 000F
-AND %r10 %r13 # r10 & r13 (r10 = Last 4 bits of yPosOnGhost) 
+AND %r10 %r13 # r10 & r13 (r10 = Last 4 bits of xPosOnGhost) 
 CMPI %r10 $0
 BEQ .UPORDOWN
 BUC .UPDATEGHOSTCONTINUE
@@ -435,7 +435,30 @@ MOVI %r14 $-2 # r14 = 00FE
 LUI %r14 $-1 # r14 = FFFE
 STOR %r0 %r14 # Store last return address in memory
 
-# Load the number of pacdots in the game into %r10
+# Before checking memory, see if capman is potentially on top of a pacdot
+# If Capman is going horizontal, his xPos must be halfway through the grid block
+# If Capman is going vertical, his yPos must be halfway through the grid block
+CMPI %r4 $1
+BEQ .VERTICALDOT
+CMPI %r4 $4
+BEQ .VERTICALDOT
+CMPI %r4 $2
+BEQ .HORIZONTALDOT
+CMPI %r4 $3
+BEQ .HORIZONTALDOT
+
+.VERTICALDOT
+MOV %r9 %r3 # r9 = Capman yPos
+BUC .LOADPACDOTS
+
+.HORIZONTALDOT
+MOV %r9 %r2 # r9 = Capman xPos
+BUC .LOADPACDOTS
+
+.LOADPACDOTS
+ANDI %r9 $8 # r9 = r9 & 0008
+CMPI %r9 $8 
+BNE .CHECKEDFORDOT # If Capman is not in the middle of a block, don't continue
 MOVI %r9 $54 # r9 = 0036
 LUI %r9 $-52 # r9 = CC36
 LOAD %r10 %r9 # Load memory at r9(CC36) into r10 (number of pacdots)
