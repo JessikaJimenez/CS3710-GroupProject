@@ -46,12 +46,12 @@ module Capman (
 	GeneralCPU CPU (
 		.clk(clk),			//Input 50MHz clock
 		.reset(reset),			//Input reset
-		.memData(0),			//Input 0, not being used
+		.memData(16'b0),		//Input 0, not being used
 		.addr(addr_b),			//Input addr_b from VGA
 		.IOinput(assemblyData),		//Input assemblyData from NES 
-		.writeEnable(0),		//Input 0, not being used	
-		.memOutput(memOutput),		//Output memOutput which will go into VGA addr_b
-		.IOoutput(0)			//Output 0, not being used
+		.writeEnable(16'b0),		//Input 0, not being used	
+		.memOutput(memOutput),		//Output memOutput which will go into VGA
+		.IOoutput(IOoutput)		//Output 0, not being used
 	);
 	
 	
