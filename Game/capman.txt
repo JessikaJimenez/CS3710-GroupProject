@@ -28,7 +28,7 @@ MOVI %r6 $16 # r6 = 16 (yPosOnGhost)
 MOVI %r7 $2 # r7 = Right (Ghost Direction)
 
 # Store starting information into memory
-MOVI %r15 .STOREDRAWINGINFORMATION # r15 = .STOREDRAWINGINFORMATION address
+JPT %r15 .STOREDRAWINGINFORMATION # Store address of .STOREDRAWINGINFORMATION in r15
 JAL %r0 %r15 # CALL .STOREDRAWINGINFORMATION (returns %r15 as CC35)
 ADDI %r15 $1 # r15 = CC36
 MOVI %r8 $69 # r8 = 69
@@ -59,47 +59,58 @@ CMPI %r8 $0
 BLE $1 # If r4 greater than 0, execute next instruction which will overwrite capman's direction
 MOV %r4 %r8 # r4 = r8
 CMPI %r4 $1
-BEQ .CAPMANDOWN
+JPT %r15 .CAPMANDOWN # r15 = .CAPMANDOWN address
+JEQ %r15 # Jump if Capman is going down
 CMPI %r4 $2
-BEQ .CAPMANRIGHT
+JPT %r15 .CAPMANRIGHT # r15 = .CAPMANRIGHT address
+JEQ %r15 # Jump if Capman is going right
 CMPI %r4 $3
-BEQ .CAPMANLEFT
+JPT %r15 .CAPMANLEFT # r15 = .CAPMANLEFT address
+JEQ %r15 # Jump if Capman is going left
 CMPI %r4 $4
-BEQ .CAPMANUP
+JPT %r15 .CAPMANUP # r15 = .CAPMANUP address
+JEQ %r15 # Jump if Capman is going up
 
 .UPDATEGAME # Label for updating game, %r11 and %r12 are updated as Capman's position on grid
 
 # Check for pacdot collision
-MOVI %r15 .CHECKDOTCOLLISION # r15 = .CHECKDOTCOLLISION address
+JPT %r15 .CHECKDOTCOLLISION # r15 = .CHECKDOTCOLLISION address
 JAL %r0 %r15 # CALL .CHECKDOTCOLLISION (Returns %r10 as number of pacdots left)
+JPT %r15 .ENDGAME # r15 = .ENDGAME address
 CMPI %r10 $0
-BEQ .ENDGAME # End the game if there are no pacdots left
+JEQ %r15 # Jump to .ENDGAME if all pacdots are collected
 
 # Update ghost position based on its current direction
 # A ghost will turn at forks loosely based on player input
 .UPDATEGHOSTBEGIN
 MOVI %r8 $0 # r8 = 0 (This will be used to avoid infinite loop with ghost)
-BUC .PICKDIRECTION
+JPT %r15 .PICKDIRECTION # r15 = .PICKDIRECTION address
+JUC %r15 # Pick a new direction for ghost if it isn't chasing capman
 .UPDATEGHOSTCONTINUE
 CMPI %r7 $1
-BEQ .GHOSTDOWN
+JPT %r15 .GHOSTDOWN # r15 = .GHOSTDOWN address
+JEQ %r15 # Jump to .GHOSTDOWN if ghost is going down
 CMPI %r7 $2
-BEQ .GHOSTRIGHT
+JPT %r15 .GHOSTRIGHT # r15 = .GHOSTRIGHT address
+JEQ %r15 # Jump to .GHOSTRIGHT if ghost is going right
 CMPI %r7 $3
-BEQ .GHOSTLEFT
+JPT %r15 .GHOSTLEFT # r15 = .GHOSTLEFT address
+JEQ %r15 # Jump to .GHOSTLEFT if ghost is going left
 CMPI %r7 $4
-BEQ .GHOSTUP
+JPT %r15 .GHOSTUP # r15 = .GHOSTUP address
+JEQ %r15 # Jump to .GHOSTUP if ghost is going up
 
 # Check if Capman has died
 .CAPMANSTATE
-MOVI %r15 .CHECKGHOSTCOLLISION # r15 = .CHECKGHOSTCOLLISION address
+JPT %r15 .CHECKGHOSTCOLLISION # r15 = .CHECKGHOSTCOLLISION address
 JAL %r0 %r15 # Call .CHECKGHOSTCOLLISION (Will update r1 if characters hit each other)
 
 # Store necessary drawing information
-MOVI %r15 .STOREDRAWINGINFORMATION # r15 = .STOREDRAWINGINFORMATION address
+JPT %r15 .STOREDRAWINGINFORMATION # r15 = .STOREDRAWINGINFORMATION address
 JAL %r0 %r15 # CALL .STOREDRAWINGINFORMATION
+JPT %r15 .ENDGAME # r15 = .ENDGAME address
 CMPI %r1 $0
-BEQ .ENDGAME # End the game if Capman is dead
+JEQ %r15 # Jump to .ENDGAME if Capman is dead
 BUC .CHECKDIRECTION # Loop back to beginning
 ###########################################################################
 # Function for character going the left direction
@@ -113,7 +124,7 @@ MOVI %r15 $64 # r15 = 64
 MULI %r15 $10 # r15 *= 10 (r15 = 640)
 ADD %r2 %r15 # xPos += 640
 .LEFTCONVERSION
-MOVI %r15 .CONVERTCAPMAN # r15 = .CONVERTCAPMAN address
+JPT %r15 .CONVERTCAPMAN # r15 = .CONVERTCAPMAN address
 JAL %r0 %r15 # CALL .CONVERTCAPMAN (Returns %r11 and %r12 as positions on grid)
 
 # When Capman goes left, Capman's yPos will be divisible by 16
@@ -123,7 +134,7 @@ MOVI %r13 $15 # r13 = 000F
 AND %r10 %r13 # r10 & r13 (r10 = Last 4 bits of yPos) 
 CMPI %r10 $0
 BNE $4 # Branch if yPos is not divisible by 6
-MOVI %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
+JPT %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
 BEQ .UPDATEGAME # Branches if capman does not collide
@@ -141,7 +152,7 @@ CMP %r2 %r15
 BLT .RIGHTCONVERSION # Execute next instruction if we need to loop
 SUB %r2 %r15 # xPos -= 640
 .RIGHTCONVERSION
-MOVI %r15 .CONVERTCAPMAN # r15 = .CONVERTCAPMAN address
+JPT %r15 .CONVERTCAPMAN # r15 = .CONVERTCAPMAN address
 JAL %r0 %r15 # CALL .CONVERTCAPMAN (Returns %r11 and %r12 as positions on grid)
 
 # When Capman goes right, Capman's yPos will be divisible by 16
@@ -151,7 +162,7 @@ MOVI %r13 $15 # r13 = 000F
 AND %r10 %r13 # r10 & r13 (r10 = Last 4 bits of yPos) 
 CMPI %r10 $0
 BNE $4 # Branch if yPos is not divisible by 6
-MOVI %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
+JPT %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
 BEQ .UPDATEGAME # Branches if capman does not collide
@@ -162,7 +173,7 @@ BUC .UPDATEGAME
 # Capman will go up only if there are no collisions present
 .CAPMANUP
 SUBI %r3 $1 # yPos -= 1
-MOVI %r15 .CONVERTCAPMAN # r15 = .CONVERTCAPMAN address
+JPT %r15 .CONVERTCAPMAN # r15 = .CONVERTCAPMAN address
 JAL %r0 %r15 # CALL .CONVERTCAPMAN (Returns %r11 and %r12 as positions on grid)
 
 # When Capman goes up, Capman's xPos will be divisible by 16
@@ -172,7 +183,7 @@ MOVI %r13 $15 # r13 = 000F
 AND %r10 %r13 # r10 & r13 (r10 = Last 4 bits of xPos) 
 CMPI %r10 $0
 BNE $4 # Branch if xPos is not divisible by 6
-MOVI %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
+JPT %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
 BEQ .UPDATEGAME # Branches if capman does not collide
@@ -183,7 +194,7 @@ BUC .UPDATEGAME
 # Capman will go down only if there are no collisions present
 .CAPMANDOWN
 ADDI %r3 $1 # yPos += 1
-MOVI %r15 .CONVERTCAPMAN # r15 = .CONVERTCAPMAN address
+JPT %r15 .CONVERTCAPMAN # r15 = .CONVERTCAPMAN address
 JAL %r0 %r15 # CALL .CONVERTCAPMAN (Returns %r11 and %r12 as positions on grid)
 
 # When Capman goes down, Capman's xPos will be divisible by 16
@@ -193,7 +204,7 @@ MOVI %r13 $15 # r13 = 000F
 AND %r10 %r13 # r10 & r13 (r10 = Last 4 bits of xPos) 
 CMPI %r10 $0
 BNE $4 # Branch if xPos is not divisible by 6
-MOVI %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
+JPT %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
 BEQ .UPDATEGAME # Branches if capman does not collide
@@ -211,16 +222,17 @@ MOVI %r15 $64 # r15 = 64
 MULI %r15 $10 # r15 *= 10 (r15 = 640)
 ADD %r5 %r15 # xPosOnGhost += 640
 .LEFTCONVERSIONGHOST
-MOVI %r15 .CONVERTGHOST # r15 = .CONVERTGHOST address
+JPT %r15 .CONVERTGHOST # r15 = .CONVERTGHOST address
 JAL %r0 %r15 # CALL .CONVERTGHOST (Returns %r11 and %r12 as positions on grid)
-MOVI %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
+JPT %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
 BEQ .CAPMANSTATE # Branches if the ghost does not collide
 ADDI %r5 $2 # Redo position update
 
 # Need to pick new direction, either up or down
-BUC .UPORDOWN
+JPT %r15 .UPORDOWN # r15 = .UPORDOWN address
+JUC %r15 # Change direction to up or down
 ###################################################################################
 # Function for when the ghost goes right
 # The ghost will go right only if there are no collisions present
@@ -233,54 +245,58 @@ CMP %r5 %r15
 BLT .RIGHTCONVERSION # Execute next instruction if we need to loop
 SUB %r5 %r15 # xPosOnGhost -= 640
 .RIGHTCONVERSIONGHOST
-MOVI %r15 .CONVERTGHOST # r15 = .CONVERTGHOST address
+JPT %r15 .CONVERTGHOST # r15 = .CONVERTGHOST address
 JAL %r0 %r15 # CALL .CONVERTGHOST (Returns %r11 and %r12 as positions on grid)
-MOVI %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
+JPT %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
 BEQ .CAPMANSTATE # Branches if the ghost does not collide
 SUBI %r5 $2 # Redo position update
 
 # Need to pick new direction, either up or down
-BUC .UPORDOWN
+JPT %r15 .UPORDOWN # r15 = .UPORDOWN address
+JUC %r15 # Change direction to up or down
 ##################################################################################
 # Function for when the ghost goes up
 # The ghost will go up only if there are no collisions present
 # Otherwise, it picks a new direction
 .GHOSTUP
 SUBI %r6 $2 # yPosOnGhost -= 2
-MOVI %r15 .CONVERTGHOST # r15 = .CONVERTGHOST address
+JPT %r15 .CONVERTGHOST # r15 = .CONVERTGHOST address
 JAL %r0 %r15 # CALL .CONVERTGHOST (Returns %r11 and %r12 as positions on grid)
-MOVI %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
+JPT %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
 BEQ .CAPMANSTATE # Branches if the ghost does not collide
 ADDI %r6 $2 # Redo position update
 
 # Need to pick new direction, either left or right
-BUC .LEFTORRIGHT
+JPT %r15 .LEFTORRIGHT # r15 = .LEFTORRIGHT address
+JUC %r15 # Change direction to left or right
 ###################################################################################
 # Function for when the ghost goes down
 # The ghost will go down only if there are no collisions present
 # Otherwise, it picks a new direction
 .GHOSTDOWN
 ADDI %r6 $2 # yPosOnGhost += 2
-MOVI %r15 .CONVERTGHOST # r15 = .CONVERTGHOST address
+JPT %r15 .CONVERTGHOST # r15 = .CONVERTGHOST address
 JAL %r0 %r15 # CALL .CONVERTGHOST (Returns %r11 and %r12 as positions on grid)
-MOVI %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
+JPT %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
 BEQ .CAPMANSTATE # Branches if the ghost does not collide
 SUBI %r6 $2 # Redo position update
 
 # Need to pick new direction, either left or right
-BUC .LEFTORRIGHT
+JPT %r15 .LEFTORRIGHT # r15 = .LEFTORRIGHT address
+JUC %r15 # Change direction to left or right
 ###################################################################################
 # This function will pick a new direction for the ghost if it can
 .PICKDIRECTION
 # Check which direction the ghost is going
 CMP %r7 %r4
-BEQ .UPDATEGHOSTCONTINUE # Keep going if both are going same direction (chasing)
+JPT %r15 .UPDATEGHOSTCONTINUE # r15 = .UPDATEGHOSTCONTINUE address
+JEQ %r15 # Keep going if both are going same direction (chasing)
 
 .NEWDIRECTION
 CMPI %r7 $1
@@ -300,7 +316,7 @@ MOVI %r13 $15 # r13 = 000F
 AND %r10 %r13 # r10 & r13 (r10 = Last 4 bits of yPosOnGhost) 
 CMPI %r10 $0
 BEQ .LEFTORRIGHT
-BUC .UPDATEGHOSTCONTINUE
+BUC .KEEPGOING
 
 # When going horizontal, only change direction if valid
 # This is when the xPosOnGhost is divisible by 16
@@ -310,27 +326,27 @@ MOVI %r13 $15 # r13 = 000F
 AND %r10 %r13 # r10 & r13 (r10 = Last 4 bits of xPosOnGhost) 
 CMPI %r10 $0
 BEQ .UPORDOWN
-BUC .UPDATEGHOSTCONTINUE
+BUC .KEEPGOING
 
 .LEFTORRIGHT
 CMPI %r8 $0
 BNE .FAILSAFE # Branches if this isn't the first time a new direction has been selected
-MOVI %r8 %r7 # Store original direction
+MOV %r8 %r7 # Store original direction
 MOVI %r7 $2 # Make ghost go right
 CMPI %r4 $3
 BLT $1
 MOVI %r7 $3 # Make ghost go left
-BUC .UPDATEGHOSTCONTINUE
+BUC .KEEPGOING
 
 .UPORDOWN
 CMPI %r8 $0
 BNE .FAILSAFE # Branches if this isn't the first time a new direction has been selected
-MOVI %r8 %r7 # Store original direction
+MOV %r8 %r7 # Store original direction
 MOVI %r7 $1 # Make ghost go down
 CMPI %r4 $3
 BLT $1
 MOVI %r7 $4 # Make ghost go up
-BUC .UPDATEGHOSTCONTINUE
+BUC .KEEPGOING
 
 # This is if the ghost may potentially be stuck in an infinite loop
 .FAILSAFE
@@ -338,22 +354,26 @@ CMPI %r8 $1
 BNE $3 # Branches if original direction wasn't down
 MOV %r8 %r7 # Will either be left or right now
 MOVI %r7 $4 # Make the ghost go up instead
-BUC .UPDATEGHOSTCONTINUE
+BUC .KEEPGOING
 CMPI %r8 $2
 BNE $3 # Branches if original direction wasn't right
 MOV %r8 %r7 # Will either be up or down now
 MOVI %r7 $3 # Make the ghost go left instead
-BUC .UPDATEGHOSTCONTINUE
+BUC .KEEPGOING
 CMPI %r8 $3
 BNE $3 # Branches if original direction wasn't left
 MOV %r8 %r7 # Will either be up or down now
 MOVI %r7 $2 # Make the ghost go right instead
-BUC .UPDATEGHOSTCONTINUE
+BUC .KEEPGOING
 CMPI %r8 $4
 BNE $3 # Branches if original direction wasn't left
 MOV %r8 %r7 # Will either be left or right now
 MOVI %r7 $1 # Make the ghost go down instead
-BUC.UPDATEGHOSTCONTINUE
+BUC .KEEPGOING
+
+.KEEPGOING
+JPT %r15 .UPDATEGHOSTCONTINUE # r15 = .UPDATEGHOSTCONTINUE address
+JUC %r15 # Try out a direction selected
 ###################################################################################
 # This function converts the xPos and yPos of Capman to positions on a 40x30 grid
 # Will update %r11 and %r12 to the positions on the grid
@@ -410,7 +430,7 @@ STOR %r0 %r14 # Store last return address in memory
 MOVI %r10 $0 # r10 = 0
 
 # Get the sprite ID on the grid
-MOVI %r15 .GETSPRITEID # r15 = .GETSPRITEID address
+JPT %r15 .GETSPRITEID # r15 = .GETSPRITEID address
 JAL %r0 %r15 # CALL .GETSPRITEID (Returns %r13 as sprite ID, won't use %r14)
 CMPI %r13 $1
 BLE .CHECKEDFORWALL # Branches if the block on grid isn't a wall
@@ -462,7 +482,7 @@ BNE .CHECKEDFORDOT # If Capman is not in the middle of a block, don't continue
 MOVI %r9 $54 # r9 = 0036
 LUI %r9 $-52 # r9 = CC36
 LOAD %r10 %r9 # Load memory at r9(CC36) into r10 (number of pacdots)
-MOVI %r15 .GETSPRITEID # r15 = .GETSPRITEID address
+JPT %r15 .GETSPRITEID # r15 = .GETSPRITEID address
 JAL %r0 %r15 # CALL .GETSPRITEID (Returns %r13 as sprite ID, %r14 as sprite ID address)
 CMPI %r13 $1
 BNE .CHECKEDFORDOT # Branches if block on grid isn't a pacdot
