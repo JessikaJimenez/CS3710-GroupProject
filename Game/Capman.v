@@ -36,7 +36,7 @@ module Capman (
 		.nesClock(nesClock),		//Output nesClock
 		.nesLatch(nesLatch),		//Output nesLatch
 		.controllerData(LEDs),		//Outputs data from controller to LEDs
-		.assemblyButton(assemblyData)	//Outputs 16-bits which will be input into the CPU
+		.assemblyButton(IOinput)	//Outputs 16-bits which will be input into the CPU
 	);
 	
 	
@@ -46,7 +46,7 @@ module Capman (
 		.reset(reset),			//Input reset
 		.memData(16'b0),		//Input 0, not being used
 		.addr(addr_b),			//Input addr_b from VGA
-		.IOinput(assemblyData),		//Input assemblyData from NES 
+		.IOinput(IOinput),		//Input IOinput from NES 
 		.writeEnable(16'b0),		//Input 0, not being used	
 		.memOutput(memOutput),		//Output memOutput which will go into VGA
 		.IOoutput(IOoutput)		//Output 0, not being used
