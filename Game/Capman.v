@@ -14,13 +14,12 @@ module Capman (
 	output vSync,			//VGA vsync
 	output wire VGA_CLK, 		//VGA 25MHz clock
 	output wire VGA_SYNC_N, 	//VGA sync
+	output wire VGA_BLANK_N		//VGA blank
 );
 	
 	//Variables for CPU
-	wire [15:0] memData;
 	wire [15:0] addr;
 	wire [15:0] IOinput;
-	wire [15:0] writeEnable;
 	wire [15:0] memOutput;
 	wire [15:0] IOoutput;
 	//Variables for NES controller
@@ -66,7 +65,7 @@ module Capman (
 		.hSync(hSync),			//Output hSync
 		.vSync(vSync),			//Output vSync
 		.splitClk(VGA_CLK),		//Output VGA 25MHz clock
-		.bright(bright),		//Output VGA bright
+		.bright(VGA_BLANK_N),		//Output VGA blank
 		.sync_n(VGA_SYNC_N),		//Output VGA sync n
 		.Red(vga_red),			//Output VGA red
 		.Green(vga_green),		//Output VGA green
