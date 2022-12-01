@@ -44,14 +44,14 @@ module Capman (
 	
 	//Instantiate CPU 
 	GeneralCPU CPU (
-		.clk(clk),			//
-		.reset(reset),			//
-		.memData(memData),		//
-		.addr(addr),			//
-		.IOinput(assemblyData),		//
-		.writeEnable(writeEnable),	//
-		.memOutput(memOutput),		//
-		.IOoutput(IOoutput)		//
+		.clk(clk),			//Input 50MHz clock
+		.reset(reset),			//Input reset
+		.memData(0),			//Input 0, not being used
+		.addr(addr_b),			//Input addr_b from VGA
+		.IOinput(assemblyData),		//Input assemblyData from NES 
+		.writeEnable(0),		//Input 0, not being used	
+		.memOutput(memOutput),		//Output memOutput which will go into VGA addr_b
+		.IOoutput(0)			//Output 0, not being used
 	);
 	
 	
@@ -59,16 +59,16 @@ module Capman (
 	vgaDisplay VGA(
 		.clk(clk),			//
 		.clear(reset),			//
-		.read_b(read_b),		//
+		.read_b(memOutput),		//Input memOutput from CPU
 		.addr_b(addr_b),		//
 		.hSync(hSync),			//
 		.vSync(vSync),			//
 		.splitClk(splitClk),		//
 		.bright(bright),		//
-		.sync_n(sync_n),
-		.Red(Red),
-		.Green(Green),
-		.Blue(Blue)
+		.sync_n(sync_n),		//
+		.Red(Red),			//
+		.Green(Green),			//
+		.Blue(Blue)			//
 	);
 	
 
