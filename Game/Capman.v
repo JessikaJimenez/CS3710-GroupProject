@@ -6,10 +6,9 @@ module Capman (
 	input        reset,		//Active-low reset
 	//input  [9:0] sw,		//Switches
 	output [7:0] LEDs,		//LEDs
-	output [6:0] hexOut,		//HEX-to-7-seg
-	output reg [7:0] vga_red,	//VGA red
-	output reg [7:0] vga_green, 	//VGA green
-	output reg [7:0] vga_blue,	//VGA blue
+	output [7:0] vga_red,		//VGA red
+	output [7:0] vga_green, 	//VGA green
+	output [7:0] vga_blue,		//VGA blue
 	output wire VGA_CLK, 		//VGA 25MHz clock
 	output wire VGA_BLANK_N, 	//VGA blank
 	output wire VGA_SYNC_N		//VGA sync n
