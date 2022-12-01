@@ -1,7 +1,7 @@
 module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
-				  (input wire bright, clk, clear,
+				  (input wire bright, clk, clear, counterEnable,
 					input wire [DATA_WIDTH-1:0] read_b,
-					input wire [9:0] hCount, vCount, fast_hCount,
+					input wire [9:0] hCount, vCount,
 					output reg [ADDR_WIDTH-1:0] addr_b,
 				   output reg [7:0] Red, Green, Blue);
 					
@@ -16,176 +16,299 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 	parameter Black = 3'b000;
 	parameter Blu = 3'b001;
 	parameter Yellow = 3'b010;
-	parameter Red = 3'b011;
+	parameter Redd = 3'b011;
 	parameter Crimson = 3'b100;
 	parameter White = 3'b111;
 	
 	parameter spriteStorageStartAddress = 16'hC4B0;
 	parameter spriteIDStartAddress = 16'hC000;
+	parameter capXAddr = 16'hCC30;
+	parameter capYAddr = 16'hCC31;
+	parameter capDirAddr = 16'hCC32;
+	parameter ghostXAddr = 16'hCC33;
+	parameter ghostYAddr = 16'hCC34;
+	parameter ghostDirAddr = 16'hCC35;
+	parameter mov_spritesBufStartAddr = 9'd200;
 	
 	//Set RGB bits to all 1's or all 0's
 	parameter ON = 8'b11111111;	
 	parameter OFF = 8'b00000000;
-	parameter IDRead = 2'b00;
-	parameter pixelRead1 = 2'b01;
-	parameter pixelRead2 = 2'b10;
-	parameter pixelRead3 = 2'b10;
-	parameter pixelRead4 = 2'b10;
-	parameter Store = 3'b000;
-	parameter Idle = 2'b11;
+	//States for buffer loading
+	parameter IDRead = 4'b0000;
+	parameter IDStore = 4'b0001;
+	parameter pixelRead1 = 4'b0010;
+	parameter pixelRead2 = 4'b0011;
+	parameter pixelRead3 = 4'b0100;
+	parameter pixelRead4 = 4'b0101;
+	parameter endSprite = 4'b0110;
+	parameter endLine = 4'b0111;
+	parameter endFrame = 4'b1000;
 	
+	wire [2:0] capColor, ghostColor, backColor;
 	reg [2:0] color;
+	wire drawCapman;
+	wire drawGhost;
+	wire inCapVRange;
+	wire inGhostVRange;
+	wire [1:0] currentPixel;
 	
-	wire [ADDR_WIDTH-1:0] currentSpriteAddr;
+	wire [ADDR_WIDTH-1:0] currentIDAddr;
 	//reg [ADDR_WIDTH-1:0] nextSpriteAddr;
 	wire [ADDR_WIDTH-1:0] currentPixelAddr;
+	wire [8:0] capPixBufAddr;
+	wire [8:0] ghostPixBufAddr;
+	reg [ADDR_WIDTH-1:0] movingSpriteAddr;
 	
-	reg [1:0] currentPixel;
-	reg [15:0] currentSpriteID
+	
+	
+	reg [15:0] currentSpriteID;
 	reg [DATA_WIDTH-1:0] pixelColorsFromMem;
-	reg [7:0] bufferAddress;
+	reg [8:0] bufferAddress;
+	
 	//reg IDRead;
-	reg state, nextstate;
-	assign currentIDAddr <= spriteIDStartAddress + fast_hCount[9:4] + alt_vCount[8:4]*16'd40;
-	assign currentPixelAddr <= {10'd0, alt_vCount[3:0], fast_hCount[3:2]}+currentSpriteID*16'd64 + spriteStorageStartAddress;
+	reg [3:0] state, nextstate;
+	assign currentIDAddr = spriteIDStartAddress + fast_hCount[9:4] + alt_vCount[8:4]*16'd40;
+	assign currentPixelAddr = {10'd0, alt_vCount[3:0], fast_hCount[3:2]}+currentSpriteID*16'd64 + spriteStorageStartAddress;
+	
+	//Want to assign currentSpriteID to be the moving sprite we want to draw.
+	assign capPixBufAddr = {3'd0, cap_vCount[3:0], cap_hCount[3:2]} + mov_spritesBufStartAddr;
+	assign ghostPixBufAddr = {3'd0, ghost_vCount[3:0], ghost_hCount[3:2]} + 9'd64 + mov_spritesBufStartAddr;
+	
+	assign inCapVRange = (vCount >= capVPos) && (vCount < (capVPos + 16));
+	assign inGhostVRange = (vCount >= ghostVPos) && (vCount < (ghostVPos + 16));
+	assign drawCapman = (hCount >= capHPos) && (hCount < (capHPos + 16)) && inCapVRange;
+	assign drawGhost = (hCount >= ghostHPos) && (hCount < (ghostHPos + 16)) && inGhostVRange;
+	assign currentPixel = hCount[1:0];
+	
+	
+	
 	
 	//reg findSprite;
 	//reg enableNewPixels;
 	
-	reg [9:0] fast_hCount [9:0];
-	reg [8:0] alt_vCount [8:0];
-	reg [9:0] pacHPos;
-	reg [8:0] pacVPos;
+	reg [9:0] fast_hCount;
+	reg [8:0] alt_vCount;
+	reg [3:0] cap_hCount;
+	reg [3:0] cap_vCount;
+	reg [3:0] ghost_hCount;
+	reg [3:0] ghost_vCount;
+	reg [7:0] mov_spritebufferCounter;
+	
+	reg [9:0] capHPos;
+	reg [8:0] capVPos;
+	reg [15:0] capDir;
+	
 	reg [9:0] ghostHPos;
 	reg [8:0] ghostVPos;
+	reg [15:0] ghostDir;
+	
+	reg [3:0] movingSpriteInfoToGet;
 	
 	
+	reg loading;
 	//Buffer for one line of the screen.
-	reg [DATA_WIDTH-1:0] buffer[(1<<8)-1:0];
+	reg [DATA_WIDTH-1:0] buffer[(1<<9)-1:0];
 	
-	    always @(posedge clk)
-      if(~clear) state <= IDRead;
-      else state <= nextstate;
+	always @(negedge clear, posedge clk) begin //Switch states and set clear info.
+		if(~clear) state <= IDRead;
+		else state <= nextstate;
+	 end
 
-	always@(*) begin
+	always@(*) begin //Switch between states.
 		case(state)
 			IDRead: nextstate <= IDStore;
 			IDStore: nextstate <= pixelRead1;
 			pixelRead1: nextstate <= pixelRead2;
 			pixelRead2: nextstate <= pixelRead3;
 			pixelRead3: nextstate <= pixelRead4;
-			pixelRead4: begin
-				if(fast_hCount >= 636 && atl_vCount < 479) nextstate <= endLine;
-				else if(fast_hCount >= 636 && atl_vCount == 479) nextstate <= endFrame;
+			pixelRead4: nextstate <= endSprite;
+			endSprite: begin
+				if(fast_hCount >= 636 && alt_vCount < 479) nextstate <= endLine;
+				else if(fast_hCount >= 636 && alt_vCount >= 479) nextstate <= endFrame;
 				else nextstate <= IDRead;
 			end
-			endLine: begin
-				if(fast_hCount == 800)
-					nextstate <= IDRead;
-				else 
-					nextstate <= Idle;
-			end
+			endLine: nextstate <= IDRead;
+			endFrame: nextstate <= IDRead;
+			default: nextstate <= IDRead;
 		endcase
 	end
 	
-	always@(*) begin
-		case(state)
-			IDRead: begin
-				buffer[fast_hCount[9:2]-1] <= read_b;
-				addr_b <= currentIDAddr;
-			end
-			IDStore: currentSpriteID <= read_b;
-			pixelRead1: begin
-				addr_b <= currentPixelAddr;
-				fast_hCount <= fast_hCount + 10'd4;
-			end
-			pixelRead2: begin
-				buffer[fast_hCount[9:2]-1] <= read_b;
-				addr_b <= currentPixelAddr;
-				fast_hCount <= fast_hCount + 10'd4;
-			end
-			pixelRead3: begin
-				buffer[fast_hCount[9:2]-1] <= read_b;
-				addr_b <= currentPixelAddr;
-				fast_hCount <= fast_hCount + 10'd4;
-			end
-			pixelRead4: begin
-				buffer[fast_hCount[9:2]-1] <= read_b;
-				addr_b <= currentPixelAddr;
-				fast_hCount <= fast_hCount + 10'd4;
-			end
-			endLine: begin
-				loading <= 0;
-				fast_hCount <= 0;
-				alt_vCount <= alt_vCount + 9'd1;
-			end
-			endFrame: begin
-				loading <= 0;
-				fast_hCount <= 0;
-				alt_vCount <= 0;
-			end
-			
+	always@(negedge clear, posedge clk) begin //Load pixel info based on state and loading bool value.
+		if(~clear) begin 
+			addr_b <= spriteIDStartAddress;
+		end
+		else if(loading) begin
+			case(state)
+				IDRead: addr_b <= currentIDAddr;			//Get the sprite ID from Memory
+				IDStore: currentSpriteID <= read_b;		//Store the ID of the sprite to the side
+				pixelRead1: begin
+					addr_b <= currentPixelAddr;			//Get the first 4 pixels using sprite ID to get pixel location
+					fast_hCount <= fast_hCount + 10'd4; //Move to the next 4 pixels
+				end
+				pixelRead2: begin
+					buffer[fast_hCount[9:2]-1] <= read_b; //Load first 4 pixels to the buffer.
+					addr_b <= currentPixelAddr; 			  //Get the next 4 pixels.
+					fast_hCount <= fast_hCount + 10'd4;	  //Move to next 4.
+				end
+				pixelRead3: begin
+					buffer[fast_hCount[9:2]-1] <= read_b; //"
+					addr_b <= currentPixelAddr;			  //"
+					fast_hCount <= fast_hCount + 10'd4;	  //"
+				end
+				pixelRead4: begin
+					buffer[fast_hCount[9:2]-1] <= read_b; //"
+					addr_b <= currentPixelAddr;			  //"
+					fast_hCount <= fast_hCount + 10'd4;	  //"
+				end
+				endSprite: buffer[fast_hCount[9:2]-1] <= read_b; //Load last 4 pixels of sprite.
+				endLine: begin
+					fast_hCount <= 0;							//Reset the buffer's hCount
+					alt_vCount <= alt_vCount + 9'd1;		//update the line we are on
+				end
+				endFrame: begin
+					fast_hCount <= 0;							//Reset buffer's hCount
+					alt_vCount <= 0;							//Reset buffer's vCount
+					movingSpriteInfoToGet <= 4'b0000;
+				end
+				default: addr_b <= currentIDAddr;
+			endcase
+		end
+		else if (movingSpriteInfoToGet < 4'b1010) begin
+			case(movingSpriteInfoToGet)
+				4'b0000: begin
+					addr_b <= capXAddr;
+					movingSpriteInfoToGet <= 4'b0001;
+				end
+				4'b0001: begin
+					capHPos <= read_b[9:0];
+					addr_b <= capYAddr;
+					movingSpriteInfoToGet <= 4'b0010;
+				end
+				4'b0010: begin
+					capVPos <= read_b[8:0];
+					addr_b <= capDirAddr;
+					movingSpriteInfoToGet <= 4'b0011;
+				end
+				4'b0011: begin
+					capDir <= read_b;
+					addr_b <= ghostXAddr;
+					movingSpriteInfoToGet <= 4'b0100;
+				end
+				4'b0100: begin
+					ghostHPos <= read_b[9:0];
+					addr_b <= ghostYAddr;
+					movingSpriteInfoToGet <= 4'b0101;
+				end
+				4'b0101: begin
+					ghostVPos <= read_b[8:0];
+					addr_b <= ghostDirAddr;
+					movingSpriteInfoToGet <= 4'b0110;
+				end
+				4'b0110: begin
+					ghostDir <= read_b;
+					movingSpriteInfoToGet <= 4'b0111;
+				end
+				4'b0111: begin
+					if(mov_spritebufferCounter < 64)
+						movingSpriteAddr <= capDir*16'd64 + spriteStorageStartAddress;
+					else
+						movingSpriteAddr <= ghostDir*16'd64 + spriteStorageStartAddress;
+					movingSpriteInfoToGet <= 4'b1000;
+				end
+				4'b1000: begin
+					if(mov_spritebufferCounter < 64)
+						addr_b <= movingSpriteAddr + mov_spritebufferCounter;
+					else 
+						addr_b <= movingSpriteAddr + mov_spritebufferCounter - 16'd64;
+					movingSpriteInfoToGet <= 4'b1001;
+				end
+				4'b1001: begin
+					buffer[mov_spritebufferCounter + 200] <= read_b;
+					if(mov_spritebufferCounter < 128) begin
+						mov_spritebufferCounter <= mov_spritebufferCounter + 1'd1;
+						movingSpriteInfoToGet <= 4'b0111;
+					end
+					else begin
+						mov_spritebufferCounter <= 0;
+						movingSpriteInfoToGet <= 4'b1010;
+					end
+				end
+				default: addr_b <= currentIDAddr;
+			endcase
+		end
+		else addr_b <= addr_b;
 	end
 	
-	
-	
-	//Set the enable signals for the addr_b use.
-	always@(*)begin
-		if(
-			
+	always@(*)begin //Set the enable signal for the addr_b use.
+		if(hCount > 639 && vCount < 479 || vCount > 500) loading <= 1;
+		else loading <= 0;
 	end
-	//Set current 
-	always@(*)begin
-		if(findSpriteEnable)begin
-			addr_b = nextSpriteAddr;
-		end	
-		else
-	end
-	always@(*) begin
-		if(bright) begin
-			//Taking the most significant bits of counters as the sprite address.
-			currentSpriteAddr <= {5'd0, fast_hCount[9:4], vCount[8:4]};
-			
-			if(hCount[9:4] == 6'd39 && vCount[8:4] == 5'd29)begin
-				nextSpriteAddr <= 16'd0;
-			end
-			else if(hCount[9:4] == 6'd39)begin
-				nextSpriteAddr <= {11'd0, vCount[8:4]+1}
-			end
-			else begin
-				nextSpriteAddr <= {5'd0, hCount[9:4]+1, vCount[8:4]};
-			end
-			
-			//CurrentPixelAddr = pixelWeAreOn/4 + ID*64 + SpriteStorageStartingAddress. (64 words of memory stores 1 sprite)
- 			currentPixelAddr <= {10'd0, vCount[3:0], hCount[3:2]}+currentSpriteID*16'd64 + spriteStorageStartAddress;
-			
-			currentPixel <= hCount[1:0];
+	
+	always@(*) begin //Choose color.
+		if(drawGhost) begin 
+			case(ghost_hCount[1:0]) 
+				2'b00: color <= buffer[ghostPixBufAddr][13:11];
+				2'b01: color <= buffer[ghostPixBufAddr][10:8];
+				2'b10: color <= buffer[ghostPixBufAddr][7:5];
+				2'b11: color <= buffer[ghostPixBufAddr][4:2];
+			endcase
+		end
+		else if (drawCapman) begin 
+			case(ghost_hCount[1:0]) 
+				2'b00: color <= buffer[capPixBufAddr][13:11];
+				2'b01: color <= buffer[capPixBufAddr][10:8];
+				2'b10: color <= buffer[capPixBufAddr][7:5];
+				2'b11: color <= buffer[capPixBufAddr][4:2];
+			endcase
+		end
+		else begin 
+			case(ghost_hCount[1:0]) 
+				2'b00: color <= buffer[bufferAddress][13:11];
+				2'b01: color <= buffer[bufferAddress][10:8];
+				2'b10: color <= buffer[bufferAddress][7:5];
+				2'b11: color <= buffer[bufferAddress][4:2];
+			endcase
 		end
 	end
 	
-	always@(*) begin
-		case(currentPixel)
-			00: begin
-				color = pixelColorsFromMem[13:11];
-				if(hCount[3:0] == 4'd12) begin
-					currentSpriteID = read_b;
-					findSprite = 0;
-				end
+	always@(negedge clear, posedge clk)begin //Update counters that go along with vgaDisplay.
+		if(~clear) begin
+			cap_hCount <= 0;
+			cap_vCount <= 0;
+			ghost_hCount <= 0;
+			ghost_vCount <= 0;
+			bufferAddress <= 0;
+		end
+		else if(counterEnable) begin
+			//Determine if we need to update horizontal counts and update them.
+			if(drawGhost) ghost_hCount <= ghost_hCount + 1'b1;
+			else if(drawCapman) cap_hCount <= cap_hCount + 1'b1;
+			else begin
+				ghost_hCount <= 0;
+				cap_hCount <= 0;
 			end
-			01: color = pixelColorsFromMem[10:8];
-			10: color = pixelColorsFromMem[7:5];
-			11: begin
-				color = pixelColorsFromMem[4:2];
-				pixelColorsFromMem = read_b;
-				if(hCount[3:0] == 4'd15) begin
-					findSprite = 1;
-				end
-			end
-		endcase
+			
+			//Determine if we need to update verticle counts and update them.
+			if(inGhostVRange && vCount != ghostVPos) ghost_vCount <= ghost_vCount + 1'b1;
+			else ghost_vCount <= 0;
+			if(inCapVRange && vCount != capVPos) cap_vCount <= cap_vCount + 1'b1;
+			else cap_vCount <= 0;
+			
+			if(hCount > 640) bufferAddress <= 0;
+			else if(currentPixel == 2'b11) bufferAddress <= bufferAddress + 1'b1;
+			else bufferAddress <= bufferAddress;
+				
+		end
+		else begin
+			ghost_hCount <= ghost_hCount;
+			cap_hCount <= cap_hCount;
+			cap_vCount <= cap_vCount;
+			ghost_vCount <= ghost_vCount;
+			bufferAddress <= bufferAddress;
+		end
 	end
 	
-	//Set Color outputs.
-	always@(*) begin
+	always@(*) begin //Set RGB outputs based on color.
 		if(bright) begin
 			case(color)
 				Black: begin
@@ -197,7 +320,7 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 				Yellow: begin
 					Red = 8'd251; Green = 8'd242; Blue = 8'd54; 
 				end
-				Red: begin
+				Redd: begin
 					Red = 8'd255; Green = 8'd50; Blue = 8'd50; 
 				end
 				Crimson: begin
@@ -210,8 +333,9 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 					Red = OFF; Green = OFF; Blue = OFF;
 				end
 			endcase	
-	end
-	else begin
-		Red = OFF; Green = OFF; Blue = OFF;
+		end
+		else begin
+			Red = OFF; Green = OFF; Blue = OFF;
+		end
 	end
 endmodule 
