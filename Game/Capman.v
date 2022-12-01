@@ -4,6 +4,8 @@
 module Capman (
 	input        clk,		//Onboard 50MHz clock
 	input        reset,		//Active-low reset
+	output 	     nesClock,		//NES clock
+	output       nesLatch,		//NES lach
 	output [7:0] LEDs,		//LEDs
 	output [7:0] vga_red,		//VGA red
 	output [7:0] vga_green, 	//VGA green
@@ -35,8 +37,8 @@ module Capman (
 	nesInterface NES (
 		.clk(clk),			//Input 50MHz clock
 		.nesData(nesData),		//Input **
-		.nesClock(nesClock),		//Output **
-		.nesLatch(nesLatch),		//Output ** 
+		.nesClock(nesClock),		//Output nesClock
+		.nesLatch(nesLatch),		//Output nesLatch
 		.controllerData(LEDs),		//Outputs data from controller to LEDs
 		.assemblyButton(assemblyData)	//Outputs 16-bits which will be input into the CPU
 	);
