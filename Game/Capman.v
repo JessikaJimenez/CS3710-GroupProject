@@ -1,7 +1,7 @@
 
-/* Top-level module for our game: CapMan */
+/* Top-level module for our game: Capman */
 /*************************************************************/
-module CapMan (
+module Capman (
 	input        clk,         //Onboard 50MHz clock
 	input        reset,       //Reset switch
 	input  [9:0] sw,          //Switches
