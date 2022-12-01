@@ -368,8 +368,8 @@ class Assembler():
                             wf.write(data + '\n')
                         elif (Disp[0] == '.'):
                             dispInt = self.labels[Disp] - address
-                            if ((dispInt > 255) or (-255 > dispInt)):
-                                sys.exit('Syntax Error: Branch can not be larger then 255 or less then -255')
+                            if ((dispInt > 127) or (-128 > dispInt)):
+                                sys.exit('Syntax Error: Branch can not be larger then 127 or less then -128')
                             elif (dispInt >= 0): 
                                 Displacement = '{0:08b}'.format(dispInt)
                             else:

@@ -2,7 +2,7 @@ module vgaTiming
 (input wire clk, clear, Enable, output reg hSync, vSync, bright, output wire sync_n, output reg [9:0] hCount, vCount);
 	assign sync_n = 0;
 	always@(negedge clear, posedge clk) begin
-		if(~clear) begin		//Set values to where the screen will clear to black and start at top left corner.
+		if(~clear) begin		//Set values to where beam will start at top left corner.
 			hCount <= 655;
 			vCount <= 489;
 			bright <= 0;
@@ -21,7 +21,6 @@ module vgaTiming
 				end
 				else if(vCount == 521)begin
 					vCount <= 0;
-					fast_hCount <= 0;
 				end
 				else vCount <= vCount;
 			end
