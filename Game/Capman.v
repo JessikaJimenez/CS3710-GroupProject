@@ -19,14 +19,12 @@ module Capman (
 );
 	
 	//Variables for CPU
-	wire [15:0] addr;
 	wire [15:0] IOinput;
 	wire [15:0] memOutput;
 	wire [15:0] IOoutput;
 	//Variables for VGA controller
 	wire [15:0] read_b;	
 	wire [15:0] addr_b;
-	wire splitClk, bright, sync_n;
 			
 	
 	//Instantiate NES Controller
