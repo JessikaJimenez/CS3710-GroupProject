@@ -9,9 +9,10 @@ module Capman (
 	output [7:0] vga_red,		//VGA red
 	output [7:0] vga_green, 	//VGA green
 	output [7:0] vga_blue,		//VGA blue
+	output hSync, 			//VGA hsync
+	output vSync,			//VGA vsync
 	output wire VGA_CLK, 		//VGA 25MHz clock
 	output wire VGA_BLANK_N, 	//VGA blank
-	output wire VGA_SYNC_N		//VGA sync n
 );
 	
 	//Variables for CPU
@@ -28,7 +29,7 @@ module Capman (
 	//Variables for VGA controller
 	wire [15:0] read_b;	
 	wire [15:0] addr_b;
-	wire hSync, vSync, splitClk, bright, sync_n;
+	wire splitClk, bright, sync_n;
 			
 	
 	//Instantiate NES Controller
@@ -61,7 +62,7 @@ module Capman (
 		.clear(reset),			//Input reset
 		.read_b(memOutput),		//Input memOutput from CPU
 		.addr_b(addr_b),		//Output addr_b to CPU
-		.hSync(hSync),			//OUtput hSync
+		.hSync(hSync),			//Output hSync
 		.vSync(vSync),			//Output vSync
 		.splitClk(VGA_CLK),		//Output VGA 25MHz clock
 		.bright(bright),		//Output VGA bright
@@ -72,9 +73,4 @@ module Capman (
 	);
 	
 	
-	
-	assign VGA_CLK = splitClk;
-	assign VGA_BLANK_N = bright;
-	assign VGA_SYNC_N = 0;
-
 endmodule 
