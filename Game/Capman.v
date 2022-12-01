@@ -4,6 +4,7 @@
 module Capman (
 	input        clk,		//Onboard 50MHz clock
 	input        reset,		//Active-low reset
+	input	     nesData,		//NES data
 	output 	     nesClock,		//NES clock
 	output       nesLatch,		//NES lach
 	output [7:0] LEDs,		//LEDs
@@ -22,10 +23,6 @@ module Capman (
 	wire [15:0] IOinput;
 	wire [15:0] memOutput;
 	wire [15:0] IOoutput;
-	//Variables for NES controller
-	wire nesData;
-    	wire nesClock;
-    	wire nesLatch;
 	//Variables for VGA controller
 	wire [15:0] read_b;	
 	wire [15:0] addr_b;
@@ -35,7 +32,7 @@ module Capman (
 	//Instantiate NES Controller
 	nesInterface NES (
 		.clk(clk),			//Input 50MHz clock
-		.nesData(nesData),		//Input **
+		.nesData(nesData),		//Input nesData
 		.nesClock(nesClock),		//Output nesClock
 		.nesLatch(nesLatch),		//Output nesLatch
 		.controllerData(LEDs),		//Outputs data from controller to LEDs
