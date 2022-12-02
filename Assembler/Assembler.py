@@ -504,9 +504,9 @@ class Assembler():
                     address += 1
                 else:
                     sys.exit('Syntax Error: not a valid instruction: ' + line)
-        while(address < 1023):
-            wf.write('0000000000000000\n')
-            address = address + 1
+        # while(address < 1023):
+        #     wf.write('0000000000000000\n')
+        #     address = address + 1
         wf.close()
         f.close()
 
