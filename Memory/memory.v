@@ -9,7 +9,7 @@ module memory #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16) (
 );
 
 	// Declare the RAM variable
-	reg [DATA_WIDTH-1:0] ram[(1<<7)-1:0]; //Depth of 16
+	reg [DATA_WIDTH-1:0] ram[(1<<13)-1:0]; //Depth of 13
 	//reg [DATA_WIDTH-1:0] ram[(2**ADDR_WIDTH)-1:0]; //Depth of 16
 	integer i;
 	
@@ -18,7 +18,7 @@ module memory #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16) (
 //			ram[i] = i[15:0]; 
 		$display("Loading Memory");
 		// you'll need to change the path to this file! 
-		$readmemb("C:/Users/sizzl/OneDrive/Documents/School Documents/CS 3710/Project/CS3710-GroupProject/Helper Files/TestMem.dat", ram); 
+		$readmemb("C:/Users/sizzl/OneDrive/Documents/School Documents/CS 3710/Project/CS3710-GroupProject/Game/CapMan.dat", ram); 
 		$display("done with memory load"); 
 	end
 

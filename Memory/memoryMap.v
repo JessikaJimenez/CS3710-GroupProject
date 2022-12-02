@@ -39,11 +39,11 @@ module memoryMap #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16) (
 	// 	ioOutput = data_a;
 
 	wire mmIOReadA;
-	assign mmIOReadA = addr_a == 16'hFFFF & !write_a; //If in IO space and not writing
+	assign mmIOReadA = addr_a == 16'h1FFF & !write_a; //If in IO space and not writing
 	mux2 OutputA(read_a, InputData, mmIOReadA, ReadDataA); //Set output data to either ExMem data or Data from IO (Switches)
 
 	wire mmIOWriteA;
-	assign mmIOWriteA = addr_a == 16'hFFFF & write_a;	//If in IO space and Writing
+	assign mmIOWriteA = addr_a == 16'h1FFF & write_a;	//If in IO space and Writing
 	flopen flopA(clk, mmIOWriteA, data_a, ioOutputData);			//Write the data in A to IO device
 
 
