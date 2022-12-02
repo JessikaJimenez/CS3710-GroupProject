@@ -305,17 +305,18 @@ class Assembler():
                             secondRegNum = '{0:04b}'.format(int(secondReg.replace('%r', '')))
                             data = self.instrCode(instr) + secondRegNum + immediate
                             wf.write(data + '\n')
-                        elif ((instr == 'MOVI') and (Immd[0] == '.') and (secondReg in self.REGISTERS)):
-                            labelInt = int(self.replaceLabel(Immd).replace('$', ''))
-                            if ((labelInt > 255) or (-255 > labelInt)):
-                                sys.exit('Syntax Error: Address can not be larger then 255 or less then -255')
-                            else:
-                                labelImmd = '{0:08b}'.format(labelInt + 1)
-                            secondRegNum = '{0:04b}'.format(int(secondReg.replace('%r', '')))
-                            data = self.instrCode(instr) + secondRegNum + labelImmd
-                            wf.write(data + '\n')
+                        # elif ((instr == 'MOVI') and (Immd[0] == '.') and (secondReg in self.REGISTERS)):
+                        #     labelInt = int(self.replaceLabel(Immd).replace('$', ''))
+                        #     if ((labelInt > 255) or (-255 > labelInt)):
+                        #         sys.exit('Syntax Error: Address can not be larger then 255 or less then -255')
+                        #     else:
+                        #         labelImmd = '{0:08b}'.format(labelInt + 1)
+                        #     secondRegNum = '{0:04b}'.format(int(secondReg.replace('%r', '')))
+                        #     data = self.instrCode(instr) + secondRegNum + labelImmd
+                        #     wf.write(data + '\n')
                         else:
-                            sys.exit('Syntax Error: Immediate operations need an immd then a register')
+                            print(line)
+                            sys.exit('Syntax Error: Immediate operations need a register then an immd')
                     else:
                         sys.exit('Syntax Error: Immediate operations need two args: ' + line)
                 elif (instr in self.Shift):
@@ -369,6 +370,7 @@ class Assembler():
                         elif (Disp[0] == '.'):
                             dispInt = self.labels[Disp] - address
                             if ((dispInt > 127) or (-128 > dispInt)):
+                                print(line)
                                 sys.exit('Syntax Error: Branch can not be larger then 127 or less then -128')
                             elif (dispInt >= 0): 
                                 Displacement = '{0:08b}'.format(dispInt)
@@ -389,6 +391,7 @@ class Assembler():
                             data = '0100' + self.instrCode(instr.replace('J', '')) + '1100' + firstRegNum
                             wf.write(data + '\n')
                         else:
+                            print(line)
                             sys.exit('Syntax Error: Jump operations need a register')
                     else:
                         sys.exit('Syntax Error: Jump operations need one arg')

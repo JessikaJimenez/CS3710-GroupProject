@@ -1,6 +1,8 @@
 module vgaDisplay #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
-						(input wire clk, clear, input wire [DATA_WIDTH-1:0] read_b,
-						output wire hSync, vSync, splitClk, bright, sync_n, output wire [ADDR_WIDTH-1:0] addr_b,
+						(input wire clk, clear, 
+						input wire [DATA_WIDTH-1:0] read_b,
+						output wire [ADDR_WIDTH-1:0] addr_b,
+						output wire hSync, vSync, splitClk, bright, sync_n, 
 						output wire [7:0] Red, Green, Blue);
 				  
 	wire [9:0] hCount;
