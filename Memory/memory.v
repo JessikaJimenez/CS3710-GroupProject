@@ -5,13 +5,14 @@ module memory #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16) (
 	input [(DATA_WIDTH-1):0] data_a, data_b,
 	input [(ADDR_WIDTH-1):0] addr_a, addr_b,
 	input write_a, write_b, clk,
-	output reg [(DATA_WIDTH-1):0] read_a, read_b
+	output [(DATA_WIDTH-1):0] read_a, read_b
 );
 
 	// Declare the RAM variable
-	reg [DATA_WIDTH-1:0] ram[(1<<13)-1:0]; //Depth of 13
-	//reg [DATA_WIDTH-1:0] ram[(2**ADDR_WIDTH)-1:0]; //Depth of 16
-	integer i;
+	//reg [DATA_WIDTH-1:0] ram[(1<<13)-1:0]; //Depth of 13
+	reg [DATA_WIDTH-1:0] ram[(2**ADDR_WIDTH)-1:0]; //Depth of 13
+	//integer i;
+	reg [ADDR_WIDTH-1:0] readAddrA, readAddrB;
 	
 	initial begin
 //		for(i=0;i<1024;i=i+1)
@@ -26,19 +27,16 @@ module memory #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16) (
 	always @ (negedge clk) begin
 		if (write_a) begin // PORT A
 			ram[addr_a] <= data_a;
-			read_a <= data_a;
 		end
-		else begin
-			read_a <= ram[addr_a];
-		end 
-		
 		if (write_b) begin // PORT B
 			ram[addr_b] <= data_b;
-			read_b <= data_b;
 		end
-		else begin
-			read_b <= ram[addr_b];
-		end 
+		
+		readAddrA <= addr_a;
+		readAddrB <= addr_b;
 	end 
 
+	assign read_a = ram[readAddrA];
+	assign read_b = ram[readAddrB];
+	
 endmodule 

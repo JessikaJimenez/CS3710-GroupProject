@@ -91,7 +91,7 @@
 // JEX - pcInstruction, rTypeInstruction, COPY
 // JWR - pcOverwrite
 // 
-module datapath #(parameter WIDTH = 16) (
+module datapath #(parameter WIDTH = 16, parameter ADDR_WIDTH = 16) (
    // DATAPATH
    input clk, reset, 
    input pcInstruction, // RDst or PC
@@ -110,7 +110,7 @@ module datapath #(parameter WIDTH = 16) (
 	
    // MEMORY ACCESS FOR PORT B
    input [WIDTH - 1 : 0] writeDataB, // Data to write to Port B
-   input [WIDTH - 1 : 0] addrDataB, // Address on Port B
+   input [ADDR_WIDTH - 1 : 0] addrDataB, // Address on Port B
    input [WIDTH - 1 : 0] ioInput, // Input data from I/O space
    input writeEnB, // Flag to write to port B
 	
@@ -194,7 +194,7 @@ module datapath #(parameter WIDTH = 16) (
     );
 
     // Memory module
-    memoryMap mp (
+    memoryMap #(.ADDR_WIDTH(13)) mp (
 	  .data_b(writeDataB),
 	  .addr_b(addrDataB),
 	  .write_b(writeEnB),

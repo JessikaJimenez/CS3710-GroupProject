@@ -55,7 +55,7 @@ module memoryMap #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16) (
 	// assign mmIOWriteB = addr_b[(ADDR_WIDTH-1):9] > 0 & write_b;	//If in IO space and Writing
 	// flopen flopB(clk, mmIOWriteB, data_b, OutputWriteDataB);			//Write the data in B to IO device
 
-	memory exMem(
+	memory #(.ADDR_WIDTH(13)) exMem (
 		.data_a(data_a),
 		.data_b(data_b),
 		.addr_a(addr_a),
