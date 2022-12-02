@@ -68,7 +68,7 @@ class CreateDat():
         lineTracker = 0
         print("Starting...")
         #### INSERT ASSEMLBY BINARY ###
-        assemblyFile = open("capman.bin", "r")
+        assemblyFile = open("capman 8k.bin", "r")
         numAdresses = 0
 
         for line in assemblyFile:
@@ -76,7 +76,6 @@ class CreateDat():
             numLines += 1
             lineTracker += 1
             numAdresses += 1
-        f.write("\n")
         assemblyFile.close()
         print("Finished Assembly Total Lines: {}".format(numLines))
         while(numLines < (self.PROGRAM_END - self.PROGRAM_START + 1)):
@@ -161,7 +160,7 @@ class CreateDat():
         print("Writing Last 0s")
         
         numLines = 0
-        while(numLines < ( 0x2000 - self.PACDOTS_END)):
+        while(numLines < ( 0x1FFF - self.PACDOTS_END)):
             f.write("0000000000000000" + "\n")
             numLines += 1
             lineTracker += 1

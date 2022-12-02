@@ -76,7 +76,6 @@ class CreateDat():
             numLines += 1
             lineTracker += 1
             numAdresses += 1
-        f.write("\n")
         assemblyFile.close()
         print("Finished Assembly Total Lines: {}".format(numLines))
         while(numLines < (self.PROGRAM_END - self.PROGRAM_START + 1)):
