@@ -18,14 +18,22 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 	parameter White = 3'b111;
 	
 	//Addresses that need accessed directly.
-	parameter spriteStorageStartAddress = 16'h14B0;
-	parameter spriteIDStartAddress = 16'h1000;
-	parameter capXAddr = 16'h1C30;
-	parameter capYAddr = 16'h1C31;
-	parameter capDirAddr = 16'h1C32;
-	parameter ghostXAddr = 16'h1C33;
-	parameter ghostYAddr = 16'h1C34;
-	parameter ghostDirAddr = 16'h1C35;
+	// parameter spriteStorageStartAddress = 16'h14B0;
+	// parameter spriteIDStartAddress = 16'h1000;
+	// parameter capXAddr = 16'h1C30;
+	// parameter capYAddr = 16'h1C31;
+	// parameter capDirAddr = 16'h1C32;
+	// parameter ghostXAddr = 16'h1C33;
+	// parameter ghostYAddr = 16'h1C34;
+	// parameter ghostDirAddr = 16'h1C35;
+	parameter spriteStorageStartAddress = 16'h000A;
+	parameter spriteIDStartAddress = 16'h0000;
+	parameter capXAddr = 16'h0004;
+	parameter capYAddr = 16'h0005;
+	parameter capDirAddr = 16'h0006;
+	parameter ghostXAddr = 16'h0007;
+	parameter ghostYAddr = 16'h0008;
+	parameter ghostDirAddr = 16'h0009;
 	parameter mov_spritesBufStartAddr = 9'd200;
 	
 	//Set RGB bits to all 1's or all 0's
@@ -62,7 +70,8 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 	assign inGhostVRange = (vCount >= ghostVPos) && (vCount < (ghostVPos + 16));
 	//Assign addresses based on where we are on loading the buffer.
 	assign currentPixel = hCount[1:0]; //Tells pixel vga beam is on.
-	assign currentIDAddr = spriteIDStartAddress + fast_hCount[9:4] + alt_vCount[8:4]*16'd40;
+	//assign currentIDAddr = spriteIDStartAddress + fast_hCount[9:4] + alt_vCount[8:4]*16'd40;
+	assign currentIDAddr = spriteIDStartAddress + fast_hCount[5:4];
 	assign currentPixelAddr = {10'd0, alt_vCount[3:0], fast_hCount[3:2]}+(currentSpriteID-16'd1)*16'd64 + spriteStorageStartAddress;
 	assign capPixBufAddr = {3'd0, cap_vCount[3:0], cap_hCount[3:2]} + mov_spritesBufStartAddr;
 	assign ghostPixBufAddr = {3'd0, ghost_vCount[3:0], ghost_hCount[3:2]} + 9'd64 + mov_spritesBufStartAddr;
