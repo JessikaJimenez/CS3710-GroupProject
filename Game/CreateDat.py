@@ -59,6 +59,8 @@ class CreateDat():
     pacdotCount = 414
     capState    = 8
 
+    
+
 
     def __init__(self):
         f = open("CapMan.dat", "w")
@@ -67,14 +69,16 @@ class CreateDat():
         print("Starting...")
         #### INSERT ASSEMLBY BINARY ###
         assemblyFile = open("capman.bin", "r")
+        numAdresses = 0
 
         for line in assemblyFile:
             f.write(line)
             numLines += 1
             lineTracker += 1
+            numAdresses += 1
         f.write("\n")
         assemblyFile.close()
-        print("Finished Assembly")
+        print("Finished Assembly Total Lines: {}".format(numLines))
         while(numLines < (self.PROGRAM_END - self.PROGRAM_START + 1)):
             f.write("0000000000000000" + "\n")
             numLines += 1
@@ -89,9 +93,10 @@ class CreateDat():
             f.write(line)
             numLines += 1
             lineTracker += 1
+            numAdresses += 1
 
         gridFile.close()
-        print("Sprite Ids finished")
+        print("Sprite Ids finished Total Lines: {}".format(numLines))
         f.write("\n")
         while(numLines < (self.SPRITE_ID_END - self.SPRITE_ID_START + 1)):
             f.write("0000000000000000" + "\n")
@@ -110,9 +115,10 @@ class CreateDat():
                     f.write(line)
                     numLines += 1
                     lineTracker += 1
+                    numAdresses += 1
 
         gridFile.close()
-        print("Sprites Finished")
+        print("Sprites Finished Total Lines: {}".format(numLines))
         f.write("\n")
         while(numLines < (self.SPRITES_END - self.SPRITES_START + 1)):
             f.write("0000000000000000" + "\n")
@@ -133,6 +139,8 @@ class CreateDat():
         f.write('{0:016b}\n'.format(self.pacdotCount))
         f.write('{0:016b}\n'.format(self.capState))
         lineTracker += 8
+        numAdresses += 8
+        print("Added Locations, Total Lines: {}".format(8))
 
 ##################################################################
 ############## PAC DOT ADDRESSES #############################
@@ -142,20 +150,24 @@ class CreateDat():
         for x in dotAddressFile:
             f.write(x)
             lineTracker += 1
+            numAdresses += 1
+            numLines += 1
+            
 
         dotAddressFile.close()
-
+        print("Finished dotAddreses Total: {}".format(numLines))
 ##################################################################
 ##################################################################
         print("Writing Last 0s")
         
         numLines = 0
-        while(numLines < ( 0xF9FF - self.PACDOTS_END)):
+        while(numLines < ( 0x10000 - self.PACDOTS_END)):
             f.write("0000000000000000" + "\n")
             numLines += 1
             lineTracker += 1
         f.close()
         print("Finished")
+        print(numAdresses)
 
 def main():
     pac = PacDotAddresses()
