@@ -167,8 +167,8 @@ class CreateDat():
             lineTracker += 1
         f.close()
         print("Finished")
-        print("Total Memory Used: " + numAdresses)
-        print("Total Lines: " + lineTracker)
+        print("Total Memory Used: " + str(numAdresses))
+        print("Total Lines: " + str(lineTracker))
 
 def main():
     pac = PacDotAddresses()
