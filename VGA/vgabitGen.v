@@ -18,14 +18,14 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 	parameter White = 3'b111;
 	
 	//Addresses that need accessed directly.
-	parameter spriteStorageStartAddress = 16'hC4B0;
-	parameter spriteIDStartAddress = 16'hC000;
-	parameter capXAddr = 16'hCC30;
-	parameter capYAddr = 16'hCC31;
-	parameter capDirAddr = 16'hCC32;
-	parameter ghostXAddr = 16'hCC33;
-	parameter ghostYAddr = 16'hCC34;
-	parameter ghostDirAddr = 16'hCC35;
+	parameter spriteStorageStartAddress = 16'h14B0;
+	parameter spriteIDStartAddress = 16'h1000;
+	parameter capXAddr = 16'h1C30;
+	parameter capYAddr = 16'h1C31;
+	parameter capDirAddr = 16'h1C32;
+	parameter ghostXAddr = 16'h1C33;
+	parameter ghostYAddr = 16'h1C34;
+	parameter ghostDirAddr = 16'h1C35;
 	parameter mov_spritesBufStartAddr = 9'd200;
 	
 	//Set RGB bits to all 1's or all 0's
@@ -63,11 +63,12 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 	//Assign addresses based on where we are on loading the buffer.
 	assign currentPixel = hCount[1:0]; //Tells pixel vga beam is on.
 	assign currentIDAddr = spriteIDStartAddress + fast_hCount[9:4] + alt_vCount[8:4]*16'd40;
-	assign currentPixelAddr = {10'd0, alt_vCount[3:0], fast_hCount[3:2]}+currentSpriteID*16'd64 + spriteStorageStartAddress;
+	assign currentPixelAddr = {10'd0, alt_vCount[3:0], fast_hCount[3:2]}+(currentSpriteID-16'd1)*16'd64 + spriteStorageStartAddress;
 	assign capPixBufAddr = {3'd0, cap_vCount[3:0], cap_hCount[3:2]} + mov_spritesBufStartAddr;
 	assign ghostPixBufAddr = {3'd0, ghost_vCount[3:0], ghost_hCount[3:2]} + 9'd64 + mov_spritesBufStartAddr;
 	
 	reg [ADDR_WIDTH-1:0] movingSpriteAddr;//Register with address to a moving sprite.
+	
 	reg [2:0] color;				 //Gets set based on pixel we need drawn.
 	reg [15:0] currentSpriteID; //used to calculate currentPixelAddr.
 	reg [8:0] bufferAddress;	 //Keeps track of where we are on drawing the background.
@@ -130,21 +131,27 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 					fast_hCount <= fast_hCount + 10'd4; //Move to the next 4 pixels
 				end
 				pixelRead2: begin
-					buffer[fast_hCount[9:2]-1] <= read_b; //Load first 4 pixels to the buffer.
-					addr_b <= currentPixelAddr; 			  //Get the next 4 pixels.
-					fast_hCount <= fast_hCount + 10'd4;	  //Move to next 4.
+					if(currentSpriteID == 16'd0) buffer[fast_hCount[9:2]-1] <= 16'd0; //If in blank square store blank pixels in buffer.
+					else buffer[fast_hCount[9:2]-1] <= read_b; 								//Load first 4 pixels to the buffer.
+					addr_b <= currentPixelAddr; 			  										//Get the next 4 pixels.
+					fast_hCount <= fast_hCount + 10'd4;	  										//Move to next 4.
 				end
 				pixelRead3: begin
-					buffer[fast_hCount[9:2]-1] <= read_b; //"
-					addr_b <= currentPixelAddr;			  //"
-					fast_hCount <= fast_hCount + 10'd4;	  //"
+					if(currentSpriteID == 16'd0) buffer[fast_hCount[9:2]-1] <= 16'd0; //"
+					else buffer[fast_hCount[9:2]-1] <= read_b; 								//"
+					addr_b <= currentPixelAddr;			  										//"
+					fast_hCount <= fast_hCount + 10'd4;	  										//"
 				end
 				pixelRead4: begin
-					buffer[fast_hCount[9:2]-1] <= read_b; //"
-					addr_b <= currentPixelAddr;			  //"
-					fast_hCount <= fast_hCount + 10'd4;	  //"
+					if(currentSpriteID == 16'd0) buffer[fast_hCount[9:2]-1] <= 16'd0; //"
+					else buffer[fast_hCount[9:2]-1] <= read_b; 								//"
+					addr_b <= currentPixelAddr;			  		 								//"
+					fast_hCount <= fast_hCount + 10'd4;	  		 								//"
 				end
-				endSprite: buffer[fast_hCount[9:2]-1] <= read_b; //Load last 4 pixels of sprite to buffer.
+				endSprite: begin
+					if(currentSpriteID == 16'd0) buffer[fast_hCount[9:2]-1] <= 16'd0; //If in blank square store blank pixels in buffer.
+					else buffer[fast_hCount[9:2]-1] <= read_b; //Load last 4 pixels of sprite to buffer.
+				end
 				endLine: begin
 					fast_hCount <= 0;							//Reset the buffer's hCount
 					alt_vCount <= alt_vCount + 9'd1;		//update the line we are on
