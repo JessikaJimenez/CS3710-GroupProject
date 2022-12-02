@@ -63,7 +63,7 @@ class CreateDat():
 
 
     def __init__(self):
-        f = open("CapMan.dat", "w")
+        f = open("CapMan8k.dat", "w")
         numLines = 0
         lineTracker = 0
         print("Starting...")
