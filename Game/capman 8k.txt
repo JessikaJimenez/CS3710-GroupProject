@@ -221,7 +221,8 @@ JAL %r0 %r15 # CALL .CONVERTGHOST (Returns %r11 and %r12 as positions on grid)
 JPT %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
-BEQ .CAPMANSTATE # Branches if the ghost does not collide
+JPT %r15 .CAPMANSTATE # r15 = .CAPMANSTATE address
+JEQ %r15 # Jump if ghost does not collide
 ADDI %r5 $2 # Redo position update
 
 # Need to pick new direction, either up or down
@@ -244,7 +245,8 @@ JAL %r0 %r15 # CALL .CONVERTGHOST (Returns %r11 and %r12 as positions on grid)
 JPT %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
-BEQ .CAPMANSTATE # Branches if the ghost does not collide
+JPT %r15 .CAPMANSTATE # r15 = .CAPMANSTATE address
+JEQ %r15 # Jump if ghost does not collide
 SUBI %r5 $2 # Redo position update
 
 # Need to pick new direction, either up or down
@@ -261,7 +263,8 @@ JAL %r0 %r15 # CALL .CONVERTGHOST (Returns %r11 and %r12 as positions on grid)
 JPT %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
-BEQ .CAPMANSTATE # Branches if the ghost does not collide
+JPT %r15 .CAPMANSTATE # r15 = .CAPMANSTATE address
+JEQ %r15 # Jump if ghost does not collide
 ADDI %r6 $2 # Redo position update
 
 # Need to pick new direction, either left or right
@@ -278,7 +281,8 @@ JAL %r0 %r15 # CALL .CONVERTGHOST (Returns %r11 and %r12 as positions on grid)
 JPT %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
-BEQ .CAPMANSTATE # Branches if the ghost does not collide
+JPT %r15 .CAPMANSTATE # r15 = .CAPMANSTATE address
+JEQ %r15 # Jump if ghost does not collide
 SUBI %r6 $2 # Redo position update
 
 # Need to pick new direction, either left or right
@@ -470,7 +474,7 @@ MOV %r9 %r2 # r9 = Capman xPos
 BUC .LOADPACDOTS
 
 .LOADPACDOTS
-ANDI %r9 $8 # r9 = r9 & 0008
+ANDI %r9 $8 # r9 = r9 & 000F
 CMPI %r9 $8 
 BNE .CHECKEDFORDOT # If Capman is not in the middle of a block, don't continue
 MOVI %r9 $54 # r9 = 0036
