@@ -39,10 +39,9 @@ class CreateDat():
     GHOST_DIR = 0x1C35 
     ##########################
     PACDOT_COUNT_INDEX = 0x1C36
-    CAPMAN_STATE_INDEX = 0x1C37
 
-    PACDOTS_START = 0x1C38
-    PACDOTS_END   = 0x1DD5
+    PACDOTS_START = 0x1C37
+    PACDOTS_END   = 0x1DD4
     ##########################
     ##########################
 
@@ -136,10 +135,10 @@ class CreateDat():
         f.write('{0:016b}\n'.format(self.ghostDir))
 
         f.write('{0:016b}\n'.format(self.pacdotCount))
-        f.write('{0:016b}\n'.format(self.capState))
-        lineTracker += 8
-        numAdresses += 8
-        print("Added Locations, Total Lines: {}".format(8))
+        lineTracker += 7
+        numAdresses += 7
+        numLines += 1
+        print("Added Locations, Total Lines: {}".format(numLines))
 
 ##################################################################
 ############## PAC DOT ADDRESSES #############################
