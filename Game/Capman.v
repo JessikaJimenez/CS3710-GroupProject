@@ -24,8 +24,7 @@ module Capman (
 	wire [15:0] IOoutput;
 	//Variables for VGA controller
 	wire [15:0] read_b;	
-	wire [15:0] addr_b;
-			
+	wire [15:0] addr_b;		
 	
 	//Instantiate NES Controller
 	nesInterface NES (
@@ -39,7 +38,7 @@ module Capman (
 	
 	
 	//Instantiate CPU 
-	GeneralCPU CPU (
+	GeneralCPU #(.ADDR_WIDTH(13)) CPU (
 		.clk(clk),			//Input 50MHz clock
 		.reset(reset),			//Input reset
 		.memData(16'b0),		//Input 0, not being used
@@ -66,6 +65,5 @@ module Capman (
 		.Green(vga_green),		//Output VGA green
 		.Blue(vga_blue)			//Output VGA blue
 	);
-	
 	
 endmodule 

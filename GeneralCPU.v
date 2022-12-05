@@ -1,6 +1,6 @@
 // Top-level module for the "In General" CPU
 /*************************************************************/
-module GeneralCPU #(parameter WIDTH = 16, parameter ADDR_WIDTH = 7) (
+module GeneralCPU #(parameter WIDTH = 16, parameter ADDR_WIDTH = 16) (
     input clk,                  // 50MHz clock
     input reset,                // active-low reset
     input [WIDTH - 1 : 0] memData,
