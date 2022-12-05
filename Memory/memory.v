@@ -17,7 +17,8 @@ module memory
 	begin
 		$display("Loading Memory");
 		// you'll need to change the path to this file! 
-		$readmemb("C:/Users/danie/Documents/Homework/22 Fall/ECE 3710/Quartus/ALUandRegister/CS3710-GroupProject/Game/CapMan8k.dat", ram); 
+//		$readmemb("C:/Users/sizzl/OneDrive/Documents/School Documents/CS 3710/Project/CS3710-GroupProject/Game/CapMan.dat", ram); 
+		$readmemb("C:/Users/sizzl/OneDrive/Documents/School Documents/CS 3710/Project/CS3710-GroupProject/Helper Files/TestMem.dat", ram);
 		$display("done with memory load"); 
 	end
 

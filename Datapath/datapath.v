@@ -194,7 +194,7 @@ module datapath #(parameter WIDTH = 16, parameter ADDR_WIDTH = 16) (
     );
 
     // Memory module
-    memoryMap #(.ADDR_WIDTH(13)) mp (
+    memoryMap #(.ADDR_WIDTH(ADDR_WIDTH)) mp (
 	  .data_b(writeDataB),
 	  .addr_b(addrDataB),
 	  .write_b(writeEnB),
