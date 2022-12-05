@@ -8,3 +8,5 @@ Documentation for the Control FSM & Instruction Decoding section: https://docs.g
 
 Documentation for Final Project Submission: https://docs.google.com/document/d/1R7QoUOnY_1TIM8aqVJcV9A65aPRkj61gWO9KQbYuKQc/edit?usp=sharing
 
+Final Project Report: https://www.overleaf.com/read/kkvdrfxhcbct 
+
