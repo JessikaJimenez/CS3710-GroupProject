@@ -2,7 +2,7 @@ MOVI %r15 $-1 # r15 = 00FF
 LUI %r15 $-1 # r15 = FFFF
 .START
 LOAD %r1 %r15 # Load input data into r1
-MOVI %r3 $2 # r2 = 2
+MOVI %r2 $2 # r2 = 2
 ADD %r1 %r2 # r1 += r2
 STOR %r1 %r15 # Store output data from r1
 BUC .START

@@ -11,6 +11,7 @@ module tb_GeneralCPU #(parameter WIDTH = 16) ();
     reg writeEnable;
     wire [WIDTH - 1 : 0] memOutput;
     wire [WIDTH - 1 : 0] IOoutput;
+	 integer i;
 
 	// Instantiate modules
 	GeneralCPU UUT (
@@ -34,22 +35,19 @@ module tb_GeneralCPU #(parameter WIDTH = 16) ();
 	   writeEnable <= 16'd0;
 		#100;
 		reset <= 1;
-		#10
-		integer[15:0] i;
-		for (i = 0; i < 128; i++) begin
-			#10
-			IOinput <= i;
-		end
-		
-		for (i = -1; i >= -128; i--) begin
-			#10
-			IOinput <= i;
-		end
+		#10;
 	end
 		
 	// Generate clock
 	always #10 begin
 	   clk = ~clk;
+	end
+	
+	always @(IOoutput) begin
+		if (IOinput < 16'd256)
+			IOinput <= IOinput + 1;
+		else
+			IOinput <= 16'd0;
 	end
 	
 endmodule 
