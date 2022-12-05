@@ -34,6 +34,17 @@ module tb_GeneralCPU #(parameter WIDTH = 16) ();
 	   writeEnable <= 16'd0;
 		#100;
 		reset <= 1;
+		#10
+		integer[15:0] i;
+		for (i = 0; i < 128; i++) begin
+			#10
+			IOinput <= i;
+		end
+		
+		for (i = -1; i >= -128; i--) begin
+			#10
+			IOinput <= i;
+		end
 	end
 		
 	// Generate clock
