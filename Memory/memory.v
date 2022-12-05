@@ -1,42 +1,52 @@
 // Quartus Prime Verilog Template
 // True Dual Port RAM with single clock
 
-module memory #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16) (
+module memory
+#(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
+(
 	input [(DATA_WIDTH-1):0] data_a, data_b,
 	input [(ADDR_WIDTH-1):0] addr_a, addr_b,
-	input write_a, write_b, clk,
-	output [(DATA_WIDTH-1):0] read_a, read_b
+	input we_a, we_b, clk,
+	output reg [(DATA_WIDTH-1):0] q_a, q_b
 );
 
 	// Declare the RAM variable
-	//reg [DATA_WIDTH-1:0] ram[(1<<13)-1:0]; //Depth of 13
-	reg [DATA_WIDTH-1:0] ram[(2**ADDR_WIDTH)-1:0]; //Depth of 13
-	//integer i;
-	reg [ADDR_WIDTH-1:0] readAddrA, readAddrB;
-	
-	initial begin
-//		for(i=0;i<1024;i=i+1)
-//			ram[i] = i[15:0]; 
+	reg [DATA_WIDTH-1:0] ram[2**ADDR_WIDTH-1:0];
+	integer i;
+	initial
+	begin
 		$display("Loading Memory");
 		// you'll need to change the path to this file! 
-		$readmemb("C:/Users/sizzl/OneDrive/Documents/School Documents/CS 3710/Project/CS3710-GroupProject/Game/CapMan.dat", ram); 
+		$readmemb("C:/Users/danie/Documents/Homework/22 Fall/ECE 3710/Quartus/ALUandRegister/CS3710-GroupProject/Game/CapMan8k.dat", ram); 
 		$display("done with memory load"); 
 	end
 
-	// Memory block
-	always @ (negedge clk) begin
-		if (write_a) begin // PORT A
+	// Port A 
+	always @ (negedge clk)
+	begin
+		if (we_a) 
+		begin
 			ram[addr_a] <= data_a;
+			q_a <= data_a;
 		end
-		if (write_b) begin // PORT B
-			ram[addr_b] <= data_b;
-		end
-		
-		readAddrA <= addr_a;
-		readAddrB <= addr_b;
+		else 
+		begin
+			q_a <= ram[addr_a];
+		end 
 	end 
 
-	assign read_a = ram[readAddrA];
-	assign read_b = ram[readAddrB];
-	
-endmodule 
+	// Port B 
+	always @ (negedge clk)
+	begin
+		if (we_b) 
+		begin
+			ram[addr_b] <= data_b;
+			q_b <= data_b;
+		end
+		else 
+		begin
+			q_b <= ram[addr_b];
+		end 
+	end
+
+endmodule

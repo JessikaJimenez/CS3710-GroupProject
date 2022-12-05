@@ -60,11 +60,11 @@ module memoryMap #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16) (
 		.data_b(data_b),
 		.addr_a(addr_a),
 		.addr_b(addr_b),
-		.write_a(write_a),
-		.write_b(write_b),
+		.we_a(write_a),
+		.we_b(write_b),
 		.clk(clk),
-		.read_a(read_a),
-		.read_b(ReadDataB)
+		.q_a(read_a),
+		.q_b(ReadDataB)
 	);
 
 endmodule

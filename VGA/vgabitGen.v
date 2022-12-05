@@ -7,7 +7,7 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 					
 //4 pixel colors can be stored in one word of memory because we have 6 pre-set colors so one color can be represented in 3 bits.
 
-//Assume sprites begin at Address C4B0 (Each sprite takes up 16*4 = 64 lines of code or 40 in hex) total memory for sprites = 1920 words
+//Assume sprites begin at Address 14B0 (Each sprite takes up 16*4 = 64 lines of code or 40 in hex) total memory for sprites = 1920 words
 					
 	//Pre-defined colors that can be displayed.
 	parameter Black = 3'b000;
@@ -18,14 +18,22 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 	parameter White = 3'b111;
 	
 	//Addresses that need accessed directly.
-	parameter spriteStorageStartAddress = 16'h14B0;
-	parameter spriteIDStartAddress = 16'h1000;
-	parameter capXAddr = 16'h1C30;
-	parameter capYAddr = 16'h1C31;
-	parameter capDirAddr = 16'h1C32;
-	parameter ghostXAddr = 16'h1C33;
-	parameter ghostYAddr = 16'h1C34;
-	parameter ghostDirAddr = 16'h1C35;
+	 parameter spriteStorageStartAddress = 16'h14B0;
+	 parameter spriteIDStartAddress = 16'h1000;
+	 parameter capXAddr = 16'h1C30;
+	 parameter capYAddr = 16'h1C31;
+	 parameter capDirAddr = 16'h1C32;
+	 parameter ghostXAddr = 16'h1C33;
+	 parameter ghostYAddr = 16'h1C34;
+	 parameter ghostDirAddr = 16'h1C35;
+//	parameter spriteStorageStartAddress = 16'h000A;
+//	parameter spriteIDStartAddress = 16'h0000;
+//	parameter capXAddr = 16'h0004;
+//	parameter capYAddr = 16'h0005;
+//	parameter capDirAddr = 16'h0006;
+//	parameter ghostXAddr = 16'h0007;
+//	parameter ghostYAddr = 16'h0008;
+//	parameter ghostDirAddr = 16'h0009;
 	parameter mov_spritesBufStartAddr = 9'd200;
 	
 	//Set RGB bits to all 1's or all 0's
@@ -61,13 +69,16 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 	assign inCapVRange = (vCount >= capVPos) && (vCount < (capVPos + 16));
 	assign inGhostVRange = (vCount >= ghostVPos) && (vCount < (ghostVPos + 16));
 	//Assign addresses based on where we are on loading the buffer.
-	assign currentPixel = hCount[1:0]; //Tells pixel vga beam is on.
+	assign currentPixel = hCount[1:0]; //Tells pixel vga beam is on.<<Testing currentIDAddr
 	assign currentIDAddr = spriteIDStartAddress + fast_hCount[9:4] + alt_vCount[8:4]*16'd40;
+	//assign currentIDAddr = spriteIDStartAddress + fast_hCount[5:4];
 	assign currentPixelAddr = {10'd0, alt_vCount[3:0], fast_hCount[3:2]}+(currentSpriteID-16'd1)*16'd64 + spriteStorageStartAddress;
 	assign capPixBufAddr = {3'd0, cap_vCount[3:0], cap_hCount[3:2]} + mov_spritesBufStartAddr;
 	assign ghostPixBufAddr = {3'd0, ghost_vCount[3:0], ghost_hCount[3:2]} + 9'd64 + mov_spritesBufStartAddr;
 	
-	reg [ADDR_WIDTH-1:0] movingSpriteAddr;//Register with address to a moving sprite.
+//	reg [ADDR_WIDTH-1:0] movingSpriteAddr;//Register with address to a moving sprite.<<<Changed to a wire.
+	wire [ADDR_WIDTH-1:0] movingSpriteAddr;
+	assign movingSpriteAddr = (((mov_spritebufferCounter<64) ? capDir:ghostDir)-1'b1)*16'd64+spriteStorageStartAddress;
 	
 	reg [2:0] color;				 //Gets set based on pixel we need drawn.
 	reg [15:0] currentSpriteID; //used to calculate currentPixelAddr.
@@ -77,7 +88,9 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 	
 	//Counters to set lookup addresses to the right address.
 	reg [9:0] fast_hCount;
-	reg [8:0] alt_vCount;
+	wire [9:0] alt_vCount;
+	assign alt_vCount = (vCount < 480) ? (vCount+1'b1):(9'd0);
+	//reg [8:0] alt_vCount; <<changed to wire.
 	reg [3:0] cap_hCount;
 	reg [3:0] cap_vCount;
 	reg [3:0] ghost_hCount;
@@ -102,6 +115,7 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 	 end
 
 	always@(*) begin //Switch between states.
+	//if(loading) begin
 		case(state)
 			IDRead: nextstate <= IDStore;
 			IDStore: nextstate <= pixelRead1;
@@ -110,14 +124,18 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 			pixelRead3: nextstate <= pixelRead4;
 			pixelRead4: nextstate <= endSprite;
 			endSprite: begin
-				if(fast_hCount >= 636 && alt_vCount < 479) nextstate <= endLine;
-				else if(fast_hCount >= 636 && alt_vCount >= 479) nextstate <= endFrame;
+//				if(fast_hCount >= 636 && alt_vCount < 479) nextstate <= endLine;
+//				else if(fast_hCount >= 636 && alt_vCount >= 479) nextstate <= endFrame;
+				if(fast_hCount > 636 && alt_vCount < 479) nextstate <= endLine;
+				else if(fast_hCount > 636 && alt_vCount >= 479) nextstate <= endFrame;
 				else nextstate <= IDRead;
 			end
 			endLine: nextstate <= IDRead;
 			endFrame: nextstate <= IDRead;
 			default: nextstate <= IDRead;
 		endcase
+	//end
+	//else nextstate <= nextstate;
 	end
 	
 	always@(negedge clear, posedge clk) begin //Load pixel info based on state and loading bool value.
@@ -151,14 +169,11 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 				endSprite: begin
 					if(currentSpriteID == 16'd0) buffer[fast_hCount[9:2]-1] <= 16'd0; //If in blank square store blank pixels in buffer.
 					else buffer[fast_hCount[9:2]-1] <= read_b; //Load last 4 pixels of sprite to buffer.
+					//fast_hCount <= fast_hCount + 10'd4;	//<<TestCode
 				end
-				endLine: begin
-					fast_hCount <= 0;							//Reset the buffer's hCount
-					alt_vCount <= alt_vCount + 9'd1;		//update the line we are on
-				end
+				endLine: fast_hCount <= 0;							//Reset the buffer's hCount
 				endFrame: begin
 					fast_hCount <= 0;							//Reset buffer's hCount
-					alt_vCount <= 0;							//Reset buffer's vCount
 					movingSpriteInfoToGet <= 4'b0000;
 				end
 				default: addr_b <= currentIDAddr;
@@ -201,20 +216,16 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 				end
 				4'b0111: begin
 					if(mov_spritebufferCounter < 64)
-						movingSpriteAddr <= capDir*16'd64 + spriteStorageStartAddress;
-					else
-						movingSpriteAddr <= ghostDir*16'd64 + spriteStorageStartAddress;
-					movingSpriteInfoToGet <= 4'b1000;
-				end
-				4'b1000: begin
-					if(mov_spritebufferCounter < 64)
 						addr_b <= movingSpriteAddr + mov_spritebufferCounter;
 					else 
 						addr_b <= movingSpriteAddr + mov_spritebufferCounter - 16'd64;
+					movingSpriteInfoToGet <= 4'b1000;
+				end
+				4'b1000: begin
+					buffer[mov_spritebufferCounter + 200] <= read_b;
 					movingSpriteInfoToGet <= 4'b1001;
 				end
 				4'b1001: begin
-					buffer[mov_spritebufferCounter + 200] <= read_b;
 					if(mov_spritebufferCounter < 128) begin
 						mov_spritebufferCounter <= mov_spritebufferCounter + 1'd1;
 						movingSpriteInfoToGet <= 4'b0111;
@@ -229,13 +240,14 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 		end
 		else addr_b <= addr_b;
 	end
-	
+// always@(*)	
 	always@(*)begin //Set the enable signal for the addr_b use.
 		if(hCount > 639 && vCount < 479 || vCount > 500) loading <= 1;
+//		if(hCount > 640 && vCount < 480 || vCount > 500) loading <= 1;
 		else loading <= 0;
 	end
-	
-	always@(*) begin //Choose color.
+// always@(*)
+	always@(negedge clk) begin //Choose color.
 		if(drawGhost) begin 
 			case(ghost_hCount[1:0]) 
 				2'b00: color <= buffer[ghostPixBufAddr][13:11];
@@ -245,21 +257,22 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 			endcase
 		end
 		else if (drawCapman) begin 
-			case(ghost_hCount[1:0]) 
+			case(cap_hCount[1:0]) 
 				2'b00: color <= buffer[capPixBufAddr][13:11];
 				2'b01: color <= buffer[capPixBufAddr][10:8];
 				2'b10: color <= buffer[capPixBufAddr][7:5];
 				2'b11: color <= buffer[capPixBufAddr][4:2];
 			endcase
 		end
-		else begin 
-			case(ghost_hCount[1:0]) 
+		else if(bright) begin 
+			case(currentPixel) 
 				2'b00: color <= buffer[bufferAddress][13:11];
 				2'b01: color <= buffer[bufferAddress][10:8];
 				2'b10: color <= buffer[bufferAddress][7:5];
 				2'b11: color <= buffer[bufferAddress][4:2];
 			endcase
 		end
+		else color<= Black;
 	end
 	
 	always@(negedge clear, posedge clk)begin //Update counters that go along with vgaDisplay.
