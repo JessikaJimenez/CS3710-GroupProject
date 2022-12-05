@@ -53,7 +53,7 @@ BUC .PACDOTLOOP
 # Infinite loop for game
 .CHECKDIRECTION # Start of infinite loop for game, updates Capman based on direction pressed
 MOVI %r15 $-1 # r15 = 00FF
-LUI %r15 $31 # r15 = 1FFF
+LUI %r15 $-1 # r15 = FFFF
 LOAD %r8 %r15 # Load user input into %r8
 CMPI %r8 $0 
 BLE $1 # If r4 greater than 0, execute next instruction which will overwrite capman's direction
@@ -544,7 +544,7 @@ JUC %r0
 # This function is called when the user either wins or loses, allows to play again
 .ENDGAME
 MOVI %r15 $-1 # r15 = 00FF
-LUI %r15 $31 # r15 = 1FFF
+LUI %r15 $-1 # r15 = FFFF
 .ENDLOOP
 LOAD %r4 %r15 # Load user input into %r4
 CMPI %r4 $-1
