@@ -243,7 +243,7 @@ class Assembler():
                     self.jpoint_instrs[label] = {
                        'initial_immd': labelAddress,
                        'shift_count': count,
-                       'is_odd': odd	
+                       'is_odd': odd
                     }	
                     if odd:
                         # if it is odd, we have to correct for the -1 above
@@ -251,8 +251,8 @@ class Assembler():
                     else:
                         self.labels[label] = labelAddress
                 elif (parts[0] == 'JPT'):
-                    # JPT gets expanded into 4 instructions to do a jump to label
-                    address = address + 4
+                    # JPT gets expanded into 2 instructions to do a jump to label
+                    address = address + 2
                 else:
                     address = address + 1
 

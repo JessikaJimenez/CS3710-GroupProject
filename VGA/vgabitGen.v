@@ -62,25 +62,7 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 	wire [ADDR_WIDTH-1:0] currentPixelAddr;
 	wire [8:0] capPixBufAddr;
 	wire [8:0] ghostPixBufAddr;
-	
-	//Assign booleans based on location of capman and the ghost compared to vga beam location.
-	assign drawCapman = (hCount >= capHPos) && (hCount < (capHPos + 16)) && inCapVRange;
-	assign drawGhost = (hCount >= ghostHPos) && (hCount < (ghostHPos + 16)) && inGhostVRange;
-	assign inCapVRange = (vCount >= capVPos) && (vCount < (capVPos + 16));
-	assign inGhostVRange = (vCount >= ghostVPos) && (vCount < (ghostVPos + 16));
-	//Assign addresses based on where we are on loading the buffer.
-	assign currentPixel = hCount[1:0]; //Tells pixel vga beam is on.<<Testing currentIDAddr
-	assign currentIDAddr = spriteIDStartAddress + fast_hCount[9:4] + alt_vCount[8:4]*16'd40;
-	//assign currentIDAddr = spriteIDStartAddress + fast_hCount[5:4];
-	assign currentPixelAddr = {10'd0, alt_vCount[3:0], fast_hCount[3:2]}+(currentSpriteID-16'd1)*16'd64 + spriteStorageStartAddress;
-	assign capPixBufAddr = {3'd0, cap_vCount[3:0], cap_hCount[3:2]} + mov_spritesBufStartAddr;
-	assign ghostPixBufAddr = {3'd0, ghost_vCount[3:0], ghost_hCount[3:2]} + 9'd64 + mov_spritesBufStartAddr;
-	
-//	reg [ADDR_WIDTH-1:0] movingSpriteAddr;//Register with address to a moving sprite.<<<Changed to a wire.
-	wire [ADDR_WIDTH-1:0] movingSpriteAddr;
-	assign movingSpriteAddr = (((mov_spritebufferCounter<64) ? capDir:ghostDir)-1'b1)*16'd64+spriteStorageStartAddress;
-	
-	reg [2:0] color;				 //Gets set based on pixel we need drawn.
+		reg [2:0] color;				 //Gets set based on pixel we need drawn.
 	reg [15:0] currentSpriteID; //used to calculate currentPixelAddr.
 	reg [8:0] bufferAddress;	 //Keeps track of where we are on drawing the background.
 	reg [3:0] state, nextstate; //State of loading background into buffer.
@@ -103,6 +85,24 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 	reg [8:0] ghostVPos;
 	reg [15:0] capDir; 		//ID of capman sprite in specific direction.
 	reg [15:0] ghostDir; 	//ID of ghost sprite in specific direction.
+	
+	//Assign booleans based on location of capman and the ghost compared to vga beam location.
+	assign drawCapman = (hCount >= capHPos) && (hCount < (capHPos + 16)) && inCapVRange;
+	assign drawGhost = (hCount >= ghostHPos) && (hCount < (ghostHPos + 16)) && inGhostVRange;
+	assign inCapVRange = (vCount >= capVPos) && (vCount < (capVPos + 16));
+	assign inGhostVRange = (vCount >= ghostVPos) && (vCount < (ghostVPos + 16));
+	//Assign addresses based on where we are on loading the buffer.
+	assign currentPixel = hCount[1:0]; //Tells pixel vga beam is on.<<Testing currentIDAddr
+	assign currentIDAddr = spriteIDStartAddress + fast_hCount[9:4] + alt_vCount[8:4]*16'd40;
+	//assign currentIDAddr = spriteIDStartAddress + fast_hCount[5:4];
+	assign currentPixelAddr = {10'd0, alt_vCount[3:0], fast_hCount[3:2]}+(currentSpriteID-16'd1)*16'd64 + spriteStorageStartAddress;
+	assign capPixBufAddr = {3'd0, cap_vCount[3:0], cap_hCount[3:2]} + mov_spritesBufStartAddr;
+	assign ghostPixBufAddr = {3'd0, ghost_vCount[3:0], ghost_hCount[3:2]} + 9'd64 + mov_spritesBufStartAddr;
+	
+//	reg [ADDR_WIDTH-1:0] movingSpriteAddr;//Register with address to a moving sprite.<<<Changed to a wire.
+	wire [ADDR_WIDTH-1:0] movingSpriteAddr;
+	assign movingSpriteAddr = (((mov_spritebufferCounter<64) ? capDir:ghostDir)-1'b1)*16'd64+spriteStorageStartAddress;
+	
 	//Tells if we are loading the background into buffer.
 	reg loading; 				
 	
@@ -246,35 +246,6 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 //		if(hCount > 640 && vCount < 480 || vCount > 500) loading <= 1;
 		else loading <= 0;
 	end
-// always@(*)
-	always@(negedge clk) begin //Choose color.
-		if(drawGhost) begin 
-			case(ghost_hCount[1:0]) 
-				2'b00: color <= buffer[ghostPixBufAddr][13:11];
-				2'b01: color <= buffer[ghostPixBufAddr][10:8];
-				2'b10: color <= buffer[ghostPixBufAddr][7:5];
-				2'b11: color <= buffer[ghostPixBufAddr][4:2];
-			endcase
-		end
-		else if (drawCapman) begin 
-			case(cap_hCount[1:0]) 
-				2'b00: color <= buffer[capPixBufAddr][13:11];
-				2'b01: color <= buffer[capPixBufAddr][10:8];
-				2'b10: color <= buffer[capPixBufAddr][7:5];
-				2'b11: color <= buffer[capPixBufAddr][4:2];
-			endcase
-		end
-		else if(bright) begin 
-			case(currentPixel) 
-				2'b00: color <= buffer[bufferAddress][13:11];
-				2'b01: color <= buffer[bufferAddress][10:8];
-				2'b10: color <= buffer[bufferAddress][7:5];
-				2'b11: color <= buffer[bufferAddress][4:2];
-			endcase
-		end
-		else color<= Black;
-	end
-	
 	always@(negedge clear, posedge clk)begin //Update counters that go along with vgaDisplay.
 		if(~clear) begin
 			cap_hCount <= 0;
@@ -311,6 +282,35 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 			bufferAddress <= bufferAddress;
 		end
 	end
+// always@(*)
+	always@(negedge clk) begin //Choose color.
+		if(drawGhost) begin 
+			case(ghost_hCount[1:0]) 
+				2'b00: color <= buffer[ghostPixBufAddr][13:11];
+				2'b01: color <= buffer[ghostPixBufAddr][10:8];
+				2'b10: color <= buffer[ghostPixBufAddr][7:5];
+				2'b11: color <= buffer[ghostPixBufAddr][4:2];
+			endcase
+		end
+		else if (drawCapman) begin 
+			case(cap_hCount[1:0]) 
+				2'b00: color <= buffer[capPixBufAddr][13:11];
+				2'b01: color <= buffer[capPixBufAddr][10:8];
+				2'b10: color <= buffer[capPixBufAddr][7:5];
+				2'b11: color <= buffer[capPixBufAddr][4:2];
+			endcase
+		end
+		else if(bright) begin 
+			case(currentPixel) 
+				2'b00: color <= buffer[bufferAddress][13:11];
+				2'b01: color <= buffer[bufferAddress][10:8];
+				2'b10: color <= buffer[bufferAddress][7:5];
+				2'b11: color <= buffer[bufferAddress][4:2];
+			endcase
+		end
+		else color<= Black;
+	end
+	
 	
 	always@(*) begin //Set RGB outputs based on color.
 		if(bright) begin

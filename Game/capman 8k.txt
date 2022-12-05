@@ -35,12 +35,6 @@ MOVI %r8 $69 # r8 = 69
 MULI %r8 $6 # r8 *= 6 (r8 = 414)
 STOR %r8 %r15 # Store Pacdot Count (414) into r15(1C36)
 ADDI %r15 $1 # r15 = 1C37
-STOR %r1 %r15 # Store Pacman State (1) into r15(1C37)
-
-# Fill in the board with pacdots
-MOVI %r13 $1 # r13 = 1
-MOVI %r15 $56 # r15 = 0038
-LUI %r15 $28 # r15 = 1C38
 .PACDOTLOOP
 LOAD %r14 %r15 # Load r14 (address of pacdot) from r15 (pacdots array index)
 STOR %r13 %r14 # Store the pacdot sprite ID (1) into the sprite block (r14)
@@ -227,7 +221,8 @@ JAL %r0 %r15 # CALL .CONVERTGHOST (Returns %r11 and %r12 as positions on grid)
 JPT %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
-BEQ .CAPMANSTATE # Branches if the ghost does not collide
+JPT %r15 .CAPMANSTATE # r15 = .CAPMANSTATE address
+JEQ %r15 # Jump if ghost does not collide
 ADDI %r5 $2 # Redo position update
 
 # Need to pick new direction, either up or down
@@ -250,7 +245,8 @@ JAL %r0 %r15 # CALL .CONVERTGHOST (Returns %r11 and %r12 as positions on grid)
 JPT %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
-BEQ .CAPMANSTATE # Branches if the ghost does not collide
+JPT %r15 .CAPMANSTATE # r15 = .CAPMANSTATE address
+JEQ %r15 # Jump if ghost does not collide
 SUBI %r5 $2 # Redo position update
 
 # Need to pick new direction, either up or down
@@ -267,7 +263,8 @@ JAL %r0 %r15 # CALL .CONVERTGHOST (Returns %r11 and %r12 as positions on grid)
 JPT %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
-BEQ .CAPMANSTATE # Branches if the ghost does not collide
+JPT %r15 .CAPMANSTATE # r15 = .CAPMANSTATE address
+JEQ %r15 # Jump if ghost does not collide
 ADDI %r6 $2 # Redo position update
 
 # Need to pick new direction, either left or right
@@ -284,7 +281,8 @@ JAL %r0 %r15 # CALL .CONVERTGHOST (Returns %r11 and %r12 as positions on grid)
 JPT %r15 .CHECKWALLCOLLISION # r15 = .CHECKWALLCOLLISION address
 JAL %r0 %r15 # CALL .CHECKWALLCOLLISION (Returns %r10 as collision detection)
 CMPI %r10 $0
-BEQ .CAPMANSTATE # Branches if the ghost does not collide
+JPT %r15 .CAPMANSTATE # r15 = .CAPMANSTATE address
+JEQ %r15 # Jump if ghost does not collide
 SUBI %r6 $2 # Redo position update
 
 # Need to pick new direction, either left or right
@@ -476,7 +474,7 @@ MOV %r9 %r2 # r9 = Capman xPos
 BUC .LOADPACDOTS
 
 .LOADPACDOTS
-ANDI %r9 $8 # r9 = r9 & 0008
+ANDI %r9 $8 # r9 = r9 & 000F
 CMPI %r9 $8 
 BNE .CHECKEDFORDOT # If Capman is not in the middle of a block, don't continue
 MOVI %r9 $54 # r9 = 0036
@@ -531,14 +529,76 @@ LUI %r15 $28 # r15 = 1C30
 STOR %r2 %r15 # Store xPos(320) into r15(1C30)
 ADDI %r15 $1 # r15 = 1C31
 STOR %r3 %r15 # Store yPos(368) into r15(1C31)
+
+# Capman's direction is the sprite ID
+CMPI %r1 $0
+BEQ .STORECAPMANDEAD
+CMPI %r4 $1
+BEQ .STORECAPMANDOWN
+CMPI %r4 $2
+BEQ .STORECAPMANRIGHT
+CMPI %r4 $3
+BEQ .STORECAPMANLEFT
+CMPI %r4 $4
+BEQ .STORECAPMANUP
+
+.STORECAPMANDEAD
+MOVI %r14 $22 # r14 = 22 (Capman Dead)
+BUC .CONTINUESTORING
+
+.STORECAPMANDOWN
+MOVI %r14 $20 # r14 = 20 (Capman Open Down)
+BUC .CONTINUESTORING
+
+.STORECAPMANRIGHT
+MOVI %r14 $16 # r14 = 16 (Capman Open Right)
+BUC .CONTINUESTORING
+
+.STORECAPMANLEFT
+MOVI %r14 $14 # r14 = 14 (Capman Open Left)
+BUC .CONTINUESTORING
+
+.STORECAPMANUP
+MOVI %r14 $18 # r14 = 18 (Capman Open Up)
+BUC .CONTINUESTORING
+
+.CONTINUESTORING
 ADDI %r15 $1 # r15 = 1C32
-STOR %r4 %r15 # Store Capman Direction (3) into r15(1C32)
+STOR %r14 %r15 # Store Capman Direction (Sprite ID) into r15(1C32)
 ADDI %r15 $1 # r15 = 1C33
 STOR %r5 %r15 # Store xPosOnGhost(304) into r15(1C33)
 ADDI %r15 $1 # r15 = 1C34
 STOR %r6 %r15 # Store yPosOnGhost(16) into r15(1C34)
+
+# The ghost's direction is the Sprite ID
+CMPI %r4 $1
+BEQ .STOREGHOSTDOWN
+CMPI %r4 $2
+BEQ .STOREGHOSTRIGHT
+CMPI %r4 $3
+BEQ .STOREGHOSTLEFT
+CMPI %r4 $4
+BEQ .STOREGHOSTUP
+
+.STOREGHOSTDOWN
+MOVI %r14 $27 # r14 = 27 (Ghost A Down)
+BUC .CONTINUESTORINGAGAIN
+
+.STOREGHOSTRIGHT
+MOVI %r14 $25 # r14 = 25 (Ghost A Right)
+BUC .CONTINUESTORINGAGAIN
+
+.STOREGHOSTLEFT
+MOVI %r14 $23 # r14 = 23 (Ghost A Left)
+BUC .CONTINUESTORINGAGAIN
+
+.STOREGHOSTUP
+MOVI %r14 $29 # r14 = 29 (Ghost A Up)
+BUC .CONTINUESTORINGAGAIN
+
+.CONTINUESTORINGAGAIN
 ADDI %r15 $1 # r15 = 1C35
-STOR %r7 %r15 # Store Ghost Direction (2) into r15(1C35)
+STOR %r7 %r15 # Store Ghost Direction (Sprite ID) into r15(1C35)
 JUC %r0
 ####################################################################################
 # This function is called when the user either wins or loses, allows to play again
