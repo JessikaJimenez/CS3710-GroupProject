@@ -1,8 +1,306 @@
-MOVI $14 %r1 #Use r1 as pointer to memory slot 1
-MOVI $15 %r2 #Use r2 as pointer to memory slot 3
-LOAD %r3 %r1 #Load data at r1 into r3
-LOAD %r4 %r2 #Load data at r2 into r4
-ADD %r4 %r3 #Add r4 and r3
-STOR %r4 %r1 #Store r4 into memory slot 1
-CMPI $9 %r3
-BNE $-4
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+JPT %r1 .end
+JUC %r1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+.start
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+MOVI %r1 $15 #Use r1 as pointer to memory slot 1
+MOVI %r2 $14#Use r2 as pointer to memory slot 3
+.end
+MOVI %r2 $3 #Skip to here
+
