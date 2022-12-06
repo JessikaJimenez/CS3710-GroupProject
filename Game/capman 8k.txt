@@ -58,7 +58,7 @@ BUC .FRAMELOOP
 
 .CHECKDIRECTION # Start of infinite loop for game, updates Capman based on direction pressed
 SUBI %r14 $1 # r14 -= 1 (r14 = 0)
-# STOR %r14 %r15 # Store 0 in the frame flag
+STOR %r14 %r15 # Store 0 in the frame flag
 MOVI %r15 $-1 # r15 = 00FF
 LUI %r15 $-1 # r15 = FFFF
 LOAD %r8 %r15 # Load user input into %r8
