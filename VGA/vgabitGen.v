@@ -2,6 +2,8 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 				  (input wire bright, clk, clear, counterEnable,
 					input wire [DATA_WIDTH-1:0] read_b,
 					input wire [9:0] hCount, vCount,
+					output reg we_b,
+					output reg [DATA_WIDTH-1:0] data_b,
 					output reg [ADDR_WIDTH-1:0] addr_b,
 				   output reg [7:0] Red, Green, Blue);
 					
@@ -18,6 +20,7 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 	parameter White = 3'b111;
 	
 	//Addresses that need accessed directly.
+	 parameter frameFinishedFlagAddress = 16'h1DD5;
 	 parameter spriteStorageStartAddress = 16'h14B0;
 	 parameter spriteIDStartAddress = 16'h1000;
 	 parameter capXAddr = 16'h1C30;
@@ -148,7 +151,10 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 		if(~clear) addr_b <= spriteIDStartAddress;
 		else if(loading) begin
 			case(state)
-				IDRead: addr_b <= currentIDAddr;			//Get the sprite ID from Memory
+				IDRead: begin
+					addr_b <= currentIDAddr;			//Get the sprite ID from Memory
+					we_b <= 0;
+				end
 				IDStore: currentSpriteID <= read_b;		//Store the ID of the sprite to the side
 				pixelRead1: begin
 					addr_b <= currentPixelAddr;			//Get the first 4 pixels using sprite ID to get pixel location
@@ -181,6 +187,9 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 				endFrame: begin
 					fast_hCount <= 0;							//Reset buffer's hCount
 					movingSpriteInfoToGet <= 4'b0000;
+					addr_b <= frameFinishedFlagAddress;
+					data_b <= 16'd1;
+					we_b <= 1;
 				end
 				default: addr_b <= currentIDAddr;
 			endcase
