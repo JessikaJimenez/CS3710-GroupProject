@@ -58,7 +58,7 @@ BUC .FRAMELOOP
 
 .CHECKDIRECTION # Start of infinite loop for game, updates Capman based on direction pressed
 SUBI %r14 $1 # r14 -= 1 (r14 = 0)
-STOR %r14 %r15 # Store 0 in the frame flag
+# STOR %r14 %r15 # Store 0 in the frame flag
 MOVI %r15 $-1 # r15 = 00FF
 LUI %r15 $-1 # r15 = FFFF
 LOAD %r8 %r15 # Load user input into %r8
@@ -537,7 +537,37 @@ JUC %r0
 # This function will check for a ghost collision
 # If a collision occurs, sets Capman's alive state to 0
 .CHECKGHOSTCOLLISION
-JUC %r0
+CMP %r3 %r6 # Compare yPos of Capman and Ghost
+BEQ .CHECKXPOS # Branch if they are on same horizontal axis
+CMP %r2 %r5 # Compare xPos of Capman and Ghost
+BEQ .CHECKYPOS # Branch if they are on same vertical axis
+JUC %r0 # Return if neither branches activate
+
+.CHECKXPOS
+MOV %r8 %r2 # r8 = xPos
+SUB %r8 %r5 # r8 -= xPosOnGhost
+BUC .CHECKDEATH
+
+.CHECKYPOS
+MOV %r8 %r3 # r8 = yPos
+SUB %r8 %r6 # r8 -= yPosOnGhost
+BUC .CHECKDEATH
+
+.CHECKDEATH
+CMPI %r8 $0
+BLT .NEGATIVE # Branch if difference is negative
+CMPI %r8 $16
+BLT .CAPMANDIED # Branch if difference is (0 <= x < 16)
+JUC %r0 # Return if difference is greater 
+
+.NEGATIVE
+CMPI %r8 $-16
+BGT .CAPMANDIED # Branch if difference is (-16 < x < 0)
+JUC %r0 # Return if difference is less
+
+.CAPMANDIED
+MOVI %r1 $0 # Kill Capman
+JUC %r0 # Return  if Capman died
 ####################################################################################
 # This function will store this drawing information:
 # Capman xPos, yPos, Direction
