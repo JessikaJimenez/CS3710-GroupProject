@@ -1,4 +1,7 @@
 // Module to test FSM on the board
+// (Uses BoardProgram.dat)
+// Takes user input (pushing switches) and outputs user input plus 2 (in binary)
+// IO input is switches, IO output is LEDs
 module CPU #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16) (
 	input        clk,   //on-board 50MHz clock
 	input        reset, //button KEY3
