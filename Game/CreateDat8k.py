@@ -43,6 +43,7 @@ class CreateDat():
     PACDOTS_START = 0x1C37
     PACDOTS_END   = 0x1DD4
     ##########################
+    FRAME_FLAG = 0x1DD5
     ##########################
 
     ##### STARTING VARIABLES ####
@@ -56,7 +57,7 @@ class CreateDat():
     ghostDir  = 6
 
     pacdotCount = 414
-    capState    = 8
+    frameflag = 0
 
     
 
@@ -137,7 +138,7 @@ class CreateDat():
         f.write('{0:016b}\n'.format(self.pacdotCount))
         lineTracker += 7
         numAdresses += 7
-        numLines += 1
+        numLines += 7
         print("Added Locations, Total Lines: {}".format(numLines))
 
 ##################################################################
@@ -156,10 +157,16 @@ class CreateDat():
         print("Finished dotAddreses Total: {}".format(numLines))
 ##################################################################
 ##################################################################
+        f.write('{0:016b}\n'.format(self.frameflag))
+        lineTracker += 1
+        numAdresses += 1
+        print("Frame Flag, Total Lines: {}".format(1))
+##################################################################
+##################################################################
         print("Writing Last 0s")
         
         numLines = 0
-        while(numLines < ( 0x1FFF - self.PACDOTS_END)):
+        while(numLines < ( 0x1FFF - self.FRAME_FLAG)):
             f.write("0000000000000000" + "\n")
             numLines += 1
             lineTracker += 1

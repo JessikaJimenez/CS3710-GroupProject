@@ -25,7 +25,7 @@ module RegFile #(parameter WIDTH = 16, REGBITS = 4) (
        if (regWrite) RAM[destAddr] <= wrData; 
 	
        // register 0 is hardwired to 0
-       assign readData1 = destAddr ? RAM[destAddr] : 0;
-       assign readData2 = sourceAddr ? RAM[sourceAddr] : 0;
+       assign readData1 = RAM[destAddr];
+       assign readData2 = RAM[sourceAddr];
 	
 endmodule

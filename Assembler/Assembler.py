@@ -259,7 +259,7 @@ class Assembler():
         f.close()
 
         print(self.labels)
-        print(self.jpoint_instrs)
+        # print(self.jpoint_instrs)
 
         f = open(args.file, 'r')
         out_name = str(args.file.rsplit('.', 1)[0] + '.bin')
@@ -487,13 +487,13 @@ class Assembler():
                         sys.exit('Syntax Error: JPT needs a pointer and a register')
                     reg = parts.pop(0)
                     pointer = parts.pop(0)
-                    if not pointer in self.jpoint_instrs:
+                    if not pointer in self.labels:
                         sys.exit('Syntax Error: pointer not found: ' + pointer)
                     if (reg not in self.REGISTERS):
                         sys.exit('Invalid register')
 
-                    instr_data = self.jpoint_instrs[pointer]
-                    immediate = '{0:016b}'.format(instr_data['initial_immd'])
+                    instr_data = self.labels[pointer]
+                    immediate = '{0:016b}'.format(self.labels[pointer] + 1)
                     regNumber = '{0:04b}'.format(int(reg.replace('%r', '')))
                     #shift_amt = '{0:04b}'.format(instr_data['shift_count'])
                     insert_lower = self.instrCode("MOVI") + regNumber + immediate[8:16]

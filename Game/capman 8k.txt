@@ -35,17 +35,30 @@ MOVI %r8 $69 # r8 = 69
 MULI %r8 $6 # r8 *= 6 (r8 = 414)
 STOR %r8 %r15 # Store Pacdot Count (414) into r15(1C36)
 ADDI %r15 $1 # r15 = 1C37
+MOVI %r13 $1 # r13 = 1
 .PACDOTLOOP
 LOAD %r14 %r15 # Load r14 (address of pacdot) from r15 (pacdots array index)
 STOR %r13 %r14 # Store the pacdot sprite ID (1) into the sprite block (r14)
 ADDI %r15 $1 # r15 += 1
 SUBI %r8 $1 # r8 -= 1 (Decrement pacdot count)
 CMPI %r8 $0
-BEQ .CHECKDIRECTION # Branch if there are no more pacdots to fill
+BEQ .STARTLOOP # Branch if there are no more pacdots to fill
 BUC .PACDOTLOOP
 #######################################################################
 # Infinite loop for game
+.STARTLOOP
+# Only update game when a frame has passed
+MOVI %r15 $-43 # r15 = 00D5
+LUI %r15 $29 # r15 = 1DD5
+.FRAMELOOP # Loop here until a frame has passed
+LOAD %r14 %r15 # Load frame completion flag into r14
+CMPI %r14 $1
+BEQ .CHECKDIRECTION
+BUC .FRAMELOOP
+
 .CHECKDIRECTION # Start of infinite loop for game, updates Capman based on direction pressed
+SUBI %r14 $1 # r14 -= 1 (r14 = 0)
+STOR %r14 %r15 # Store 0 in the frame flag
 MOVI %r15 $-1 # r15 = 00FF
 LUI %r15 $-1 # r15 = FFFF
 LOAD %r8 %r15 # Load user input into %r8
@@ -105,7 +118,7 @@ JAL %r0 %r15 # CALL .STOREDRAWINGINFORMATION
 JPT %r15 .ENDGAME # r15 = .ENDGAME address
 CMPI %r1 $0
 JEQ %r15 # Jump to .ENDGAME if Capman is dead
-BUC .CHECKDIRECTION # Loop back to beginning
+BUC .STARTLOOP # Loop back to beginning
 ###########################################################################
 # Function for character going the left direction
 # Goes left if there are no collisions present
@@ -237,7 +250,7 @@ ADDI %r5 $2 # xPosOnGhost += 2
 MOVI %r15 $64 # r15 = 64
 MULI %r15 $10 # r15 *= 10 (r15 = 640)
 CMP %r5 %r15
-BLT .RIGHTCONVERSION # Execute next instruction if we need to loop
+BLT .RIGHTCONVERSIONGHOST # Execute next instruction if we need to loop
 SUB %r5 %r15 # xPosOnGhost -= 640
 .RIGHTCONVERSIONGHOST
 JPT %r15 .CONVERTGHOST # r15 = .CONVERTGHOST address
@@ -292,10 +305,6 @@ JUC %r15 # Change direction to left or right
 # This function will pick a new direction for the ghost if it can
 .PICKDIRECTION
 # Check which direction the ghost is going
-CMP %r7 %r4
-JPT %r15 .UPDATEGHOSTCONTINUE # r15 = .UPDATEGHOSTCONTINUE address
-JEQ %r15 # Keep going if both are going same direction (chasing)
-
 .NEWDIRECTION
 CMPI %r7 $1
 BEQ .GOINGVERTICAL
@@ -306,7 +315,7 @@ BEQ .GOINGHORIZONTAL
 CMPI %r7 $3
 BEQ .GOINGHORIZONTAL
 
-# When going vertical, only change direction if valid
+# When going vertical, only change direction or check walls if valid
 # This is when the yPosOnGhost is divisible by 16
 .GOINGVERTICAL
 MOV %r10 %r6 # r10 = yPosOnGhost
@@ -316,7 +325,7 @@ CMPI %r10 $0
 BEQ .LEFTORRIGHT
 BUC .KEEPGOING
 
-# When going horizontal, only change direction if valid
+# When going horizontal, only change direction or check walls if valid
 # This is when the xPosOnGhost is divisible by 16
 .GOINGHORIZONTAL
 MOV %r10 %r5 # r10 = xPosOnGhost
@@ -327,46 +336,50 @@ BEQ .UPORDOWN
 BUC .KEEPGOING
 
 .LEFTORRIGHT
+CMPI %r8 $1
+BEQ .TURNUP
+CMPI %r8 $4
+BEQ .TURNDOWN
 CMPI %r8 $0
-BNE .FAILSAFE # Branches if this isn't the first time a new direction has been selected
+BNE .GOBACKORIGINALDIRECTION # Branches if this isn't the first time a new direction has been selected
 MOV %r8 %r7 # Store original direction
-MOVI %r7 $2 # Make ghost go right
 CMPI %r4 $3
-BLT $1
+BLT .TURNLEFT
+BUC .TURNRIGHT
+
+.TURNRIGHT
+MOVI %r7 $2 # Make ghost go right
+BUC .KEEPGOING
+
+.TURNLEFT
 MOVI %r7 $3 # Make ghost go left
 BUC .KEEPGOING
 
 .UPORDOWN
+CMPI %r8 $2
+BEQ .TURNLEFT
+CMPI %r8 $3
+BEQ .TURNRIGHT
 CMPI %r8 $0
-BNE .FAILSAFE # Branches if this isn't the first time a new direction has been selected
+BNE .GOBACKORIGINALDIRECTION # Branches if this isn't the first time a new direction has been selected
 MOV %r8 %r7 # Store original direction
-MOVI %r7 $1 # Make ghost go down
 CMPI %r4 $3
-BLT $1
+BLT .TURNUP
+BUC .TURNDOWN
+
+.TURNDOWN
+MOVI %r7 $1 # Make ghost go down
+BUC .KEEPGOING
+
+.TURNUP
 MOVI %r7 $4 # Make ghost go up
 BUC .KEEPGOING
 
-# This is if the ghost may potentially be stuck in an infinite loop
-.FAILSAFE
-CMPI %r8 $1
-BNE $3 # Branches if original direction wasn't down
-MOV %r8 %r7 # Will either be left or right now
-MOVI %r7 $4 # Make the ghost go up instead
-BUC .KEEPGOING
-CMPI %r8 $2
-BNE $3 # Branches if original direction wasn't right
-MOV %r8 %r7 # Will either be up or down now
-MOVI %r7 $3 # Make the ghost go left instead
-BUC .KEEPGOING
-CMPI %r8 $3
-BNE $3 # Branches if original direction wasn't left
-MOV %r8 %r7 # Will either be up or down now
-MOVI %r7 $2 # Make the ghost go right instead
-BUC .KEEPGOING
-CMPI %r8 $4
-BNE $3 # Branches if original direction wasn't left
-MOV %r8 %r7 # Will either be left or right now
-MOVI %r7 $1 # Make the ghost go down instead
+# This is if the ghost tries to turn and it doesn't work
+.GOBACKORIGINALDIRECTION
+MOV %r9 %r7 # r9 = r7 (Turn ghost tried to make)
+MOV %r7 %r8 # r7 = r8 (Ghost's initial direction)
+MOV %r8 %r9 # r8 = r9 (Turn ghost tried to make)
 BUC .KEEPGOING
 
 .KEEPGOING
@@ -384,8 +397,8 @@ MOV %r13 %r2 # r13 = xPos
 MOV %r14 %r3 # r14 = yPos
 CMPI %r4 $3
 BGE .CONTINUECAPMANCONVERSION # Branch if direction is left or up, otherwise focus point must be on bottom right of sprite
-ADDI %r13 $16 # r13 += 16
-ADDI %r14 $16 # r14 += 16
+ADDI %r13 $15 # r13 += 15
+ADDI %r14 $15 # r14 += 15
 .CONTINUECAPMANCONVERSION
 MOV %r11 %r13 # r11 = xPos (top left or bottom right)
 ASHUI %r11 $-4 # r11 /= 16
@@ -404,8 +417,8 @@ MOV %r13 %r5 # r13 = xPosOnGhost
 MOV %r14 %r6 # r14 = yPosOnGhost
 CMPI %r7 $3
 BGE .CONTINUEGHOSTCONVERSION # Branch if direction is left or up, otherwise focus point must be on bottom right of sprite
-ADDI %r13 $16 # r13 += 16
-ADDI %r14 $16 # r14 += 16
+ADDI %r13 $15 # r13 += 15
+ADDI %r14 $15 # r14 += 15
 .CONTINUEGHOSTCONVERSION
 MOV %r11 %r13 # r11 = xPosOnGhost (top left or bottom right)
 ASHUI %r11 $-4 # r11 /= 16
@@ -424,7 +437,7 @@ MOVI %r14 $-1 # r14 = 00FF
 LUI %r14 $15 # r14 = 0FFF
 STOR %r0 %r14 # Store last return address in memory
 
-# Assume that capman does not collide
+# Assume that it does not collide
 MOVI %r10 $0 # r10 = 0
 
 # Get the sprite ID on the grid
@@ -432,7 +445,7 @@ JPT %r15 .GETSPRITEID # r15 = .GETSPRITEID address
 JAL %r0 %r15 # CALL .GETSPRITEID (Returns %r13 as sprite ID, won't use %r14)
 CMPI %r13 $1
 BLE .CHECKEDFORWALL # Branches if the block on grid isn't a wall
-MOVI %r10 $1 # r10 = 1 (Player collides)
+MOVI %r10 $1 # r10 = 1 (Collides)
 .CHECKEDFORWALL
 
 # Return address was overwritten, get it back from memory
@@ -452,6 +465,8 @@ JUC %r0
 MOVI %r14 $-1 # r14 = 00FF
 LUI %r14 $15 # r14 = 0FFF
 STOR %r0 %r14 # Store last return address in memory
+
+MOVI %r10 $1 # r10 = 1 by default
 
 # Before checking memory, see if capman is potentially on top of a pacdot
 # If Capman is going horizontal, his xPos must be halfway through the grid block
@@ -571,13 +586,13 @@ ADDI %r15 $1 # r15 = 1C34
 STOR %r6 %r15 # Store yPosOnGhost(16) into r15(1C34)
 
 # The ghost's direction is the Sprite ID
-CMPI %r4 $1
+CMPI %r7 $1
 BEQ .STOREGHOSTDOWN
-CMPI %r4 $2
+CMPI %r7 $2
 BEQ .STOREGHOSTRIGHT
-CMPI %r4 $3
+CMPI %r7 $3
 BEQ .STOREGHOSTLEFT
-CMPI %r4 $4
+CMPI %r7 $4
 BEQ .STOREGHOSTUP
 
 .STOREGHOSTDOWN
@@ -598,15 +613,16 @@ BUC .CONTINUESTORINGAGAIN
 
 .CONTINUESTORINGAGAIN
 ADDI %r15 $1 # r15 = 1C35
-STOR %r7 %r15 # Store Ghost Direction (Sprite ID) into r15(1C35)
+STOR %r14 %r15 # Store Ghost Direction (Sprite ID) into r15(1C35)
 JUC %r0
 ####################################################################################
 # This function is called when the user either wins or loses, allows to play again
 .ENDGAME
 MOVI %r15 $-1 # r15 = 00FF
 LUI %r15 $-1 # r15 = FFFF
+JPT %r14 .START # r14 = .START address
 .ENDLOOP
 LOAD %r4 %r15 # Load user input into %r4
 CMPI %r4 $-1
-BNE .ENDLOOP # Branches if user does not press A (play again button)
-BUC .ENDGAME
+JEQ %r14 # Branches if user presses A (play again button)
+BUC .ENDLOOP

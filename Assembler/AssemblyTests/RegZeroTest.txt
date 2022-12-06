@@ -1,0 +1,7 @@
+MOVI %r0 $2 # r0 = 2
+ADDI %r0 $3 # r0 += 3 (r0 = 5)
+JUC %r0 # Jump to address 4
+MOVI %r14 $1 # shouldn't happen
+MOV %r15 %r0 # r15 = r0 (5)
+
+# THIS FILE PASSES TESTBENCH
