@@ -24,7 +24,9 @@ module Capman (
 	wire [15:0] IOoutput;
 	//Variables for VGA controller
 	wire [15:0] read_b;	
-	wire [15:0] addr_b;		
+	wire [15:0] addr_b;	
+	wire [15:0] data_b;
+	wire write_b;	
 	
 	//Instantiate NES Controller
 	nesInterface NES (
@@ -41,10 +43,10 @@ module Capman (
 	GeneralCPU #(.ADDR_WIDTH(13)) CPU (
 		.clk(clk),			//Input 50MHz clock
 		.reset(reset),			//Input reset
-		.memData(16'b0),		//Input 0, not being used
+		.memData(data_b),		//Input data_b from VGA
 		.addr(addr_b),			//Input addr_b from VGA
 		.IOinput(IOinput),		//Input IOinput from NES 
-		.writeEnable(16'b0),		//Input 0, not being used	
+		.writeEnable(write_b),		//Input write_b from VGA	
 		.memOutput(memOutput),		//Output memOutput which will go into VGA
 		.IOoutput(IOoutput)		//Output 0, not being used
 	);
@@ -56,6 +58,8 @@ module Capman (
 		.clear(reset),			//Input reset
 		.read_b(memOutput),		//Input memOutput from CPU
 		.addr_b(addr_b),		//Output addr_b to CPU
+		.write_b(write_b),		//Output write_b to CPU
+		.data_b(data_b),		//Output data_b to CPU
 		.hSync(hSync),			//Output hSync
 		.vSync(vSync),			//Output vSync
 		.splitClk(VGA_CLK),		//Output VGA 25MHz clock
