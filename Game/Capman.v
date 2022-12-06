@@ -58,7 +58,7 @@ module Capman (
 		.clear(reset),			//Input reset
 		.read_b(memOutput),		//Input memOutput from CPU
 		.addr_b(addr_b),		//Output addr_b to CPU
-		.we_b(write_b),		//Output write_b to CPU
+		.write_b(write_b),		//Output write_b to CPU
 		.data_b(data_b),		//Output data_b to CPU
 		.hSync(hSync),			//Output hSync
 		.vSync(vSync),			//Output vSync
