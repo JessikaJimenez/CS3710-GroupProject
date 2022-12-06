@@ -7,7 +7,7 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 					
 //4 pixel colors can be stored in one word of memory because we have 6 pre-set colors so one color can be represented in 3 bits.
 
-//Assume sprites begin at Address 14B0 (Each sprite takes up 16*4 = 64 lines of code or 40 in hex) total memory for sprites = 1920 words
+//Assume sprites begin at Address C4B0 (Each sprite takes up 16*4 = 64 lines of code or 40 in hex) total memory for sprites = 1920 words
 					
 	//Pre-defined colors that can be displayed.
 	parameter Black = 3'b000;
@@ -51,6 +51,31 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 	parameter endLine = 4'b0111;
 	parameter endFrame = 4'b1000;
 	
+	reg [2:0] color;				 //Gets set based on pixel we need drawn.
+	reg [15:0] currentSpriteID; //used to calculate currentPixelAddr.
+	reg [3:0] state, nextstate; //State of loading background into buffer.
+	reg [3:0] movingSpriteInfoToGet; //Keep track of what moving sprite info we need to lookup.
+	
+	//Counters to set lookup addresses to the right address.
+	reg [9:0] fast_hCount;
+	wire [9:0] alt_vCount;
+	assign alt_vCount = (vCount < 480) ? (vCount+1'b1):(9'd0);
+	//reg [8:0] alt_vCount; <<changed to wire.
+//	reg [3:0] cap_hCount;
+//	reg [3:0] cap_vCount;
+//	reg [3:0] ghost_hCount;
+	reg [9:0] backPix;	 //Keeps track of where we are on drawing the background.
+	reg [7:0] ghostPix;
+	reg [7:0] capPix;
+//	reg [3:0] ghost_vCount;
+	reg [7:0] mov_spritebufferCounter; //Where we are on loading a sprite into the buffer.
+	//Positions of capman and the ghost so we can know where to draw them
+	reg [9:0] capHPos;
+	reg [8:0] capVPos;
+	reg [9:0] ghostHPos;
+	reg [8:0] ghostVPos;
+	reg [15:0] capDir; 		//ID of capman sprite in specific direction.
+	reg [15:0] ghostDir; 	//ID of ghost sprite in specific direction.
 	//Booleans to determine what to draw.
 	wire drawCapman;
 	wire drawGhost;
@@ -62,29 +87,7 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 	wire [ADDR_WIDTH-1:0] currentPixelAddr;
 	wire [8:0] capPixBufAddr;
 	wire [8:0] ghostPixBufAddr;
-		reg [2:0] color;				 //Gets set based on pixel we need drawn.
-	reg [15:0] currentSpriteID; //used to calculate currentPixelAddr.
-	reg [8:0] bufferAddress;	 //Keeps track of where we are on drawing the background.
-	reg [3:0] state, nextstate; //State of loading background into buffer.
-	reg [3:0] movingSpriteInfoToGet; //Keep track of what moving sprite info we need to lookup.
-	
-	//Counters to set lookup addresses to the right address.
-	reg [9:0] fast_hCount;
-	wire [9:0] alt_vCount;
-	assign alt_vCount = (vCount < 480) ? (vCount+1'b1):(9'd0);
-	//reg [8:0] alt_vCount; <<changed to wire.
-	reg [3:0] cap_hCount;
-	reg [3:0] cap_vCount;
-	reg [3:0] ghost_hCount;
-	reg [3:0] ghost_vCount;
-	reg [7:0] mov_spritebufferCounter; //Where we are on loading a sprite into the buffer.
-	//Positions of capman and the ghost so we can know where to draw them
-	reg [9:0] capHPos;
-	reg [8:0] capVPos;
-	reg [9:0] ghostHPos;
-	reg [8:0] ghostVPos;
-	reg [15:0] capDir; 		//ID of capman sprite in specific direction.
-	reg [15:0] ghostDir; 	//ID of ghost sprite in specific direction.
+	wire [8:0] backPixBufAddr;
 	
 	//Assign booleans based on location of capman and the ghost compared to vga beam location.
 	assign drawCapman = (hCount >= capHPos) && (hCount < (capHPos + 16)) && inCapVRange;
@@ -94,10 +97,13 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 	//Assign addresses based on where we are on loading the buffer.
 	assign currentPixel = hCount[1:0]; //Tells pixel vga beam is on.<<Testing currentIDAddr
 	assign currentIDAddr = spriteIDStartAddress + fast_hCount[9:4] + alt_vCount[8:4]*16'd40;
-	//assign currentIDAddr = spriteIDStartAddress + fast_hCount[5:4];
+//	assign currentIDAddr = spriteIDStartAddress + fast_hCount[5:4];
 	assign currentPixelAddr = {10'd0, alt_vCount[3:0], fast_hCount[3:2]}+(currentSpriteID-16'd1)*16'd64 + spriteStorageStartAddress;
-	assign capPixBufAddr = {3'd0, cap_vCount[3:0], cap_hCount[3:2]} + mov_spritesBufStartAddr;
-	assign ghostPixBufAddr = {3'd0, ghost_vCount[3:0], ghost_hCount[3:2]} + 9'd64 + mov_spritesBufStartAddr;
+//	assign capPixBufAddr = {3'd0, cap_vCount[3:0], cap_hCount[3:2]} + mov_spritesBufStartAddr;
+//	assign ghostPixBufAddr = {3'd0, ghost_vCount[3:0], ghost_hCount[3:2]} + 9'd64 + mov_spritesBufStartAddr;
+	assign capPixBufAddr = {3'd0, capPix[7:2]} + mov_spritesBufStartAddr;
+	assign ghostPixBufAddr = {3'd0, ghostPix[7:2]} + 9'd64 + mov_spritesBufStartAddr;
+	assign backPixBufAddr = {3'd0, backPix[7:2]};
 	
 //	reg [ADDR_WIDTH-1:0] movingSpriteAddr;//Register with address to a moving sprite.<<<Changed to a wire.
 	wire [ADDR_WIDTH-1:0] movingSpriteAddr;
@@ -246,71 +252,114 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 //		if(hCount > 640 && vCount < 480 || vCount > 500) loading <= 1;
 		else loading <= 0;
 	end
-	always@(negedge clear, posedge clk)begin //Update counters that go along with vgaDisplay.
-		if(~clear) begin
-			cap_hCount <= 0;
-			cap_vCount <= 0;
-			ghost_hCount <= 0;
-			ghost_vCount <= 0;
-			bufferAddress <= 0;
-		end
-		else if(counterEnable) begin
-			//Determine if we need to update horizontal counts and update them.
-			if(drawGhost) ghost_hCount <= ghost_hCount + 1'b1;
-			else if(drawCapman) cap_hCount <= cap_hCount + 1'b1;
-			else begin
-				ghost_hCount <= 0;
-				cap_hCount <= 0;
-			end
-			
-			//Determine if we need to update verticle counts and update them.
-			if(inGhostVRange && vCount != ghostVPos) ghost_vCount <= ghost_vCount + 1'b1;
-			else ghost_vCount <= 0;
-			if(inCapVRange && vCount != capVPos) cap_vCount <= cap_vCount + 1'b1;
-			else cap_vCount <= 0;
-			
-			if(hCount > 640) bufferAddress <= 0;
-			else if(currentPixel == 2'b11) bufferAddress <= bufferAddress + 1'b1;
-			else bufferAddress <= bufferAddress;
-				
-		end
-		else begin
-			ghost_hCount <= ghost_hCount;
-			cap_hCount <= cap_hCount;
-			cap_vCount <= cap_vCount;
-			ghost_vCount <= ghost_vCount;
-			bufferAddress <= bufferAddress;
-		end
-	end
 // always@(*)
 	always@(negedge clk) begin //Choose color.
-		if(drawGhost) begin 
-			case(ghost_hCount[1:0]) 
-				2'b00: color <= buffer[ghostPixBufAddr][13:11];
-				2'b01: color <= buffer[ghostPixBufAddr][10:8];
-				2'b10: color <= buffer[ghostPixBufAddr][7:5];
-				2'b11: color <= buffer[ghostPixBufAddr][4:2];
-			endcase
+		if(counterEnable) begin
+			if(drawGhost) begin 
+				case(ghostPix[1:0]) 
+					2'b00: begin
+						color <= buffer[ghostPixBufAddr][13:11];
+						ghostPix <= ghostPix + 1'b1;
+					end
+					2'b01: begin
+						color <= buffer[ghostPixBufAddr][10:8];
+						ghostPix <= ghostPix + 1'b1;
+					end
+					2'b10: begin
+						color <= buffer[ghostPixBufAddr][7:5];
+						ghostPix <= ghostPix + 1'b1;
+					end
+					2'b11: begin 
+						color <= buffer[ghostPixBufAddr][4:2];
+						if(ghostPix == 255) ghostPix <= 0;
+						else ghostPix <= ghostPix + 1'b1;
+					end
+				endcase
+	//			case(ghostpix[1:0]) 
+	//				2'b00: color <= buffer[ghostPixBufAddr][13:11];
+	//				2'b01: color <= buffer[ghostPixBufAddr][10:8];
+	//				2'b10: color <= buffer[ghostPixBufAddr][7:5];
+	//				2'b11: color <= buffer[ghostPixBufAddr][4:2];
+	//			endcase
+			end
+			else if (drawCapman) begin 
+				case(capPix[1:0]) 
+					2'b00: begin
+						color <= buffer[capPixBufAddr][13:11];
+						capPix <= capPix + 1'b1;
+					end
+					2'b01: begin
+						color <= buffer[capPixBufAddr][10:8];
+						capPix <= capPix + 1'b1;
+					end
+					2'b10: begin
+						color <= buffer[capPixBufAddr][7:5];
+						capPix <= capPix + 1'b1;
+					end
+					2'b11: begin
+						color <= buffer[capPixBufAddr][4:2];
+						if(capPix == 255) capPix <= 0;
+						else capPix <= capPix + 1'b1;
+					end
+				endcase
+			end
+			else if(bright) begin 
+				case(backPix[1:0]) 
+					2'b00: color <= buffer[backPixBufAddr][13:11];
+					2'b01: color <= buffer[backPixBufAddr][10:8];
+					2'b10: color <= buffer[backPixBufAddr][7:5];
+					2'b11: color <= buffer[backPixBufAddr][4:2];
+				endcase
+			end
+			else color<= Black;
+			
+			if(bright) begin
+				if(backPix == 639) backPix <= 0;
+				else backPix <= backPix +1'b1;
+			end
+			else backPix <= backPix;
+			
 		end
-		else if (drawCapman) begin 
-			case(cap_hCount[1:0]) 
-				2'b00: color <= buffer[capPixBufAddr][13:11];
-				2'b01: color <= buffer[capPixBufAddr][10:8];
-				2'b10: color <= buffer[capPixBufAddr][7:5];
-				2'b11: color <= buffer[capPixBufAddr][4:2];
-			endcase
-		end
-		else if(bright) begin 
-			case(currentPixel) 
-				2'b00: color <= buffer[bufferAddress][13:11];
-				2'b01: color <= buffer[bufferAddress][10:8];
-				2'b10: color <= buffer[bufferAddress][7:5];
-				2'b11: color <= buffer[bufferAddress][4:2];
-			endcase
-		end
-		else color<= Black;
+		else ghostPix <= ghostPix;
 	end
 	
+//	always@(negedge clear, posedge clk)begin //Update counters that go along with vgaDisplay.
+//		if(~clear) begin
+//			cap_hCount <= 0;
+//			cap_vCount <= 0;
+//			ghost_hCount <= 0;
+//			ghost_vCount <= 0;
+//			bufferAddress <= 0;
+//		end
+//		else if(counterEnable) begin
+			//Determine if we need to update horizontal counts and update them.
+//			if(drawGhost) ghost_hCount <= ghost_hCount + 1'b1;
+//			else if(drawCapman) cap_hCount <= cap_hCount + 1'b1;
+//			if(drawCapman) cap_hCount <= cap_hCount + 1'b1;
+//			else begin
+//				ghost_hCount <= 0;
+//				cap_hCount <= 0;
+//			end
+			
+			//Determine if we need to update verticle counts and update them.
+//			if(inGhostVRange && vCount != ghostVPos) ghost_vCount <= ghost_vCount + 1'b1;
+//			else ghost_vCount <= 0;
+//			if(inCapVRange && vCount != capVPos) cap_vCount <= cap_vCount + 1'b1;
+//			else cap_vCount <= 0;
+			
+//			if(hCount > 640) bufferAddress <= 0;
+//			else if(currentPixel == 2'b11) bufferAddress <= bufferAddress + 1'b1;
+//			else bufferAddress <= bufferAddress;
+				
+//		end
+//		else begin
+//			ghost_hCount <= ghost_hCount;
+//			cap_hCount <= cap_hCount;
+//			cap_vCount <= cap_vCount;
+//			ghost_vCount <= ghost_vCount;
+//			bufferAddress <= bufferAddress;
+//		end
+//	end
 	
 	always@(*) begin //Set RGB outputs based on color.
 		if(bright) begin
