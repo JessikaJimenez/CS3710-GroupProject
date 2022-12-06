@@ -58,7 +58,7 @@ BUC .FRAMELOOP
 
 .CHECKDIRECTION # Start of infinite loop for game, updates Capman based on direction pressed
 SUBI %r14 $1 # r14 -= 1 (r14 = 0)
-STOR %r14 %r15 # Store 0 in the frame flag
+# STOR %r14 %r15 # Store 0 in the frame flag
 MOVI %r15 $-1 # r15 = 00FF
 LUI %r15 $-1 # r15 = FFFF
 LOAD %r8 %r15 # Load user input into %r8
@@ -90,7 +90,8 @@ JEQ %r15 # Jump to .ENDGAME if all pacdots are collected
 # Update ghost position based on its current direction
 # A ghost will turn at forks loosely based on player input
 .UPDATEGHOSTBEGIN
-MOVI %r8 $0 # r8 = 0 (This will be used to avoid infinite loop with ghost)
+MOVI %r8 $0 # r8 = 0 (This will be used to store original direction)
+MOVI %r9 $0 # r9 = 0 (This will be used to prevent infinite loops)
 JPT %r15 .PICKDIRECTION # r15 = .PICKDIRECTION address
 JUC %r15 # Pick a new direction for ghost if it isn't chasing capman
 .UPDATEGHOSTCONTINUE
@@ -336,12 +337,10 @@ BEQ .UPORDOWN
 BUC .KEEPGOING
 
 .LEFTORRIGHT
-CMPI %r8 $1
-BEQ .TURNUP
-CMPI %r8 $4
-BEQ .TURNDOWN
+CMPI %r9 $0
+BNE .FAILSAFE # Branch if this is the second time ghost tries to turn
 CMPI %r8 $0
-BNE .GOBACKORIGINALDIRECTION # Branches if this isn't the first time a new direction has been selected
+BNE .GOBACKORIGINALDIRECTION # Branch if this isn't the first time ghost tries to turn
 MOV %r8 %r7 # Store original direction
 CMPI %r4 $3
 BLT .TURNLEFT
@@ -356,12 +355,10 @@ MOVI %r7 $3 # Make ghost go left
 BUC .KEEPGOING
 
 .UPORDOWN
-CMPI %r8 $2
-BEQ .TURNLEFT
-CMPI %r8 $3
-BEQ .TURNRIGHT
+CMPI %r9 $0
+BNE .FAILSAFE # Branch if this is the second time ghost tries to turn
 CMPI %r8 $0
-BNE .GOBACKORIGINALDIRECTION # Branches if this isn't the first time a new direction has been selected
+BNE .GOBACKORIGINALDIRECTION # Branch if this isn't the first time ghost tries to turn
 MOV %r8 %r7 # Store original direction
 CMPI %r4 $3
 BLT .TURNUP
@@ -375,12 +372,23 @@ BUC .KEEPGOING
 MOVI %r7 $4 # Make ghost go up
 BUC .KEEPGOING
 
-# This is if the ghost tries to turn and it doesn't work
+# This is if the ghost tries to turn once and it doesn't work
 .GOBACKORIGINALDIRECTION
 MOV %r9 %r7 # r9 = r7 (Turn ghost tried to make)
 MOV %r7 %r8 # r7 = r8 (Ghost's initial direction)
 MOV %r8 %r9 # r8 = r9 (Turn ghost tried to make)
 BUC .KEEPGOING
+
+# This is if the ghost tries to turn twice and it doesn't work
+.FAILSAFE
+CMPI %r9 $1
+BEQ .TURNUP
+CMPI %r9 $2
+BEQ .TURNLEFT
+CMPI %r9 $3
+BEQ .TURNRIGHT
+CMPI %r9 $4
+BEQ .TURNDOWN
 
 .KEEPGOING
 JPT %r15 .UPDATEGHOSTCONTINUE # r15 = .UPDATEGHOSTCONTINUE address
