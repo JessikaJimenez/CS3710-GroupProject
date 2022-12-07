@@ -65,7 +65,7 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 	wire [9:0] alt_vCount;
 	assign alt_vCount = (vCount < 480) ? (vCount+1'b1):(9'd0);
 	
-	reg [9:0] backPix;	 //Keeps track of where we are on drawing the background.
+//	reg [9:0] backPix;	 //Keeps track of where we are on drawing the background.
 	reg [7:0] ghostPix;	 //Where we are on drawing ghost sprite.
 	reg [7:0] capPix;		 //Where we are on drawing Capman sprite.
 	reg [7:0] mov_spritebufferCounter; //location offset for loading sprites into buffer.
@@ -89,7 +89,9 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 	wire [ADDR_WIDTH-1:0] currentPixelAddr;
 	wire [8:0] capPixBufAddr;
 	wire [8:0] ghostPixBufAddr;
-	wire [8:0] backPixBufAddr;
+//	wire [8:0] backPixBufAddr;
+	
+	reg [8:0] bufferAddress;
 	
 	//Assign booleans based on location of capman and the ghost compared to vga beam location.
 	assign drawCapman = (hCount >= capHPos) && (hCount < (capHPos + 16)) && inCapVRange;
@@ -103,7 +105,7 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 	assign currentPixelAddr = {10'd0, alt_vCount[3:0], fast_hCount[3:2]}+(currentSpriteID-16'd1)*16'd64 + spriteStorageStartAddress;
 	assign capPixBufAddr = {3'd0, capPix[7:2]} + mov_spritesBufStartAddr;
 	assign ghostPixBufAddr = {3'd0, ghostPix[7:2]} + 9'd64 + mov_spritesBufStartAddr;
-	assign backPixBufAddr = {3'd0, backPix[7:2]};
+//	assign backPixBufAddr = {3'd0, backPix[7:2]};
 	
 	wire [ADDR_WIDTH-1:0] movingSpriteAddr;
 	assign movingSpriteAddr = (((mov_spritebufferCounter<64) ? capDir:ghostDir)-1'b1)*16'd64+spriteStorageStartAddress;
@@ -250,6 +252,22 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 		else loading <= 0;
 	end
 	
+	always@(negedge clear, posedge clk)begin //Update counters that go along with vgaDisplay.
+		if(~clear) begin
+			bufferAddress <= 0;
+		end
+		else if(counterEnable) begin
+			
+			if(hCount > 640) bufferAddress <= 0;
+			else if(hCount[1:0] == 2'b11) bufferAddress <= bufferAddress + 1'b1;
+			else bufferAddress <= bufferAddress;
+				
+		end
+		else begin
+			bufferAddress <= bufferAddress;
+		end
+	end
+	
 	always@(negedge clk) begin //Choose color.
 		if(counterEnable) begin //Syncs this always block with the VGA Clock.
 			if(drawGhost) begin 
@@ -295,21 +313,14 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 				endcase
 			end
 			else if(bright) begin 
-				case(backPix[1:0]) //Set color based on current background pixel.
-					2'b00: color <= buffer[backPixBufAddr][13:11];
-					2'b01: color <= buffer[backPixBufAddr][10:8];
-					2'b10: color <= buffer[backPixBufAddr][7:5];
-					2'b11: color <= buffer[backPixBufAddr][4:2];
+				case(hCount[1:0]) //Set color based on current background pixel.
+					2'b00: color <= buffer[bufferAddress][13:11];
+					2'b01: color <= buffer[bufferAddress][10:8];
+					2'b10: color <= buffer[bufferAddress][7:5];
+					2'b11: color <= buffer[bufferAddress][4:2];
 				endcase
 			end
 			else color<= Black;
-			
-			if(bright) begin //Want to update the background pixel counter every time any of the counters goes up but only if bright is high.
-				if(backPix == 639) backPix <= 0; //If at end of line reset the counter.
-				else backPix <= hCount;
-			end
-			else backPix <= backPix;
-			
 		end
 		else ghostPix <= ghostPix;
 	end
