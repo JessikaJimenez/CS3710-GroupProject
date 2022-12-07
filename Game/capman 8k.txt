@@ -155,7 +155,7 @@ BUC .STARTLOOP # Loop back to beginning
 .CAPMANLEFT
 SUBI %r2 $1 # xPos -= 1
 CMPI %r2 $0
-BGE .LEFTCONVERSION # Execute next few instruction if we need to loop
+BGE .LEFTCONVERSION # Branch if we don't need to loop around
 MOVI %r15 $64 # r15 = 64
 MULI %r15 $10 # r15 *= 10 (r15 = 640)
 ADD %r2 %r15 # xPos += 640
@@ -193,8 +193,10 @@ JUC %r15
 ADDI %r2 $1 # xPos += 1
 MOVI %r15 $64 # r15 = 64
 MULI %r15 $10 # r15 *= 10 (r15 = 640)
+SUBI %r15 $15 # r15 -= 15 (r15 = 625)
 CMP %r2 %r15
-BLT .RIGHTCONVERSION # Execute next instruction if we need to loop
+BLT .RIGHTCONVERSION # Branch if we don't need to loop around
+ADDI %r15 $15 # r15 += 15 (r15 = 640)
 SUB %r2 %r15 # xPos -= 640
 .RIGHTCONVERSION
 JPT %r15 .CONVERTCAPMAN # r15 = .CONVERTCAPMAN address
@@ -289,7 +291,7 @@ JUC %r15
 .GHOSTLEFT
 SUBI %r5 $2 # xPosOnGhost -= 2
 CMPI %r5 $0
-BGE .LEFTCONVERSIONGHOST # Execute next few instruction if we need to loop
+BGE .LEFTCONVERSIONGHOST # Branch if we don't need to loop around
 MOVI %r15 $64 # r15 = 64
 MULI %r15 $10 # r15 *= 10 (r15 = 640)
 ADD %r5 %r15 # xPosOnGhost += 640
@@ -314,8 +316,10 @@ JUC %r15 # Change direction to up or down
 ADDI %r5 $2 # xPosOnGhost += 2
 MOVI %r15 $64 # r15 = 64
 MULI %r15 $10 # r15 *= 10 (r15 = 640)
+SUBI %r15 $14 # r15 -= 14 (r15 = 626)
 CMP %r5 %r15
-BLT .RIGHTCONVERSIONGHOST # Execute next instruction if we need to loop
+BLT .RIGHTCONVERSIONGHOST # Branch if we don't need to loop around
+ADDI %r15 $14 # r15 += 14 (r15 = 640)
 SUB %r5 %r15 # xPosOnGhost -= 640
 .RIGHTCONVERSIONGHOST
 JPT %r15 .CONVERTGHOST # r15 = .CONVERTGHOST address
