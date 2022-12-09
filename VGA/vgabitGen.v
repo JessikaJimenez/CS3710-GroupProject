@@ -30,7 +30,7 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 	 parameter ghostXAddr = 16'h1C33;
 	 parameter ghostYAddr = 16'h1C34;
 	 parameter ghostDirAddr = 16'h1C35;
-	parameter mov_spritesBufStartAddr = 11'd800;
+	parameter mov_spritesBufStartAddr = 11'd1100;
 	
 	//Set RGB bits to all 1's or all 0's
 	parameter ON = 8'b11111111;	
@@ -107,13 +107,12 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 	assign movingSpriteAddr [ADDR_WIDTH-1:0] = (((mov_spritebufferCounter<256) ? capDir:ghostDir)-1'b1)*16'd64+spriteStorageStartAddress;
 	
 	//Tells if we are loading the background into buffer.
-	reg loading; 	
 	wire loadingTime;
 	assign loadingTime = hCount >= 600 && vCount < 480;
 	
 	wire [2:0] mov_SpriteColor;
 	wire draw_movSprite;
-	assign mov_SpriteColor = drawGhost ? (buffer[ghostPixBufAddr][2:0]):(buffer[capPixBufAddr][2:0]);
+	assign mov_SpriteColor = drawCapman ? (buffer[capPixBufAddr][2:0]):(buffer[ghostPixBufAddr][2:0]);
 	assign draw_movSprite = drawCapman || drawGhost;
 	
 	always @(negedge clear, posedge clk) begin
@@ -122,7 +121,7 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 	 end
 
 	always@(*) begin //Switch between states.
-		if(loading) begin
+		if(loadingTime) begin
 			case(state)
 				IDRead: nextstate <= IDStore;
 				IDStore: nextstate <= pixelRead;
@@ -143,7 +142,7 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 	
 	always@(negedge clear, posedge clk) begin //Load pixel info based on state and loading bool value.
 		if(~clear) addr_b <= spriteIDStartAddress; //Set addr_b to first ID address.
-		else if(loading) begin
+		else if(loadingTime) begin
 			case(state)
 				IDRead: begin
 					addr_b <= currentIDAddr;			//Get the sprite ID from Memory
@@ -188,7 +187,7 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 					movingSpriteInfoToGet <= 4'b0011;
 				end
 				4'b0011: begin //Store cap direction. Get ghost x-pos from memory.
-					capDir <= animationCounter[4] ? read_b:(read_b + 1'd1);
+					capDir <= (read_b == 22) ? read_b:(animationCounter[4] ? read_b:(read_b + 1'd1));
 					addr_b <= ghostXAddr;
 					movingSpriteInfoToGet <= 4'b0100;
 				end
@@ -234,11 +233,6 @@ module vgabitGen #(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=16)
 			endcase
 		end
 		else addr_b <= addr_b;
-	end
-	
-	always@(*)begin //Set the enable signal for the addr_b use.
-		if(loadingTime) loading <= 1;
-		else loading <= 0;
 	end
 	
 	always@(negedge clk) begin //Choose color.
