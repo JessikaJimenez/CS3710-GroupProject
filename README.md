@@ -1,7 +1,7 @@
 # CS3710-GroupProject
 
------ CAPMAN -----
-University of Utah ECE 3710 Junior Project
+----- CAPMAN -----  
+University of Utah ECE 3710 Junior Project  
 By: Nami Eskandarian, Hyrum Bailey, Rolando Quintana, Jessika Jimenez 
 
 
