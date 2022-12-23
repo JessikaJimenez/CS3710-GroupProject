@@ -1,6 +1,6 @@
 # CS3710-GroupProject
 
------ CAPMAN ----- 
+----- CAPMAN -----  
 A video game made from Verilog/Assembly/Python which plays similarly to Pac-Man but isn't Pac-Man.  
 Can be played by taking all the files in this repository and loading them onto a De1-Soc FPGA board, that also has a NES controller or gyroscope hat controller connected to it.  
 Please refer to the "Documentation for Final Project Submission" and "Final Project Report" for more details on the project. 
