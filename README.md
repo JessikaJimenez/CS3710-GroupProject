@@ -2,7 +2,8 @@
 
 ----- CAPMAN -----  
 A video game made from Verilog/Assembly/Python which plays similarly to Pac-Man but isn't Pac-Man.  
-Can be played by taking all the files in this repository and loading them onto a De1-Soc FPGA board, that also has a NES controller or gyroscope hat controller connected to it.  
+Can be played by taking all the files in this repository and loading them onto a De1-Soc FPGA board.  
+Additionally, a NES controller or a gyroscope hat controller, and a VGA-compatible monitor also need to be conencted to the FPGA board.   
 Please refer to the "Documentation for Final Project Submission" and "Final Project Report" for more details on the project. 
 
 University of Utah ECE 3710 Junior Project  
